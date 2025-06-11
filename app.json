@@ -1,7 +1,8 @@
 {
     "expo": {
-        "name": "cc42",
-        "slug": "cc42",
+        "name": "Check Cadet",
+        "slug": "check-cadet",
+        "description": "A mobile app for managing cadet activities and schedules.",
         "version": "1.0.0",
         "orientation": "portrait",
         "icon": "./assets/images/icon.png",
