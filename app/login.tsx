@@ -39,13 +39,17 @@ export default function LoginScreen() {
         >
             <View style={styles.container}>
                 <View style={styles.card}>
-                    <VideoView
-                        player={player}
-                        style={styles.video}
-                        contentFit="contain"
-                        nativeControls={false}
-                        showsTimecodes={false}
-                    />
+                    {Platform.OS === "web" ? (
+                        <WebVideo />
+                    ) : (
+                        <VideoView
+                            player={player}
+                            style={styles.video}
+                            contentFit="contain"
+                            nativeControls={false}
+                            showsTimecodes={false}
+                        />
+                    )}
                 </View>
                 <View style={styles.buttonContainer}>
                     <SignInButton onPress={() => signIn()} />
@@ -74,6 +78,26 @@ const SignInButton: React.FC<SignInButtonProps> = ({ onPress }) => {
         </TouchableOpacity>
     );
 };
+
+function WebVideo() {
+    return (
+        <video
+            autoPlay
+            muted
+            loop
+            playsInline
+            controls={false}
+            disablePictureInPicture
+            style={{
+                objectFit: "contain",
+                borderRadius: 8,
+                width: 150,
+                height: 150,
+            }}
+            src={require("@/assets/images/qr_code_phone_gif.mp4")}
+        />
+    );
+}
 
 const styles = StyleSheet.create({
     background: {
