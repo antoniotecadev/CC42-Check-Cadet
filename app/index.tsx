@@ -47,7 +47,6 @@ const styles = StyleSheet.create({
         textShadowColor: "black",
         textShadowOffset: { width: 2, height: 2 },
         textShadowRadius: 3,
-        fontFamily: "Foldit-Medium",
     },
     checkCadet: {
         fontSize: 16,
@@ -55,6 +54,5 @@ const styles = StyleSheet.create({
         textShadowColor: "black",
         textShadowOffset: { width: 2, height: 2 },
         textShadowRadius: 3,
-        fontFamily: "Foldit-Medium",
     },
 });

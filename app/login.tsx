@@ -1,18 +1,18 @@
 import { useVideoPlayer, VideoView } from "expo-video";
 import React from "react";
 import {
-    Dimensions,
     GestureResponderEvent,
     ImageBackground,
+    Platform,
     StyleSheet,
     Text,
     TouchableOpacity,
-    View
+    useWindowDimensions,
+    View,
 } from "react-native";
 
-const { width } = Dimensions.get("window");
-
 export default function LoginScreen() {
+    const { width, height } = useWindowDimensions();
     const videoSource = require("@/assets/images/qr_code_phone_gif.mp4");
 
     const player = useVideoPlayer(videoSource, (player) => {
@@ -26,10 +26,15 @@ export default function LoginScreen() {
         alert("Sign In button pressed!"); // Aqui você pode implementar a lógica de login
     }
 
+    const imageBackground =
+        Platform.OS === "web"
+            ? require("@/assets/images/42_default_background.jpg")
+            : require("@/assets/images/back_default_42_16_9.png");
+
     return (
         <ImageBackground
-            source={require("@/assets/images/back_default_42_16_9.png")} // Coloca a imagem de fundo aqui
-            style={styles.background}
+            source={imageBackground}
+            style={[styles.background, { width, height }]}
             resizeMode="cover"
         >
             <View style={styles.container}>
@@ -109,7 +114,6 @@ const styles = StyleSheet.create({
         textShadowColor: "black",
         textShadowOffset: { width: 2, height: 2 },
         textShadowRadius: 3,
-        fontFamily: "Foldit-Medium", // Usa expo-font se necessário
     },
     checkCadet: {
         fontSize: 16,
@@ -117,13 +121,10 @@ const styles = StyleSheet.create({
         textShadowColor: "black",
         textShadowOffset: { width: 2, height: 2 },
         textShadowRadius: 3,
-        fontFamily: "Foldit-Medium",
     },
     button: {
-        height: 60,
         backgroundColor: "#AFC9F1",
         borderRadius: 8,
-        marginHorizontal: 16,
         justifyContent: "center",
         alignItems: "center",
         elevation: 4, // sombra em Android
@@ -131,6 +132,18 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.2,
         shadowRadius: 3,
+        ...(Platform.OS === "web"
+            ? {
+                  height: 44,
+                  paddingHorizontal: 24,
+                  maxWidth: 320, // largura máxima (parece botão de login padrão)
+                  alignSelf: "center",
+                  width: "90%", // responsivo para telas menores
+              }
+            : {
+                  height: 60,
+                  marginHorizontal: 16,
+              }),
     },
     buttonText: {
         fontSize: 24,
