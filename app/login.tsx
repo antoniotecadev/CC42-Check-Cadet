@@ -1,3 +1,5 @@
+import { useLogin42 } from "@/hooks/useLogin42";
+import { AuthRequest } from "expo-auth-session";
 import { useVideoPlayer, VideoView } from "expo-video";
 import React from "react";
 import {
@@ -13,6 +15,7 @@ import {
 
 export default function LoginScreen() {
     const { width, height } = useWindowDimensions();
+    const { request, token, promptAsync } = useLogin42();
     const videoSource = require("@/assets/images/qr_code_phone_gif.mp4");
 
     const player = useVideoPlayer(videoSource, (player) => {
@@ -52,12 +55,22 @@ export default function LoginScreen() {
                     )}
                 </View>
                 <View style={styles.buttonContainer}>
-                    <SignInButton onPress={() => signIn()} />
+                    <SignInButton
+                        request={request}
+                        onPress={() => promptAsync()}
+                    />
                 </View>
 
                 <View style={styles.footer}>
                     <Text style={styles.appName}>CC 42</Text>
                     <Text style={styles.checkCadet}>Check Cadet</Text>
+                    <Text style={styles.checkCadet}>
+                        {token && (
+                            <Text style={{ marginTop: 20 }}>
+                                Token: {token}
+                            </Text>
+                        )}
+                    </Text>
                 </View>
             </View>
         </ImageBackground>
@@ -65,12 +78,17 @@ export default function LoginScreen() {
 }
 
 interface SignInButtonProps {
+    request: AuthRequest | null;
     onPress: (event: GestureResponderEvent) => void;
 }
 
-const SignInButton: React.FC<SignInButtonProps> = ({ onPress }) => {
+const SignInButton: React.FC<SignInButtonProps> = ({ request, onPress }) => {
     return (
-        <TouchableOpacity onPress={onPress} style={styles.button}>
+        <TouchableOpacity
+            disabled={!request}
+            onPress={onPress}
+            style={styles.button}
+        >
             <Text style={styles.buttonText}>
                 <Text style={styles.sign}>SIGN</Text>{" "}
                 <Text style={styles.in}>IN</Text>

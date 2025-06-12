@@ -1,46 +1,49 @@
 {
-    "expo": {
-        "name": "Check Cadet",
-        "slug": "check-cadet",
-        "description": "A mobile app for managing cadet activities and schedules.",
-        "version": "1.0.0",
-        "orientation": "portrait",
-        "icon": "./assets/images/icon.png",
-        "scheme": "cc42",
-        "userInterfaceStyle": "automatic",
-        "newArchEnabled": true,
-        "ios": {
-            "supportsTablet": true
-        },
-        "android": {
-            "adaptiveIcon": {
-                "foregroundImage": "./assets/images/adaptive-icon.png",
-                "backgroundColor": "#ffffff"
-            },
-            "edgeToEdgeEnabled": true
-        },
-        "web": {
-            "bundler": "metro",
-            "output": "static",
-            "favicon": "./assets/images/favicon.png"
-        },
-        "plugins": [
-            "expo-router",
-            // [
-            //     "expo-splash-screen",
-            //     {
-            //         "image": "./assets/images/splash-icon.png",
-            //         "dark": {
-            //             "backgroundColor": "#000000"
-            //         },
-            //         "backgroundColor": "#ffffff"
-            //     }
-            // ],
-            "expo-video"
-        ],
-        "experiments": {
-            "typedRoutes": true
-        },
-        "host": "lan"
-    }
+  "expo": {
+    "name": "Check Cadet",
+    "slug": "cc42",
+    "description": "A mobile app for managing cadet activities and schedules.",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "cc42",
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "edgeToEdgeEnabled": true
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-video",
+      "expo-web-browser"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "host": "lan",
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "751b05e6-4b80-4dae-b3b0-299c676f93d5"
+      }
+    },
+    "owner": "antonioteca"
+  }
 }
