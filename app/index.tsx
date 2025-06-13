@@ -1,8 +1,16 @@
 import { router } from "expo-router";
 import { useEffect } from "react";
-import { ImageBackground, StyleSheet, Text, View } from "react-native";
+import {
+    ImageBackground,
+    Platform,
+    StyleSheet,
+    Text,
+    useWindowDimensions,
+    View,
+} from "react-native";
 
 export default function SplashScreen() {
+    const { width, height } = useWindowDimensions();
     useEffect(() => {
         const timeout = setTimeout(() => {
             router.replace("/login"); // Redireciona para a tela de login
@@ -11,10 +19,15 @@ export default function SplashScreen() {
         return () => clearTimeout(timeout);
     }, []);
 
+    const imageBackground =
+        Platform.OS === "web"
+            ? require("@/assets/images/42_default_background.jpg")
+            : require("@/assets/images/back_default_42_16_9.png");
+
     return (
         <ImageBackground
-            source={require("@/assets/images/back_default_42_16_9.png")}
-            style={styles.container}
+            source={imageBackground}
+            style={[styles.container, { width, height }]}
             resizeMode="cover"
         >
             <View style={styles.content}>
