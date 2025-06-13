@@ -1,7 +1,8 @@
 import { useLogin42 } from "@/hooks/useLogin42";
 import { AuthRequest } from "expo-auth-session";
+import { router } from "expo-router";
 import { useVideoPlayer, VideoView } from "expo-video";
-import React from "react";
+import React, { useEffect } from "react";
 import {
     GestureResponderEvent,
     ImageBackground,
@@ -15,8 +16,12 @@ import {
 
 export default function LoginScreen() {
     const { width, height } = useWindowDimensions();
-    const { request, token, promptAsync } = useLogin42();
+    const { request, sucess, promptAsync } = useLogin42();
     const videoSource = require("@/assets/images/qr_code_phone_gif.mp4");
+
+    useEffect(() => {
+        if (sucess) router.replace("/(tabs)"); // Redireciona para a tela home
+    }, [sucess]);
 
     const player = useVideoPlayer(videoSource, (player) => {
         player.loop = true;
@@ -24,10 +29,6 @@ export default function LoginScreen() {
         player.volume = 0;
         player.play();
     });
-
-    function signIn(): void {
-        alert("Sign In button pressed!"); // Aqui você pode implementar a lógica de login
-    }
 
     const imageBackground =
         Platform.OS === "web"
@@ -64,13 +65,6 @@ export default function LoginScreen() {
                 <View style={styles.footer}>
                     <Text style={styles.appName}>CC 42</Text>
                     <Text style={styles.checkCadet}>Check Cadet</Text>
-                    <Text style={styles.checkCadet}>
-                        {token && (
-                            <Text style={{ marginTop: 20 }}>
-                                Token: {token}
-                            </Text>
-                        )}
-                    </Text>
                 </View>
             </View>
         </ImageBackground>

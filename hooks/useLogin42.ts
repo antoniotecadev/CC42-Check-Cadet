@@ -1,4 +1,3 @@
-import useAlert from "@/hooks/useAlert";
 import { fetchApiKeyFromDatabase } from "@/services/firebaseApiKey"; // Importe a função para buscar a chave da API
 import {
     exchangeCodeAsync,
@@ -9,6 +8,8 @@ import {
 import * as WebBrowser from "expo-web-browser";
 import { useEffect, useState } from "react";
 import { Platform } from "react-native";
+import useAlert from "./useAlert";
+import { useAuthToken } from "./useAuthToken";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -21,7 +22,8 @@ const discovery = {
 };
 
 export function useLogin42() {
-    const { showError, showSuccess } = useAlert();
+    const { showError } = useAlert();
+    const { saveToken } = useAuthToken();
     const isWeb = Platform.OS === "web";
     const isDev = __DEV__;
 
@@ -31,7 +33,7 @@ export function useLogin42() {
           }) // fixo para funcionar com 42 na web
         : "cc42://checkcadet42"; // para Android/iOS (dev ou produção)
 
-    const [token, setToken] = useState<string | null>(null);
+    const [sucess, setSucess] = useState<boolean>(false);
     const [request, response, promptAsync] = useAuthRequest(
         {
             clientId: CLIENT_ID,
@@ -60,8 +62,12 @@ export function useLogin42() {
                 if (!tokenResponse.accessToken) {
                     throw new Error("Access token não recebido");
                 }
-                showSuccess("Acess Token", tokenResponse.accessToken);
-                setToken(tokenResponse.accessToken);
+                const sucess: boolean = await saveToken({
+                    accessToken: tokenResponse.accessToken,
+                    refreshToken: tokenResponse.refreshToken || "",
+                    expiresIn: tokenResponse.expiresIn || 3600, // padrão de 1 hora
+                });
+                setSucess(sucess);
             } catch (err: any) {
                 showError(
                     "Token Response",
@@ -75,7 +81,6 @@ export function useLogin42() {
                 const { code } = response.params;
                 const secret = await fetchApiKeyFromDatabase("intra");
                 if (secret) {
-                    showSuccess("KeySecret", "Chave da API da 42: " + secret);
                     handleTokenExchange(secret, code);
                 }
             }
@@ -85,7 +90,7 @@ export function useLogin42() {
 
     return {
         request,
-        token,
+        sucess,
         promptAsync, // chama isto no botão ou evento
     };
 }
