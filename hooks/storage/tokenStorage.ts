@@ -51,7 +51,7 @@ export function tokenStorage() {
                 ]);
                 return true;
             } catch (e) {
-                showError("Token", "Erro ao salvar token: " + e);
+                showError("Erro", "Erro ao salvar token: " + e);
                 return false;
             }
         },

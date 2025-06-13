@@ -4,6 +4,7 @@ import { router } from "expo-router";
 import { useVideoPlayer, VideoView } from "expo-video";
 import React, { useEffect } from "react";
 import {
+    ActivityIndicator,
     GestureResponderEvent,
     ImageBackground,
     Platform,
@@ -16,7 +17,7 @@ import {
 
 export default function LoginScreen() {
     const { width, height } = useWindowDimensions();
-    const { request, sucess, promptAsync } = useLogin42();
+    const { loading, request, sucess, promptAsync } = useLogin42();
     const videoSource = require("@/assets/images/qr_code_phone_gif.mp4");
 
     useEffect(() => {
@@ -56,10 +57,14 @@ export default function LoginScreen() {
                     )}
                 </View>
                 <View style={styles.buttonContainer}>
-                    <SignInButton
-                        request={request}
-                        onPress={() => promptAsync()}
-                    />
+                    {loading ? (
+                        <ActivityIndicator size="large" color="#419259" />
+                    ) : (
+                        <SignInButton
+                            request={request}
+                            onPress={() => promptAsync()}
+                        />
+                    )}
                 </View>
 
                 <View style={styles.footer}>

@@ -8,6 +8,7 @@ import {
 import * as WebBrowser from "expo-web-browser";
 import { useEffect, useState } from "react";
 import { Platform } from "react-native";
+import { fetchUser } from "./fetchUser";
 import { tokenStorage } from "./storage/tokenStorage";
 import useAlert from "./useAlert";
 
@@ -23,7 +24,7 @@ const discovery = {
 
 export function useLogin42() {
     const { showError } = useAlert();
-    const { saveToken } = tokenStorage();
+    const { saveToken, clearTokens } = tokenStorage();
     const isWeb = Platform.OS === "web";
     const isDev = __DEV__;
 
@@ -34,6 +35,7 @@ export function useLogin42() {
         : "cc42://checkcadet42"; // para Android/iOS (dev ou produção)
 
     const [sucess, setSucess] = useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(false);
     const [request, response, promptAsync] = useAuthRequest(
         {
             clientId: CLIENT_ID,
@@ -62,33 +64,43 @@ export function useLogin42() {
                 if (!tokenResponse.accessToken) {
                     throw new Error("Access token não recebido");
                 }
-                const sucess: boolean = await saveToken({
+                let sucess: boolean = await saveToken({
                     accessToken: tokenResponse.accessToken,
                     refreshToken: tokenResponse.refreshToken || "",
                     expiresIn: tokenResponse.expiresIn || 3600, // padrão de 1 hora
                 });
-                setSucess(sucess);
+                if (sucess) {
+                    sucess = await fetchUser(); // Busca os dados do usuário após salvar o token
+                    if (!sucess) {
+                        clearTokens(); // Limpa os tokens se falhar ao buscar usuário
+                    }
+                    setSucess(sucess);
+                } else {
+                    setSucess(sucess);
+                    showError("Erro", "Erro ao salvar o token");
+                }
             } catch (err: any) {
-                showError(
-                    "Token Response",
-                    "Erro ao trocar código por token: " + err
-                );
+                showError("Erro", "Erro ao trocar código por token: " + err);
+            } finally {
+                setLoading(false);
             }
         };
 
         const getSecret = async () => {
             if (response?.type === "success") {
+                setLoading(true);
                 const { code } = response.params;
                 const secret = await fetchApiKeyFromDatabase("intra");
                 if (secret) {
                     handleTokenExchange(secret, code);
-                }
+                } else setLoading(false);
             }
         };
         getSecret();
     }, [response]);
 
     return {
+        loading,
         request,
         sucess,
         promptAsync, // chama isto no botão ou evento
