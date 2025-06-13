@@ -8,8 +8,8 @@ import {
 import * as WebBrowser from "expo-web-browser";
 import { useEffect, useState } from "react";
 import { Platform } from "react-native";
+import { tokenStorage } from "./storage/tokenStorage";
 import useAlert from "./useAlert";
-import { useAuthToken } from "./useAuthToken";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -23,7 +23,7 @@ const discovery = {
 
 export function useLogin42() {
     const { showError } = useAlert();
-    const { saveToken } = useAuthToken();
+    const { saveToken } = tokenStorage();
     const isWeb = Platform.OS === "web";
     const isDev = __DEV__;
 

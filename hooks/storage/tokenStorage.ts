@@ -1,7 +1,7 @@
 import * as SecureStore from "expo-secure-store";
 import { useCallback } from "react";
 import { Platform } from "react-native";
-import useAlert from "./useAlert";
+import useAlert from "../useAlert";
 
 const ACCESS_TOKEN_KEY = "access_token";
 const REFRESH_TOKEN_KEY = "refresh_token";
@@ -31,7 +31,7 @@ async function removeItem(key: string) {
     }
 }
 
-export function useAuthToken() {
+export function tokenStorage() {
     const { showError } = useAlert();
     const saveToken = useCallback(
         async (token: {
