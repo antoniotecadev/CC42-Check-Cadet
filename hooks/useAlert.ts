@@ -20,11 +20,11 @@ function useAlert() {
     };
 
     const showError = (title: string, message?: string) => {
-        showInfo("❌ " + title, message);
+        showInfo("🔴 " + title, message);
     };
 
     const showSuccess = (title: string, message?: string) => {
-        showInfo("✅ " + title, message);
+        showInfo("🟢 " + title, message);
     };
 
     const showConfirm = (
