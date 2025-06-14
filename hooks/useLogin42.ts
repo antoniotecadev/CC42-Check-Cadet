@@ -8,7 +8,7 @@ import {
 import * as WebBrowser from "expo-web-browser";
 import { useEffect, useState } from "react";
 import { Platform } from "react-native";
-import { useTokenStorage } from "./storage/useTokenStorage";
+import useTokenStorage from "./storage/useTokenStorage";
 import useAlert from "./useAlert";
 import useFetchUser from "./useFetchUser";
 
