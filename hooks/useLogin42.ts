@@ -1,4 +1,4 @@
-import { fetchApiKeyFromDatabase } from "@/services/firebaseApiKey"; // Importe a função para buscar a chave da API
+import { fetchApiKeyFromDatabase } from "@/services/firebaseApiKey";
 import {
     exchangeCodeAsync,
     makeRedirectUri,
@@ -8,9 +8,9 @@ import {
 import * as WebBrowser from "expo-web-browser";
 import { useEffect, useState } from "react";
 import { Platform } from "react-native";
-import { fetchUser } from "./fetchUser";
-import { tokenStorage } from "./storage/tokenStorage";
+import { useTokenStorage } from "./storage/useTokenStorage";
 import useAlert from "./useAlert";
+import useFetchUser from "./useFetchUser";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -24,7 +24,8 @@ const discovery = {
 
 export function useLogin42() {
     const { showError } = useAlert();
-    const { saveToken, clearTokens } = tokenStorage();
+    const { fetchUser } = useFetchUser();
+    const { saveToken, clearTokens } = useTokenStorage();
     const isWeb = Platform.OS === "web";
     const isDev = __DEV__;
 
@@ -67,7 +68,7 @@ export function useLogin42() {
                 let sucess: boolean = await saveToken({
                     accessToken: tokenResponse.accessToken,
                     refreshToken: tokenResponse.refreshToken || "",
-                    expiresIn: tokenResponse.expiresIn || 3600, // padrão de 1 hora
+                    expiresIn: tokenResponse.expiresIn || 0,
                 });
                 if (sucess) {
                     sucess = await fetchUser(); // Busca os dados do usuário após salvar o token

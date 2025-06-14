@@ -1,3 +1,4 @@
+import { useTokenStorage } from "@/hooks/storage/useTokenStorage";
 import { router } from "expo-router";
 import { useEffect } from "react";
 import {
@@ -11,9 +12,24 @@ import {
 
 export default function SplashScreen() {
     const { width, height } = useWindowDimensions();
+    const {
+        getAccessToken,
+        getRefreshToken,
+        isTokenExpired,
+        refreshTokenUser,
+    } = useTokenStorage();
+
     useEffect(() => {
-        const timeout = setTimeout(() => {
-            router.replace("/login"); // Redireciona para a tela de login
+        const timeout = setTimeout(async () => {
+            const accessToken = await getAccessToken();
+            const refreshToken = await getRefreshToken();
+            if (accessToken == null || refreshToken == null) {
+                router.replace("/login");
+            } else if (await isTokenExpired()) {
+                const sucess = await refreshTokenUser(refreshToken);
+                if (!sucess) router.replace("/login");
+                else router.replace("/(tabs)");
+            } else router.replace("/(tabs)");
         }, 5000);
 
         return () => clearTimeout(timeout);
