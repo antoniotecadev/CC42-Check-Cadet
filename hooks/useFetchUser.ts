@@ -1,10 +1,11 @@
 import axios from "axios";
-import { useTokenStorage } from "./storage/useTokenStorage";
-import { saveUser } from "./storage/userStorage";
+import useTokenStorage from "./storage/useTokenStorage";
+import useUserStorage from "./storage/useUserStorage";
 import useAlert from "./useAlert";
 
 const useFetchUser = () => {
     const { showError } = useAlert();
+    const { saveUser } = useUserStorage();
     const { getAccessToken } = useTokenStorage();
 
     const fetchUser = async (): Promise<boolean> => {

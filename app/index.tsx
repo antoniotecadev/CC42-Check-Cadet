@@ -1,4 +1,4 @@
-import { useTokenStorage } from "@/hooks/storage/useTokenStorage";
+import useTokenStorage from "@/hooks/storage/useTokenStorage";
 import { router } from "expo-router";
 import { useEffect } from "react";
 import {

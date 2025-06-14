@@ -35,7 +35,7 @@ async function removeItem(key: string) {
     }
 }
 
-export function useTokenStorage() {
+export default function useTokenStorage() {
     const { showError } = useAlert();
     const saveToken = useCallback(
         async (token: {
