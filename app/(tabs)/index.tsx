@@ -1,13 +1,13 @@
-import { Image } from "expo-image";
-import { Platform, StyleSheet } from "react-native";
-
 import { HelloWave } from "@/components/HelloWave";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import useUserStorage from "@/hooks/storage/useUserStorage";
 import useAlert from "@/hooks/useAlert";
+import { Image } from "expo-image";
+import { Platform, StyleSheet } from "react-native";
 
+import FloatActionButton from "@/components/ui/FloatActionButton";
 import React, { useEffect, useState } from "react";
 
 export default function HomeScreen() {
@@ -91,6 +91,7 @@ export default function HomeScreen() {
                             {user?.displayname || ""}
                         </ThemedText>
                     </ThemedView>
+                    <FloatActionButton right={24} bottom={24} />
                 </React.Fragment>
             }
         >
