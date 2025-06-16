@@ -1,4 +1,5 @@
-import { TouchableOpacity } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { Platform, TouchableOpacity } from "react-native";
 import { IconSymbol } from "./IconSymbol";
 
 type Props = {
@@ -37,13 +38,22 @@ export default function FloatActionButton({
             }}
             onPress={() => onPress?.()}
         >
-            <IconSymbol
-                name="qrcode"
-                size={28}
-                color="#000"
-                style={{ position: "absolute" }}
-                weight="bold"
-            />
+            {Platform.OS === "web" ? (
+                <Ionicons
+                    name="qr-code-outline"
+                    size={28}
+                    color="#000"
+                    style={{ position: "absolute" }}
+                />
+            ) : (
+                <IconSymbol
+                    name="qrcode"
+                    size={28}
+                    color="#000"
+                    style={{ position: "absolute" }}
+                    weight="bold"
+                />
+            )}
         </TouchableOpacity>
     );
 }
