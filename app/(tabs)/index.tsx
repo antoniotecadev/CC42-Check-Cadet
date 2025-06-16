@@ -120,6 +120,8 @@ export default function HomeScreen() {
                                 pathname: "/qr_code",
                                 params: {
                                     content: userCrypt,
+                                    title: user?.login,
+                                    description: user?.displayname,
                                 },
                             })
                         }
