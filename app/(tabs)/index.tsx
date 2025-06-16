@@ -8,12 +8,16 @@ import { Image } from "expo-image";
 import { Platform, StyleSheet } from "react-native";
 
 import FloatActionButton from "@/components/ui/FloatActionButton";
+import { encrypt } from "@/utility/AESUtil";
+import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 
 export default function HomeScreen() {
+    const router = useRouter();
     const { showInfo } = useAlert();
     const { getUser } = useUserStorage();
     const [user, setUser] = useState<any>(null);
+    const [userCrypt, setUserCrypt] = useState<string | null>(null);
 
     const blurhash =
         "|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuayj[";
@@ -26,6 +30,23 @@ export default function HomeScreen() {
                 showInfo(
                     `Welcome back, ${userData.email}!`,
                     JSON.stringify(userData.coalition, null, 2)
+                );
+                setUserCrypt(
+                    encrypt(
+                        "cc42user" +
+                            (userData?.id ?? "0") +
+                            "#" +
+                            (userData?.login ?? "") +
+                            "#" +
+                            (userData?.displayname ?? "") +
+                            "#" +
+                            (userData?.projects_users?.[0]?.cursus_ids?.[0] ??
+                                "0") +
+                            "#" +
+                            (userData?.campus?.[0]?.id ?? "0") +
+                            "#" +
+                            (userData?.image?.link?.trim() ?? "")
+                    )
                 );
             } else {
                 showInfo("Welcome!", "You can start exploring the app.");
@@ -91,54 +112,70 @@ export default function HomeScreen() {
                             {user?.displayname || ""}
                         </ThemedText>
                     </ThemedView>
-                    <FloatActionButton right={24} bottom={24} />
+                    <FloatActionButton
+                        right={16}
+                        bottom={16}
+                        onPress={() =>
+                            router.push({
+                                pathname: "/qr_code",
+                                params: {
+                                    content: userCrypt,
+                                },
+                            })
+                        }
+                    />
                 </React.Fragment>
             }
         >
-            <ThemedView style={styles.titleContainer}>
-                <ThemedText type="title">Welcome!</ThemedText>
-                <HelloWave />
-            </ThemedView>
-            <ThemedView style={styles.stepContainer}>
-                <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-                <ThemedText>
-                    Edit{" "}
-                    <ThemedText type="defaultSemiBold">
-                        app/(tabs)/index.tsx
-                    </ThemedText>{" "}
-                    to see changes. Press{" "}
-                    <ThemedText type="defaultSemiBold">
-                        {Platform.select({
-                            ios: "cmd + d",
-                            android: "cmd + m",
-                            web: "F12",
-                        })}
-                    </ThemedText>{" "}
-                    to open developer tools.
-                </ThemedText>
-            </ThemedView>
-            <ThemedView style={styles.stepContainer}>
-                <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-                <ThemedText>
-                    {`Tap the Explore tab to learn more about what's included in this starter app.`}
-                </ThemedText>
-            </ThemedView>
-            <ThemedView style={styles.stepContainer}>
-                <ThemedText type="subtitle">
-                    Step 3: Get a fresh start
-                </ThemedText>
-                <ThemedText>
-                    {`When you're ready, run `}
-                    <ThemedText type="defaultSemiBold">
-                        npm run reset-project
-                    </ThemedText>{" "}
-                    to get a fresh{" "}
-                    <ThemedText type="defaultSemiBold">app</ThemedText>{" "}
-                    directory. This will move the current{" "}
-                    <ThemedText type="defaultSemiBold">app</ThemedText> to{" "}
-                    <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-                </ThemedText>
-            </ThemedView>
+            <>
+                <ThemedView style={styles.titleContainer}>
+                    <ThemedText type="title">Welcome!</ThemedText>
+                    <HelloWave />
+                </ThemedView>
+                <ThemedView style={styles.stepContainer}>
+                    <ThemedText type="subtitle">Step 1: Try it</ThemedText>
+                    <ThemedText>
+                        Edit{" "}
+                        <ThemedText type="defaultSemiBold">
+                            app/(tabs)/index.tsx
+                        </ThemedText>{" "}
+                        to see changes. Press{" "}
+                        <ThemedText type="defaultSemiBold">
+                            {Platform.select({
+                                ios: "cmd + d",
+                                android: "cmd + m",
+                                web: "F12",
+                            })}
+                        </ThemedText>{" "}
+                        to open developer tools.
+                    </ThemedText>
+                </ThemedView>
+                <ThemedView style={styles.stepContainer}>
+                    <ThemedText type="subtitle">Step 2: Explore</ThemedText>
+                    <ThemedText>
+                        {`Tap the Explore tab to learn more about what's included in this starter app.`}
+                    </ThemedText>
+                </ThemedView>
+                <ThemedView style={styles.stepContainer}>
+                    <ThemedText type="subtitle">
+                        Step 3: Get a fresh start
+                    </ThemedText>
+                    <ThemedText>
+                        {`When you're ready, run `}
+                        <ThemedText type="defaultSemiBold">
+                            npm run reset-project
+                        </ThemedText>{" "}
+                        to get a fresh{" "}
+                        <ThemedText type="defaultSemiBold">app</ThemedText>{" "}
+                        directory. This will move the current{" "}
+                        <ThemedText type="defaultSemiBold">app</ThemedText> to{" "}
+                        <ThemedText type="defaultSemiBold">
+                            app-example
+                        </ThemedText>
+                        .
+                    </ThemedText>
+                </ThemedView>
+            </>
         </ParallaxScrollView>
     );
 }

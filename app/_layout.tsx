@@ -1,7 +1,7 @@
 import {
-  DarkTheme,
-  DefaultTheme,
-  ThemeProvider,
+    DarkTheme,
+    DefaultTheme,
+    ThemeProvider,
 } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import { SplashScreen, Stack } from "expo-router";
@@ -35,6 +35,15 @@ export default function RootLayout() {
                 <Stack.Screen name="index" options={{ headerShown: false }} />
                 <Stack.Screen name="login" options={{ headerShown: false }} />
                 <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                <Stack.Screen
+                    name="qr_code"
+                    options={{
+                        headerShown: true,
+                        title: "QR Code",
+                        headerBackTitle: "Voltar", // iOS: texto do botão
+                        headerBackVisible: true, // mostrar ou ocultar botão de voltar
+                    }}
+                />
                 <Stack.Screen name="+not-found" />
             </Stack>
             <StatusBar style="auto" />

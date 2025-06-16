@@ -35,10 +35,7 @@ export default function FloatActionButton({
                 justifyContent: "center",
                 alignItems: "center",
             }}
-            onPress={() => {
-                // Adicione aqui a ação do botão
-                alert();
-            }}
+            onPress={() => onPress?.()}
         >
             <IconSymbol
                 name="qrcode"
