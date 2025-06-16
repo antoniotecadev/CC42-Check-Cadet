@@ -23,6 +23,12 @@ export default function TabLayout() {
                         // Use a transparent background on iOS to show the blur effect
                         position: "absolute",
                     },
+                    web: {
+                        width: "100%",
+                        maxWidth: 480, // limite superior
+                        minWidth: 600, // limite inferior (opcional)
+                        marginHorizontal: "auto", // centraliza na web (usando style prop em web pura)
+                    },
                     default: {},
                 }),
             }}
