@@ -135,7 +135,7 @@ export default function useTokenStorage() {
         } catch (error: any) {
             showError(
                 "Erro",
-                "Erro ao fazer refresh do token: " + error.message
+                "Erro ao fazer refresh do token: " + JSON.stringify(error)
             );
             return false;
         }
