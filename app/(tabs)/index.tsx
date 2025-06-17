@@ -25,6 +25,16 @@ export default function HomeScreen() {
     const [user, setUser] = useState<any>(null);
     const [userCrypt, setUserCrypt] = useState<string | null>(null);
 
+    const [events, setEvents] = useState<Event[]>([]);
+    const [loading, setLoading] = useState(true);
+    const { getEvents } = useEvents();
+
+    type UserProps = {
+        campusId: number;
+        cursusId: number;
+        isStaff: boolean;
+    };
+
     const blurhash =
         "|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuayj[";
 
@@ -58,10 +68,25 @@ export default function HomeScreen() {
                             (userData?.image?.link?.trim() ?? "")
                     )
                 );
+                const user = {
+                    campusId: userData?.campus?.[0]?.id || 0,
+                    cursusId:
+                        userData?.projects_users?.[0]?.cursus_ids?.[0] || 0,
+                    isStaff: false,
+                };
+                loadEvents(user);
             } else {
                 showInfo("Welcome!", "You can start exploring the app.");
             }
         };
+
+        async function loadEvents(user: UserProps) {
+            setLoading(true);
+            const data = await getEvents(user);
+            setEvents(data);
+            setLoading(false);
+        }
+
         fetchUser();
     }, []);
 
@@ -140,11 +165,7 @@ export default function HomeScreen() {
             }
         >
             <>
-                <EventsList
-                    color={color}
-                    campusId={user?.campus?.[0]?.id}
-                    cursusId={user?.projects_users?.[0]?.cursus_ids?.[0]}
-                />
+                <EventsList color={color} events={events} loading={loading} />
                 {/* <ThemedView style={styles.titleContainer}>
                     <ThemedText type="title">Welcome!</ThemedText>
                     <HelloWave />
@@ -199,32 +220,11 @@ export default function HomeScreen() {
 
 type EventsListProps = {
     color: string;
-    campusId: number;
-    cursusId: number;
+    events: Event[];
+    loading: boolean;
 };
 
-function EventsList({ color, campusId, cursusId }: EventsListProps) {
-    const [events, setEvents] = useState<Event[]>([]);
-    const [loading, setLoading] = useState(true);
-    const { getEvents } = useEvents();
-
-    const user = {
-        campusId: campusId,
-        cursusId: cursusId,
-        isStaff: false,
-    };
-
-    useEffect(() => {
-        async function loadEvents() {
-            setLoading(true);
-            const data = await getEvents(user);
-            setEvents(data);
-            setLoading(false);
-        }
-
-        loadEvents();
-    }, []);
-
+function EventsList({ color, events, loading }: EventsListProps) {
     if (loading)
         return <Text style={{ color: color }}>Carregando eventos...</Text>;
 
