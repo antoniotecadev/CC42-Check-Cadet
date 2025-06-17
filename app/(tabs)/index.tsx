@@ -7,7 +7,9 @@ import useAlert from "@/hooks/useAlert";
 import { Image } from "expo-image";
 import { Platform, StyleSheet } from "react-native";
 
+import { useColorCoalition } from "@/components/ColorCoalitionContext";
 import FloatActionButton from "@/components/ui/FloatActionButton";
+import { Colors } from "@/constants/Colors";
 import { encrypt } from "@/utility/AESUtil";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -16,6 +18,7 @@ export default function HomeScreen() {
     const router = useRouter();
     const { showInfo } = useAlert();
     const { getUser } = useUserStorage();
+    const { setColor } = useColorCoalition();
     const [user, setUser] = useState<any>(null);
     const [userCrypt, setUserCrypt] = useState<string | null>(null);
 
@@ -30,6 +33,10 @@ export default function HomeScreen() {
                 showInfo(
                     `Welcome back, ${userData.email}!`,
                     JSON.stringify(userData.coalition, null, 2)
+                );
+                setColor(
+                    userData?.coalition?.color?.trim() ||
+                        Colors.light_blue_900.default
                 );
                 setUserCrypt(
                     encrypt(

@@ -1,10 +1,13 @@
+import { useColorCoalition } from "@/components/ColorCoalitionContext";
 import axios from "axios";
+import { Colors } from "react-native/Libraries/NewAppScreen";
 import useTokenStorage from "./storage/useTokenStorage";
 import useUserStorage from "./storage/useUserStorage";
 import useAlert from "./useAlert";
 
 const useFetchUser = () => {
     const { showError } = useAlert();
+    const { setColor } = useColorCoalition();
     const { saveUser } = useUserStorage();
     const { getAccessToken } = useTokenStorage();
 
@@ -49,6 +52,7 @@ const useFetchUser = () => {
                 coalition,
             };
 
+            setColor(coalition?.color?.trim() || Colors.light_blue_900.default);
             // 4. Salvar localmente
             await saveUser(userWithCoalition);
             return true;

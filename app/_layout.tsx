@@ -8,8 +8,12 @@ import { SplashScreen, Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import "react-native-reanimated";
 
+import {
+    ColorCoalitionProvider,
+    useColorCoalition,
+} from "@/components/ColorCoalitionContext";
 import { useColorScheme } from "@/hooks/useColorScheme";
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 
 export default function RootLayout() {
     const colorScheme = useColorScheme();
@@ -31,22 +35,59 @@ export default function RootLayout() {
         <ThemeProvider
             value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
         >
-            <Stack>
-                <Stack.Screen name="index" options={{ headerShown: false }} />
-                <Stack.Screen name="login" options={{ headerShown: false }} />
-                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                <Stack.Screen
-                    name="qr_code"
-                    options={{
-                        headerShown: true,
-                        title: "QR Code",
-                        headerBackTitle: "Voltar", // iOS: texto do botão
-                        headerBackVisible: true, // mostrar ou ocultar botão de voltar
-                    }}
-                />
-                <Stack.Screen name="+not-found" />
-            </Stack>
-            <StatusBar style="auto" />
+            <ColorCoalitionProvider>
+                <StackHeader colorScheme={colorScheme ?? "light"}>
+                    <Stack.Screen
+                        name="index"
+                        options={{ headerShown: false }}
+                    />
+                    <Stack.Screen
+                        name="login"
+                        options={{ headerShown: false }}
+                    />
+                    <Stack.Screen
+                        name="(tabs)"
+                        options={{ headerShown: false }}
+                    />
+                    <Stack.Screen
+                        name="qr_code"
+                        options={{
+                            headerShown: true,
+                            title: "QR Code",
+                            headerBackTitle: "Voltar", // iOS: texto do botão
+                            headerBackVisible: true, // mostrar ou ocultar botão de voltar
+                        }}
+                    />
+                    <Stack.Screen name="+not-found" />
+                </StackHeader>
+                <StatusBar style="auto" />
+            </ColorCoalitionProvider>
         </ThemeProvider>
+    );
+}
+
+// Esse componente vai dentro do ColorProvider
+type StackHeaderProps = {
+    colorScheme: string;
+    children: React.ReactNode;
+};
+
+function StackHeader({ colorScheme, children }: StackHeaderProps) {
+    const { color } = useColorCoalition();
+
+    return (
+        <Stack
+            screenOptions={{
+                headerStyle: {
+                    backgroundColor: color,
+                },
+                headerTintColor:
+                    colorScheme === "dark"
+                        ? DarkTheme.colors.text
+                        : DefaultTheme.colors.text,
+            }}
+        >
+            {children}
+        </Stack>
     );
 }
