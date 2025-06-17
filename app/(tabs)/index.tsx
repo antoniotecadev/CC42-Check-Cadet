@@ -1,11 +1,9 @@
-import { HelloWave } from "@/components/HelloWave";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import useUserStorage from "@/hooks/storage/useUserStorage";
 import useAlert from "@/hooks/useAlert";
 import { Image } from "expo-image";
-import { Platform, StyleSheet } from "react-native";
 
 import { useColorCoalition } from "@/components/ColorCoalitionContext";
 import FloatActionButton from "@/components/ui/FloatActionButton";
@@ -14,11 +12,16 @@ import { encrypt } from "@/utility/AESUtil";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 
+import { Event } from "@/model/Event";
+import useEvents from "@/repository/eventRepository";
+import { FlashList } from "@shopify/flash-list";
+import { StyleSheet, Text, View } from "react-native";
+
 export default function HomeScreen() {
     const router = useRouter();
     const { showInfo } = useAlert();
     const { getUser } = useUserStorage();
-    const { setColor } = useColorCoalition();
+    const { color, setColor } = useColorCoalition();
     const [user, setUser] = useState<any>(null);
     const [userCrypt, setUserCrypt] = useState<string | null>(null);
 
@@ -137,7 +140,12 @@ export default function HomeScreen() {
             }
         >
             <>
-                <ThemedView style={styles.titleContainer}>
+                <EventsList
+                    color={color}
+                    campusId={user?.campus?.[0]?.id}
+                    cursusId={user?.projects_users?.[0]?.cursus_ids?.[0]}
+                />
+                {/* <ThemedView style={styles.titleContainer}>
                     <ThemedText type="title">Welcome!</ThemedText>
                     <HelloWave />
                 </ThemedView>
@@ -183,9 +191,59 @@ export default function HomeScreen() {
                         </ThemedText>
                         .
                     </ThemedText>
-                </ThemedView>
+                </ThemedView> */}
             </>
         </ParallaxScrollView>
+    );
+}
+
+type EventsListProps = {
+    color: string;
+    campusId: number;
+    cursusId: number;
+};
+
+function EventsList({ color, campusId, cursusId }: EventsListProps) {
+    const [events, setEvents] = useState<Event[]>([]);
+    const [loading, setLoading] = useState(true);
+    const { getEvents } = useEvents();
+
+    const user = {
+        campusId: campusId,
+        cursusId: cursusId,
+        isStaff: false,
+    };
+
+    useEffect(() => {
+        async function loadEvents() {
+            setLoading(true);
+            const data = await getEvents(user);
+            setEvents(data);
+            setLoading(false);
+        }
+
+        loadEvents();
+    }, []);
+
+    if (loading)
+        return <Text style={{ color: color }}>Carregando eventos...</Text>;
+
+    return (
+        <FlashList
+            data={events}
+            estimatedItemSize={30}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={({ item }) => (
+                <View style={{ padding: 12 }}>
+                    <Text style={{ fontWeight: "bold" }}>{item.name}</Text>
+                    <Text>{item.location}</Text>
+                    <Text>
+                        Início: {new Date(item.begin_at).toLocaleString()}
+                        {"\n"}Fim: {new Date(item.end_at).toLocaleString()}
+                    </Text>
+                </View>
+            )}
+        />
     );
 }
 
