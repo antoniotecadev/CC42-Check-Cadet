@@ -12,6 +12,7 @@ import { encrypt } from "@/utility/AESUtil";
 import { useRouter } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
+import EventItem from "@/components/ui/EventItem";
 import useEvents from "@/repository/eventRepository";
 import { FlashList } from "@shopify/flash-list";
 import {
@@ -20,7 +21,6 @@ import {
     RefreshControl,
     StyleSheet,
     Text,
-    View,
 } from "react-native";
 
 export default function HomeScreen() {
@@ -286,16 +286,7 @@ function EventsList({ color, userData, onRefreshReady }: EventsListProps) {
                     )}
                 </>
             }
-            renderItem={({ item }) => (
-                <View style={{ padding: 12 }}>
-                    <Text style={{ fontWeight: "bold" }}>{item.name}</Text>
-                    <Text>{item.location}</Text>
-                    <Text>
-                        Início: {new Date(item.begin_at).toLocaleString()}
-                        {"\n"}Fim: {new Date(item.end_at).toLocaleString()}
-                    </Text>
-                </View>
-            )}
+            renderItem={({ item }) => <EventItem item={item} color={color} />}
         />
     );
 }
