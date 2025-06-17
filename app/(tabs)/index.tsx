@@ -10,22 +10,42 @@ import FloatActionButton from "@/components/ui/FloatActionButton";
 import { Colors } from "@/constants/Colors";
 import { encrypt } from "@/utility/AESUtil";
 import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import useEvents from "@/repository/eventRepository";
 import { FlashList } from "@shopify/flash-list";
-import { StyleSheet, Text, View } from "react-native";
+import {
+    ActivityIndicator,
+    Platform,
+    RefreshControl,
+    StyleSheet,
+    Text,
+    View,
+} from "react-native";
 
 export default function HomeScreen() {
     const router = useRouter();
     const { showInfo } = useAlert();
     const { getUser } = useUserStorage();
     const { color, setColor } = useColorCoalition();
+
+    const refreshRef = useRef<() => void>(null);
+
     const [user, setUser] = useState<any>(null);
     const [userCrypt, setUserCrypt] = useState<string | null>(null);
 
     const blurhash =
         "|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuayj[";
+
+    const handleRefreshReady = (refreshFn: (() => void) | null) => {
+        refreshRef.current = refreshFn;
+    };
+
+    const onReloadEvents = () => {
+        if (refreshRef.current) {
+            refreshRef.current();
+        }
+    };
 
     useEffect(() => {
         const fetchUser = async () => {
@@ -123,8 +143,21 @@ export default function HomeScreen() {
                         </ThemedText>
                     </ThemedView>
                     <FloatActionButton
+                        nameIcon={
+                            Platform.OS === "web"
+                                ? "reload-outline"
+                                : "arrow.clockwise"
+                        }
+                        left={16}
+                        bottom={16}
+                        onPress={onReloadEvents}
+                    />
+                    <FloatActionButton
                         right={16}
                         bottom={16}
+                        nameIcon={
+                            Platform.OS === "web" ? "qr-code-outline" : "qrcode"
+                        }
                         onPress={() =>
                             router.push({
                                 pathname: "/qr_code",
@@ -140,7 +173,13 @@ export default function HomeScreen() {
             }
         >
             <>
-                {user && <EventsList color={color} userData={user} />}
+                {user && (
+                    <EventsList
+                        color={color}
+                        userData={user}
+                        onRefreshReady={handleRefreshReady}
+                    />
+                )}
                 {/* <ThemedView style={styles.titleContainer}>
                     <ThemedText type="title">Welcome!</ThemedText>
                     <HelloWave />
@@ -196,29 +235,57 @@ export default function HomeScreen() {
 type EventsListProps = {
     color: string;
     userData: any;
+    onRefreshReady: (refreshFn: (() => void) | null) => void;
 };
 
-function EventsList({ color, userData }: EventsListProps) {
+function EventsList({ color, userData, onRefreshReady }: EventsListProps) {
     const {
         data: events,
         isLoading,
         error,
+        refetch,
+        isRefetching,
     } = useEvents({
         campusId: userData?.campus?.[0]?.id || 0,
         cursusId: userData?.projects_users?.[0]?.cursus_ids?.[0] || 0,
         isStaff: false,
     });
 
+    const handleRefresh = useCallback(() => {
+        refetch();
+    }, [refetch]);
+
+    useEffect(() => {
+        if (onRefreshReady) {
+            onRefreshReady(handleRefresh);
+        }
+    }, [handleRefresh, onRefreshReady]);
+
     if (isLoading)
         return <Text style={{ color: color }}>Carregando eventos...</Text>;
     if (error)
-        return <Text style={{ color: color }}>Erro ao carregar eventos</Text>;
+        return <Text style={{ color: "red" }}>Erro ao carregar eventos</Text>;
 
     return (
         <FlashList
             data={events}
             estimatedItemSize={30}
             keyExtractor={(item) => item.id.toString()}
+            refreshControl={
+                <RefreshControl
+                    colors={[color]} // Android: array de cores da animação
+                    tintColor={color} // iOS: cor do spinner
+                    refreshing={isRefetching}
+                    onRefresh={handleRefresh}
+                />
+            }
+            ListHeaderComponent={
+                <>
+                    {Platform.OS === "web" && isRefetching && (
+                        <ActivityIndicator color={color} size="large" />
+                    )}
+                </>
+            }
             renderItem={({ item }) => (
                 <View style={{ padding: 12 }}>
                     <Text style={{ fontWeight: "bold" }}>{item.name}</Text>

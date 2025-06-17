@@ -3,15 +3,19 @@ import { Platform, TouchableOpacity } from "react-native";
 import { IconSymbol } from "./IconSymbol";
 
 type Props = {
+    nameIcon: any;
     onPress?: () => void;
     right?: number;
+    left?: number;
     bottom?: number;
     width?: number;
     height?: number;
 };
 
 export default function FloatActionButton({
+    nameIcon,
     right,
+    left,
     bottom,
     width,
     height,
@@ -21,6 +25,7 @@ export default function FloatActionButton({
         <TouchableOpacity
             style={{
                 position: "absolute",
+                left: left,
                 right: right,
                 bottom: bottom,
                 zIndex: 10,
@@ -40,14 +45,14 @@ export default function FloatActionButton({
         >
             {Platform.OS === "web" ? (
                 <Ionicons
-                    name="qr-code-outline"
+                    name={nameIcon}
                     size={28}
                     color="#000"
                     style={{ position: "absolute" }}
                 />
             ) : (
                 <IconSymbol
-                    name="qrcode"
+                    name={nameIcon}
                     size={28}
                     color="#000"
                     style={{ position: "absolute" }}
