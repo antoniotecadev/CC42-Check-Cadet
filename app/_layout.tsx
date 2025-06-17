@@ -15,7 +15,13 @@ import {
 import { useColorScheme } from "@/hooks/useColorScheme";
 import React, { useEffect } from "react";
 
+import { useReactQueryDevTools } from "@dev-plugins/react-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+const queryClient = new QueryClient({});
+
 export default function RootLayout() {
+    useReactQueryDevTools(queryClient);
     const colorScheme = useColorScheme();
     const [loaded] = useFonts({
         SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
@@ -32,37 +38,39 @@ export default function RootLayout() {
     }
 
     return (
-        <ThemeProvider
-            value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
-        >
-            <ColorCoalitionProvider>
-                <StackHeader colorScheme={colorScheme ?? "light"}>
-                    <Stack.Screen
-                        name="index"
-                        options={{ headerShown: false }}
-                    />
-                    <Stack.Screen
-                        name="login"
-                        options={{ headerShown: false }}
-                    />
-                    <Stack.Screen
-                        name="(tabs)"
-                        options={{ headerShown: false }}
-                    />
-                    <Stack.Screen
-                        name="qr_code"
-                        options={{
-                            headerShown: true,
-                            title: "QR Code",
-                            headerBackTitle: "Voltar", // iOS: texto do botão
-                            headerBackVisible: true, // mostrar ou ocultar botão de voltar
-                        }}
-                    />
-                    <Stack.Screen name="+not-found" />
-                </StackHeader>
-                <StatusBar style="auto" />
-            </ColorCoalitionProvider>
-        </ThemeProvider>
+        <QueryClientProvider client={queryClient}>
+            <ThemeProvider
+                value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+            >
+                <ColorCoalitionProvider>
+                    <StackHeader colorScheme={colorScheme ?? "light"}>
+                        <Stack.Screen
+                            name="index"
+                            options={{ headerShown: false }}
+                        />
+                        <Stack.Screen
+                            name="login"
+                            options={{ headerShown: false }}
+                        />
+                        <Stack.Screen
+                            name="(tabs)"
+                            options={{ headerShown: false }}
+                        />
+                        <Stack.Screen
+                            name="qr_code"
+                            options={{
+                                headerShown: true,
+                                title: "QR Code",
+                                headerBackTitle: "Voltar", // iOS: texto do botão
+                                headerBackVisible: true, // mostrar ou ocultar botão de voltar
+                            }}
+                        />
+                        <Stack.Screen name="+not-found" />
+                    </StackHeader>
+                    <StatusBar style="auto" />
+                </ColorCoalitionProvider>
+            </ThemeProvider>
+        </QueryClientProvider>
     );
 }
 

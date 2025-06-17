@@ -12,7 +12,6 @@ import { encrypt } from "@/utility/AESUtil";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 
-import { Event } from "@/model/Event";
 import useEvents from "@/repository/eventRepository";
 import { FlashList } from "@shopify/flash-list";
 import { StyleSheet, Text, View } from "react-native";
@@ -24,16 +23,6 @@ export default function HomeScreen() {
     const { color, setColor } = useColorCoalition();
     const [user, setUser] = useState<any>(null);
     const [userCrypt, setUserCrypt] = useState<string | null>(null);
-
-    const [events, setEvents] = useState<Event[]>([]);
-    const [loading, setLoading] = useState(true);
-    const { getEvents } = useEvents();
-
-    type UserProps = {
-        campusId: number;
-        cursusId: number;
-        isStaff: boolean;
-    };
 
     const blurhash =
         "|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuayj[";
@@ -68,24 +57,10 @@ export default function HomeScreen() {
                             (userData?.image?.link?.trim() ?? "")
                     )
                 );
-                const user = {
-                    campusId: userData?.campus?.[0]?.id || 0,
-                    cursusId:
-                        userData?.projects_users?.[0]?.cursus_ids?.[0] || 0,
-                    isStaff: false,
-                };
-                loadEvents(user);
             } else {
                 showInfo("Welcome!", "You can start exploring the app.");
             }
         };
-
-        async function loadEvents(user: UserProps) {
-            setLoading(true);
-            const data = await getEvents(user);
-            setEvents(data);
-            setLoading(false);
-        }
 
         fetchUser();
     }, []);
@@ -165,7 +140,7 @@ export default function HomeScreen() {
             }
         >
             <>
-                <EventsList color={color} events={events} loading={loading} />
+                {user && <EventsList color={color} userData={user} />}
                 {/* <ThemedView style={styles.titleContainer}>
                     <ThemedText type="title">Welcome!</ThemedText>
                     <HelloWave />
@@ -220,13 +195,24 @@ export default function HomeScreen() {
 
 type EventsListProps = {
     color: string;
-    events: Event[];
-    loading: boolean;
+    userData: any;
 };
 
-function EventsList({ color, events, loading }: EventsListProps) {
-    if (loading)
+function EventsList({ color, userData }: EventsListProps) {
+    const {
+        data: events,
+        isLoading,
+        error,
+    } = useEvents({
+        campusId: userData?.campus?.[0]?.id || 0,
+        cursusId: userData?.projects_users?.[0]?.cursus_ids?.[0] || 0,
+        isStaff: false,
+    });
+
+    if (isLoading)
         return <Text style={{ color: color }}>Carregando eventos...</Text>;
+    if (error)
+        return <Text style={{ color: color }}>Erro ao carregar eventos</Text>;
 
     return (
         <FlashList

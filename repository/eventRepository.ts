@@ -1,6 +1,7 @@
 import useAlert from "@/hooks/useAlert";
 import { Event } from "@/model/Event";
 import useApiInterceptors from "@/services/api";
+import { useQuery } from "@tanstack/react-query";
 
 interface GetEventsParams {
     campusId: number;
@@ -8,7 +9,7 @@ interface GetEventsParams {
     isStaff: boolean;
 }
 
-export default function usevents() {
+export default function useEvents(params: GetEventsParams) {
     const { showError } = useAlert();
     const { api } = useApiInterceptors();
 
@@ -29,5 +30,12 @@ export default function usevents() {
             return [];
         }
     };
-    return { getEvents };
+
+    return useQuery<Event[]>({
+        queryKey: ["events", params],
+        queryFn: () => (params ? getEvents(params) : Promise.resolve([])),
+        enabled: !!params,
+        staleTime: 1000 * 60 * 5, // cache por 5 minutos
+        retry: 1, // tenta 1x se falhar
+    });
 }
