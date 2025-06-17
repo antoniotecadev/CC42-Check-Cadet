@@ -1,6 +1,6 @@
 import { useColorCoalition } from "@/components/ColorCoalitionContext";
+import { Colors } from "@/constants/Colors";
 import axios from "axios";
-import { Colors } from "react-native/Libraries/NewAppScreen";
 import useTokenStorage from "./storage/useTokenStorage";
 import useUserStorage from "./storage/useUserStorage";
 import useAlert from "./useAlert";
