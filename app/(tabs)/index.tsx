@@ -142,6 +142,17 @@ export default function HomeScreen() {
                             {user?.displayname || ""}
                         </ThemedText>
                     </ThemedView>
+                    <ThemedText
+                        type="title"
+                        style={{
+                            color: "#fff",
+                            position: "absolute",
+                            alignSelf: "center",
+                            bottom: 16,
+                        }}
+                    >
+                        {user?.login || ""}
+                    </ThemedText>
                     <FloatActionButton
                         nameIcon={
                             Platform.OS === "web"
@@ -215,9 +226,24 @@ function EventsList({ color, userData, onRefreshReady }: EventsListProps) {
     }, [handleRefresh, onRefreshReady]);
 
     if (isLoading)
-        return <Text style={{ color: color }}>Carregando eventos...</Text>;
+        return (
+            <Text
+                style={[
+                    {
+                        color: color,
+                    },
+                    styles.alignText,
+                ]}
+            >
+                Carregando eventos...
+            </Text>
+        );
     if (error)
-        return <Text style={{ color: "red" }}>Erro ao carregar eventos</Text>;
+        return (
+            <Text style={[{ color: "red" }, styles.alignText]}>
+                Erro ao carregar eventos
+            </Text>
+        );
 
     return (
         <FlashList
@@ -228,13 +254,13 @@ function EventsList({ color, userData, onRefreshReady }: EventsListProps) {
                 <RefreshControl
                     colors={[color]} // Android: array de cores da animação
                     tintColor={color} // iOS: cor do spinner
-                    refreshing={isRefetching}
+                    refreshing={isRefetching || isLoading}
                     onRefresh={handleRefresh}
                 />
             }
             ListHeaderComponent={
                 <>
-                    {Platform.OS === "web" && isRefetching && (
+                    {Platform.OS === "web" && (isRefetching || isLoading) && (
                         <ActivityIndicator color={color} size="large" />
                     )}
                 </>
@@ -251,6 +277,10 @@ const styles = StyleSheet.create({
         bottom: 0,
         left: 0,
         position: "absolute",
+    },
+    alignText: {
+        alignItems: "center",
+        justifyContent: "center",
     },
     text: {
         textAlign: "center",
