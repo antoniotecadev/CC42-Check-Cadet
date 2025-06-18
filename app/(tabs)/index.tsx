@@ -21,6 +21,7 @@ import {
     RefreshControl,
     StyleSheet,
     Text,
+    TouchableOpacity,
 } from "react-native";
 
 export default function HomeScreen() {
@@ -265,7 +266,11 @@ function EventsList({ color, userData, onRefreshReady }: EventsListProps) {
                     )}
                 </>
             }
-            renderItem={({ item }) => <EventItem item={item} color={color} />}
+            renderItem={({ item }) => (
+                <TouchableOpacity onPress={() => alert(item.name)}>
+                    <EventItem item={item} color={color} />
+                </TouchableOpacity>
+            )}
         />
     );
 }
