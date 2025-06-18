@@ -1,6 +1,7 @@
 import useTokenStorage from "@/hooks/storage/useTokenStorage";
 import { fetchApiKeyFromDatabase } from "@/services/firebaseApiKey";
 import axios from "axios";
+import { router } from "expo-router";
 
 export default function useApiInterceptors() {
     const { getAccessToken, getRefreshToken, saveToken, clearTokens } =
@@ -87,6 +88,7 @@ export default function useApiInterceptors() {
                     processQueue(err, null);
                     await clearTokens();
                     // Redirecionar para login se quiser
+                    router.replace("/login");
                     return Promise.reject(err);
                 } finally {
                     isRefreshing = false;
