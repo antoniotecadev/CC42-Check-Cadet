@@ -1,3 +1,4 @@
+import { fetchRatings, RatingResult } from "@/repository/eventRepository";
 import { encrypt } from "@/utility/AESUtil";
 import { getEventDuration, getTimeUntilEvent } from "@/utility/DateUtil";
 import {
@@ -7,7 +8,7 @@ import {
 } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
-import React from "react";
+import React, { useState } from "react";
 import {
   Animated,
   Dimensions,
@@ -24,8 +25,11 @@ const QR_ICON = "qrcode";
 const ATTENDANCE_ICON = "clipboard-list-outline";
 
 const EventDetailScreen = () => {
-    const { userId, events } = useLocalSearchParams();
-    const event = typeof events === "string" ? JSON.parse(events) : null;
+    const [rating, setRating] = useState<RatingResult>();
+    const { userData, eventData } = useLocalSearchParams();
+    const user = typeof userData === "string" ? JSON.parse(userData) : null;
+    const event = typeof eventData === "string" ? JSON.parse(eventData) : null;
+
     // Animation for floating buttons
     const scaleAnim = React.useRef(new Animated.Value(1)).current;
 
@@ -43,6 +47,17 @@ const EventDetailScreen = () => {
             useNativeDriver: true,
         }).start();
     };
+
+    React.useEffect(() => {
+        const unsubscribe = fetchRatings(
+            user?.campusId,
+            event?.cursus_ids[0],
+            "events",
+            event?.id,
+            setRating
+        );
+        return () => unsubscribe();
+    }, [event]);
 
     return (
         <ScrollView
@@ -121,23 +136,30 @@ const EventDetailScreen = () => {
                 <Text style={styles.sectionTitle}>Descrição</Text>
                 <Text style={styles.description}>{event?.description}</Text>
             </View>
-
             {/* Rating Section */}
             <View style={styles.ratingContainer}>
                 <View style={styles.ratingLeft}>
-                    <Text style={styles.ratingValue}>4.8</Text>
+                    <Text style={styles.ratingValue}>
+                        {rating?.ratingValue?.toFixed(1) ?? "-"}
+                    </Text>
                     <View style={styles.starsRow}>
-                        {[...Array(5)].map((_, i) => (
+                        {rating?.stars.map((star, i) => (
                             <FontAwesome
                                 key={i}
-                                name={i < 4 ? "star" : "star-half-full"}
+                                name={
+                                    star === "star-half"
+                                        ? "star-half-full"
+                                        : star
+                                }
                                 size={28}
                                 color="#FFD700"
                                 style={{ marginRight: 2 }}
                             />
                         ))}
                     </View>
-                    <Text style={styles.ratingCount}>120 avaliações</Text>
+                    <Text style={styles.ratingCount}>
+                        {rating?.ratingCount ?? 0} avaliações
+                    </Text>
                 </View>
                 <View style={styles.ratingRight}>
                     <Text style={styles.tapToRate}>Toque para avaliar</Text>
@@ -173,7 +195,7 @@ const EventDetailScreen = () => {
                                 pathname: "/qr_code",
                                 params: {
                                     content: encrypt(
-                                        "cc42event" + event?.id + "#" + userId
+                                        "cc42event" + event?.id + "#" + user?.id
                                     ),
                                     title: event?.kind,
                                     description: event?.name,

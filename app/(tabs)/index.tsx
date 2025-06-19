@@ -13,7 +13,7 @@ import { router, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import EventItem from "@/components/ui/EventItem";
-import useEvents from "@/repository/eventRepository";
+import { useEvents } from "@/repository/eventRepository";
 import { FlashList } from "@shopify/flash-list";
 import {
     ActivityIndicator,
@@ -272,8 +272,11 @@ function EventsList({ color, userData, onRefreshReady }: EventsListProps) {
                         router.push({
                             pathname: "/event_details",
                             params: {
-                                userId: userData.id,
-                                events: JSON.stringify(item),
+                                userData: JSON.stringify({
+                                    id: userData.id,
+                                    campusId: userData?.campus?.[0]?.id || 0,
+                                }),
+                                eventData: JSON.stringify(item),
                             },
                         })
                     }
