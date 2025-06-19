@@ -1,0 +1,398 @@
+import { getEventDuration, getTimeUntilEvent } from "@/utility/DateUtil";
+import {
+  FontAwesome,
+  MaterialCommunityIcons,
+  MaterialIcons,
+} from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import { useLocalSearchParams } from "expo-router";
+import React from "react";
+import {
+  Animated,
+  Dimensions,
+  ImageBackground,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+
+const HEADER_IMAGE = require("../assets/images/back_default_42_16_9_horizontal.png");
+const QR_ICON = "qrcode";
+const ATTENDANCE_ICON = "clipboard-list-outline";
+
+const EventDetailScreen = () => {
+    const params = useLocalSearchParams<{ events?: string }>();
+    const event = params.events ? JSON.parse(params.events) : null;
+    // Animation for floating buttons
+    const scaleAnim = React.useRef(new Animated.Value(1)).current;
+
+    const handlePressIn = () => {
+        Animated.spring(scaleAnim, {
+            toValue: 0.92,
+            useNativeDriver: true,
+        }).start();
+    };
+
+    const handlePressOut = () => {
+        Animated.spring(scaleAnim, {
+            toValue: 1,
+            friction: 3,
+            useNativeDriver: true,
+        }).start();
+    };
+
+    return (
+        <ScrollView
+            style={styles.container}
+            showsVerticalScrollIndicator={false}
+        >
+            {/* Header with image and gradient */}
+            <View style={styles.headerContainer}>
+                <ImageBackground
+                    source={HEADER_IMAGE}
+                    style={styles.headerImage}
+                    resizeMode="cover"
+                >
+                    <LinearGradient
+                        colors={[
+                            "rgba(0,0,0,0.7)",
+                            "rgba(0,0,0,0.2)",
+                            "transparent",
+                        ]}
+                        style={styles.headerGradient}
+                    />
+                    <View style={styles.headerTextContainer}>
+                        <Text style={styles.kind}>{event?.kind}</Text>
+                        <Text style={styles.title}>{event?.name}</Text>
+                        <Text style={styles.date}>
+                            {new Date(event?.begin_at).toLocaleString()}
+                        </Text>
+                    </View>
+                </ImageBackground>
+            </View>
+
+            {/* Quick Info Cards */}
+            <View style={styles.infoRow}>
+                <View style={styles.infoCard}>
+                    <MaterialIcons
+                        name="access-time"
+                        size={22}
+                        color="#3A86FF"
+                    />
+                    <Text style={styles.infoText}>
+                        {getEventDuration(event?.begin_at, event?.end_at)}
+                    </Text>
+                </View>
+                <View style={styles.infoCard}>
+                    <MaterialIcons
+                        name="calendar-today"
+                        size={22}
+                        color="#3A86FF"
+                    />
+                    <Text style={styles.infoText}>
+                        {getTimeUntilEvent(event?.begin_at)}
+                    </Text>
+                </View>
+                <View style={styles.infoCard}>
+                    <MaterialIcons
+                        name="location-on"
+                        size={22}
+                        color="#3A86FF"
+                    />
+                    <Text style={styles.infoText}>{event?.location}</Text>
+                </View>
+                <View style={styles.infoCard}>
+                    <MaterialIcons
+                        name="people-outline"
+                        size={22}
+                        color="#3A86FF"
+                    />
+                    <Text style={styles.infoText}>
+                        {event?.nbr_subscribers || 0}/{event?.max_people || 0}
+                    </Text>
+                </View>
+            </View>
+
+            {/* Description */}
+            <View style={styles.card}>
+                <Text style={styles.sectionTitle}>Descrição</Text>
+                <Text style={styles.description}>{event?.description}</Text>
+            </View>
+
+            {/* Rating Section */}
+            <View style={styles.ratingContainer}>
+                <View style={styles.ratingLeft}>
+                    <Text style={styles.ratingValue}>4.8</Text>
+                    <View style={styles.starsRow}>
+                        {[...Array(5)].map((_, i) => (
+                            <FontAwesome
+                                key={i}
+                                name={i < 4 ? "star" : "star-half-full"}
+                                size={28}
+                                color="#FFD700"
+                                style={{ marginRight: 2 }}
+                            />
+                        ))}
+                    </View>
+                    <Text style={styles.ratingCount}>120 avaliações</Text>
+                </View>
+                <View style={styles.ratingRight}>
+                    <Text style={styles.tapToRate}>Toque para avaliar</Text>
+                    <View style={styles.starsRowSmall}>
+                        {[...Array(5)].map((_, i) => (
+                            <FontAwesome
+                                key={i}
+                                name={"star-o"}
+                                size={22}
+                                color="#B0B0B0"
+                                style={{ marginRight: 1 }}
+                            />
+                        ))}
+                    </View>
+                </View>
+            </View>
+
+            {/* Floating Action Buttons */}
+            <View style={styles.fabRow}>
+                <Animated.View
+                    style={[
+                        styles.fabWrapper,
+                        { transform: [{ scale: scaleAnim }] },
+                    ]}
+                >
+                    <TouchableOpacity
+                        style={styles.fab}
+                        activeOpacity={0.8}
+                        onPressIn={handlePressIn}
+                        onPressOut={handlePressOut}
+                    >
+                        <MaterialCommunityIcons
+                            name={QR_ICON}
+                            size={44}
+                            color="#3A86FF"
+                        />
+                        {/* <Text style={styles.fabLabel}>QR Code</Text> */}
+                    </TouchableOpacity>
+                </Animated.View>
+                <Animated.View
+                    style={[
+                        styles.fabWrapper,
+                        { transform: [{ scale: scaleAnim }] },
+                    ]}
+                >
+                    <TouchableOpacity
+                        style={styles.fab}
+                        activeOpacity={0.8}
+                        onPressIn={handlePressIn}
+                        onPressOut={handlePressOut}
+                    >
+                        <MaterialCommunityIcons
+                            name={ATTENDANCE_ICON}
+                            size={44}
+                            color="#3A86FF"
+                        />
+                        {/* <Text style={styles.fabLabel}>Lista Presença</Text> */}
+                    </TouchableOpacity>
+                </Animated.View>
+            </View>
+        </ScrollView>
+    );
+};
+
+const { width } = Dimensions.get("window");
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: "#F7F9FB",
+    },
+    headerContainer: {
+        height: 220,
+        width: "100%",
+        borderBottomLeftRadius: 32,
+        borderBottomRightRadius: 32,
+        overflow: "hidden",
+        marginBottom: 12,
+        elevation: 4,
+        shadowColor: "#000",
+        shadowOpacity: 0.15,
+        shadowRadius: 12,
+        shadowOffset: { width: 0, height: 4 },
+    },
+    headerImage: {
+        flex: 1,
+        justifyContent: "flex-end",
+    },
+    headerGradient: {
+        ...StyleSheet.absoluteFillObject,
+        borderBottomLeftRadius: 32,
+        borderBottomRightRadius: 32,
+    },
+    headerTextContainer: {
+        alignItems: "center",
+        paddingBottom: 24,
+    },
+    kind: {
+        color: "#fff",
+        fontSize: 15,
+        fontWeight: "bold",
+        letterSpacing: 2,
+        textShadowColor: "#000",
+        textShadowOffset: { width: 1, height: 1 },
+        textShadowRadius: 4,
+        textTransform: "uppercase",
+    },
+    title: {
+        color: "#fff",
+        fontSize: 24,
+        fontWeight: "bold",
+        marginTop: 6,
+        textShadowColor: "#000",
+        textShadowOffset: { width: 1, height: 1 },
+        textShadowRadius: 6,
+        textAlign: "center",
+    },
+    date: {
+        color: "#E0E0E0",
+        fontSize: 13,
+        marginTop: 6,
+        textShadowColor: "#000",
+        textShadowOffset: { width: 1, height: 1 },
+        textShadowRadius: 4,
+    },
+    infoRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        marginHorizontal: 18,
+        marginTop: -32,
+        marginBottom: 18,
+    },
+    infoCard: {
+        backgroundColor: "#fff",
+        borderRadius: 16,
+        paddingVertical: 12,
+        paddingHorizontal: 10,
+        alignItems: "center",
+        width: (width - 56) / 4,
+        elevation: 2,
+        shadowColor: "#000",
+        shadowOpacity: 0.08,
+        shadowRadius: 6,
+        shadowOffset: { width: 0, height: 2 },
+    },
+    infoText: {
+        textAlign: "center",
+        marginTop: 6,
+        color: "#3A86FF",
+        fontWeight: "bold",
+        fontSize: 13,
+    },
+    card: {
+        backgroundColor: "#fff",
+        borderRadius: 18,
+        marginHorizontal: 18,
+        padding: 18,
+        marginBottom: 18,
+        elevation: 2,
+        shadowColor: "#000",
+        shadowOpacity: 0.07,
+        shadowRadius: 6,
+        shadowOffset: { width: 0, height: 2 },
+    },
+    sectionTitle: {
+        fontSize: 17,
+        fontWeight: "bold",
+        color: "#3A86FF",
+        marginBottom: 8,
+    },
+    description: {
+        color: "#222",
+        fontSize: 15,
+        lineHeight: 22,
+        fontFamily: "sans-serif-light",
+    },
+    ratingContainer: {
+        flexDirection: "row",
+        backgroundColor: "#fff",
+        borderRadius: 18,
+        marginHorizontal: 18,
+        padding: 18,
+        marginBottom: 18,
+        alignItems: "center",
+        elevation: 2,
+        shadowColor: "#000",
+        shadowOpacity: 0.07,
+        shadowRadius: 6,
+        shadowOffset: { width: 0, height: 2 },
+    },
+    ratingLeft: {
+        flex: 1,
+        alignItems: "center",
+        borderRightWidth: 1,
+        borderRightColor: "#F0F0F0",
+        paddingRight: 12,
+    },
+    ratingValue: {
+        fontSize: 38,
+        fontWeight: "bold",
+        color: "#3A86FF",
+        marginBottom: 2,
+    },
+    starsRow: {
+        flexDirection: "row",
+        marginBottom: 2,
+    },
+    ratingCount: {
+        color: "#888",
+        fontSize: 13,
+        marginTop: 2,
+    },
+    ratingRight: {
+        flex: 1,
+        alignItems: "center",
+        paddingLeft: 12,
+    },
+    tapToRate: {
+        color: "#3A86FF",
+        fontWeight: "bold",
+        fontSize: 15,
+        marginBottom: 4,
+    },
+    starsRowSmall: {
+        flexDirection: "row",
+    },
+    fabRow: {
+        flexDirection: "row",
+        justifyContent: "space-evenly",
+        marginTop: 10,
+        marginBottom: 32,
+    },
+    fabWrapper: {
+        elevation: 6,
+        shadowColor: "#3A86FF",
+        shadowOpacity: 0.18,
+        shadowRadius: 12,
+        shadowOffset: { width: 0, height: 6 },
+        borderRadius: 50,
+    },
+    fab: {
+        backgroundColor: "#fff",
+        width: 90,
+        height: 90,
+        borderRadius: 45,
+        alignItems: "center",
+        justifyContent: "center",
+        marginHorizontal: 8,
+        marginBottom: 4,
+    },
+    fabLabel: {
+        color: "#3A86FF",
+        fontWeight: "bold",
+        fontSize: 13,
+        marginTop: 4,
+    },
+});
+
+export default EventDetailScreen;

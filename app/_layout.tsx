@@ -65,6 +65,15 @@ export default function RootLayout() {
                                 headerBackVisible: true, // mostrar ou ocultar botão de voltar
                             }}
                         />
+                        <Stack.Screen
+                            name="event_details"
+                            options={{
+                                headerShown: true,
+                                title: "EVENT",
+                                headerBackTitle: "Voltar",
+                                headerBackVisible: true,
+                            }}
+                        />
                         <Stack.Screen name="+not-found" />
                     </StackHeader>
                     <StatusBar style="auto" />

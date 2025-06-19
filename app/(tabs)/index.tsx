@@ -9,7 +9,7 @@ import { useColorCoalition } from "@/components/ColorCoalitionContext";
 import FloatActionButton from "@/components/ui/FloatActionButton";
 import { Colors } from "@/constants/Colors";
 import { encrypt } from "@/utility/AESUtil";
-import { useRouter } from "expo-router";
+import { router, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import EventItem from "@/components/ui/EventItem";
@@ -267,7 +267,16 @@ function EventsList({ color, userData, onRefreshReady }: EventsListProps) {
                 </>
             }
             renderItem={({ item }) => (
-                <TouchableOpacity onPress={() => alert(item.name)}>
+                <TouchableOpacity
+                    onPress={() =>
+                        router.push({
+                            pathname: "/event_details",
+                            params: {
+                                events: JSON.stringify(item),
+                            },
+                        })
+                    }
+                >
                     <EventItem item={item} color={color} />
                 </TouchableOpacity>
             )}
