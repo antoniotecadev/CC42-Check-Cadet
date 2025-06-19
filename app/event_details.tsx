@@ -1,3 +1,4 @@
+import { encrypt } from "@/utility/AESUtil";
 import { getEventDuration, getTimeUntilEvent } from "@/utility/DateUtil";
 import {
   FontAwesome,
@@ -5,7 +6,7 @@ import {
   MaterialIcons,
 } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import React from "react";
 import {
   Animated,
@@ -23,8 +24,8 @@ const QR_ICON = "qrcode";
 const ATTENDANCE_ICON = "clipboard-list-outline";
 
 const EventDetailScreen = () => {
-    const params = useLocalSearchParams<{ events?: string }>();
-    const event = params.events ? JSON.parse(params.events) : null;
+    const { userId, events } = useLocalSearchParams();
+    const event = typeof events === "string" ? JSON.parse(events) : null;
     // Animation for floating buttons
     const scaleAnim = React.useRef(new Animated.Value(1)).current;
 
@@ -167,6 +168,18 @@ const EventDetailScreen = () => {
                         activeOpacity={0.8}
                         onPressIn={handlePressIn}
                         onPressOut={handlePressOut}
+                        onPress={() =>
+                            router.push({
+                                pathname: "/qr_code",
+                                params: {
+                                    content: encrypt(
+                                        "cc42event" + event?.id + "#" + userId
+                                    ),
+                                    title: event?.kind,
+                                    description: event?.name,
+                                },
+                            })
+                        }
                     >
                         <MaterialCommunityIcons
                             name={QR_ICON}

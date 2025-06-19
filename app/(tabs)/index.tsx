@@ -272,6 +272,7 @@ function EventsList({ color, userData, onRefreshReady }: EventsListProps) {
                         router.push({
                             pathname: "/event_details",
                             params: {
+                                userId: userData.id,
                                 events: JSON.stringify(item),
                             },
                         })
