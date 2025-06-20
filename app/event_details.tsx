@@ -36,6 +36,7 @@ const QR_ICON = "qrcode";
 const ATTENDANCE_ICON = "clipboard-list-outline";
 
 const EventDetailScreen = () => {
+    const isWeb = Platform.OS === "web";
     const { showError, showSuccess } = useAlert();
     const [rating, setRating] = useState<RatingResult>();
     const { userData, eventData } = useLocalSearchParams();
@@ -78,8 +79,8 @@ const EventDetailScreen = () => {
 
     return (
         <ScrollView
-            style={[styles.container, Platform.OS == "web" ? styles.inner : {}]}
-            showsVerticalScrollIndicator={Platform.OS == "web" ? true : false}
+            style={[styles.container, isWeb ? styles.inner : {}]}
+            showsVerticalScrollIndicator={isWeb}
         >
             {/* Header with image and gradient */}
             <View style={styles.headerContainer}>

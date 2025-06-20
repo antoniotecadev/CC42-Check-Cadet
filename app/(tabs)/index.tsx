@@ -30,6 +30,8 @@ export default function HomeScreen() {
     const { getUser } = useUserStorage();
     const { color, setColor } = useColorCoalition();
 
+    const isWeb = Platform.OS === "web";
+
     const refreshRef = useRef<() => void>(null);
 
     const [user, setUser] = useState<any>(null);
@@ -155,11 +157,7 @@ export default function HomeScreen() {
                         {user?.login || ""}
                     </ThemedText>
                     <FloatActionButton
-                        nameIcon={
-                            Platform.OS === "web"
-                                ? "reload-outline"
-                                : "arrow.clockwise"
-                        }
+                        nameIcon={isWeb ? "reload-outline" : "arrow.clockwise"}
                         left={16}
                         bottom={16}
                         onPress={onReloadEvents}
@@ -167,9 +165,7 @@ export default function HomeScreen() {
                     <FloatActionButton
                         right={16}
                         bottom={16}
-                        nameIcon={
-                            Platform.OS === "web" ? "qr-code-outline" : "qrcode"
-                        }
+                        nameIcon={isWeb ? "qr-code-outline" : "qrcode"}
                         onPress={() =>
                             router.push({
                                 pathname: "/qr_code",
@@ -187,6 +183,7 @@ export default function HomeScreen() {
             <>
                 {user && (
                     <EventsList
+                        isWeb={isWeb}
                         color={color}
                         userData={user}
                         onRefreshReady={handleRefreshReady}
@@ -198,12 +195,18 @@ export default function HomeScreen() {
 }
 
 type EventsListProps = {
+    isWeb: boolean;
     color: string;
     userData: any;
     onRefreshReady: (refreshFn: (() => void) | null) => void;
 };
 
-function EventsList({ color, userData, onRefreshReady }: EventsListProps) {
+function EventsList({
+    isWeb,
+    color,
+    userData,
+    onRefreshReady,
+}: EventsListProps) {
     const {
         data: events,
         isLoading,
@@ -261,7 +264,7 @@ function EventsList({ color, userData, onRefreshReady }: EventsListProps) {
             }
             ListHeaderComponent={
                 <>
-                    {Platform.OS === "web" && (isRefetching || isLoading) && (
+                    {isWeb && (isRefetching || isLoading) && (
                         <ActivityIndicator color={color} size="large" />
                     )}
                 </>
