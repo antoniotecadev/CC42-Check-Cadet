@@ -79,7 +79,7 @@ const EventDetailScreen = () => {
     return (
         <ScrollView
             style={[styles.container, Platform.OS == "web" ? styles.inner : {}]}
-            showsVerticalScrollIndicator={false}
+            showsVerticalScrollIndicator={Platform.OS == "web" ? true : false}
         >
             {/* Header with image and gradient */}
             <View style={styles.headerContainer}>
