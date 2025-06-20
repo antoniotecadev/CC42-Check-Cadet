@@ -58,11 +58,12 @@ const EventDetailScreen = () => {
             event?.cursus_ids[0],
             "events",
             event?.id,
+            user?.id,
             setRating
         );
         return () => unsubscribe();
     }, [event]);
-
+    
     return (
         <ScrollView
             style={styles.container}
@@ -197,7 +198,9 @@ const EventDetailScreen = () => {
                                 (error) => showError("ERRO", error.message)
                             );
                         }}
-                        disabled={userRating === 0}
+                        disabled={
+                            userRating === 0 || rating?.userRating != undefined
+                        }
                     />
                 </View>
             </View>

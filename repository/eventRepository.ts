@@ -46,6 +46,7 @@ export type RatingResult = {
     ratingValue: number;
     ratingCount: number;
     stars: ("star" | "star-half" | "star-o")[];
+    userRating: number | undefined;
 };
 
 export function fetchRatings(
@@ -53,6 +54,7 @@ export function fetchRatings(
     cursusId: string,
     type: string,
     typeId: string,
+    userId: string,
     callback: (result: RatingResult) => void
 ) {
     const reference = ref(
@@ -66,6 +68,7 @@ export function fetchRatings(
                 ratingValue: 0,
                 ratingCount: 0,
                 stars: ["star-o", "star-o", "star-o", "star-o", "star-o"],
+                userRating: undefined,
             });
             return;
         }
@@ -89,7 +92,12 @@ export function fetchRatings(
             value -= 1;
         }
 
-        callback({ ratingValue, ratingCount, stars });
+        // Verifica se o usuário já avaliou
+        const userRating = ratingsObj[userId]
+            ? Number(ratingsObj[userId])
+            : undefined;
+
+        callback({ ratingValue, ratingCount, stars, userRating });
     });
 
     return unsubscribe; // Chame para parar de ouvir
