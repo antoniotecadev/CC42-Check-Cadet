@@ -15,12 +15,21 @@ import {
   Button,
   Dimensions,
   ImageBackground,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+
+const { width: windowWidth } = Dimensions.get("window");
+const CARD_MARGIN = 18;
+const CARD_GAP = 8;
+const infoCardWidth =
+    Platform.OS === "web"
+        ? Math.min(120, (windowWidth - CARD_MARGIN * 2 - CARD_GAP * 3) / 4)
+        : (windowWidth - CARD_MARGIN * 2 - CARD_GAP * 3) / 4;
 
 const HEADER_IMAGE = require("../assets/images/back_default_42_16_9_horizontal.png");
 const QR_ICON = "qrcode";
@@ -69,7 +78,7 @@ const EventDetailScreen = () => {
 
     return (
         <ScrollView
-            style={styles.container}
+            style={[styles.container, Platform.OS == "web" ? styles.inner : {}]}
             showsVerticalScrollIndicator={false}
         >
             {/* Header with image and gradient */}
@@ -99,7 +108,7 @@ const EventDetailScreen = () => {
 
             {/* Quick Info Cards */}
             <View style={styles.infoRow}>
-                <View style={styles.infoCard}>
+                <View style={[styles.infoCard, { width: infoCardWidth }]}>
                     <MaterialIcons
                         name="access-time"
                         size={22}
@@ -109,7 +118,7 @@ const EventDetailScreen = () => {
                         {getEventDuration(event?.begin_at, event?.end_at)}
                     </Text>
                 </View>
-                <View style={styles.infoCard}>
+                <View style={[styles.infoCard, { width: infoCardWidth }]}>
                     <MaterialIcons
                         name="calendar-today"
                         size={22}
@@ -119,7 +128,7 @@ const EventDetailScreen = () => {
                         {getTimeUntilEvent(event?.begin_at)}
                     </Text>
                 </View>
-                <View style={styles.infoCard}>
+                <View style={[styles.infoCard, { width: infoCardWidth }]}>
                     <MaterialIcons
                         name="location-on"
                         size={22}
@@ -127,7 +136,7 @@ const EventDetailScreen = () => {
                     />
                     <Text style={styles.infoText}>{event?.location}</Text>
                 </View>
-                <View style={styles.infoCard}>
+                <View style={[styles.infoCard, { width: infoCardWidth }]}>
                     <MaterialIcons
                         name="people-outline"
                         size={22}
@@ -279,8 +288,6 @@ const EventDetailScreen = () => {
     );
 };
 
-const { width } = Dimensions.get("window");
-
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -312,6 +319,12 @@ const styles = StyleSheet.create({
     headerTextContainer: {
         alignItems: "center",
         paddingBottom: 24,
+    },
+    inner: {
+        width: "100%",
+        maxWidth: 600, // limite superior
+        minWidth: 480, // limite inferior (opcional)
+        marginHorizontal: "auto", // centraliza na web (usando style prop em web pura)
     },
     kind: {
         color: "#fff",
@@ -354,7 +367,7 @@ const styles = StyleSheet.create({
         paddingVertical: 12,
         paddingHorizontal: 10,
         alignItems: "center",
-        width: (width - 56) / 4,
+        //width: (width - 56) / 4,
         elevation: 2,
         shadowColor: "#000",
         shadowOpacity: 0.08,
