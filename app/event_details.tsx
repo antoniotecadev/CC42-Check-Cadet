@@ -34,6 +34,9 @@ const EventDetailScreen = () => {
     const user = typeof userData === "string" ? JSON.parse(userData) : null;
     const event = typeof eventData === "string" ? JSON.parse(eventData) : null;
 
+    // Se o usuário já avaliou, mostra a nota dele, senão mostra o que ele está selecionando
+    const starsToShow = rating?.userRating ?? userRating; // userRating = estado local para seleção
+
     // Animation for floating buttons
     const scaleAnim = React.useRef(new Animated.Value(1)).current;
 
@@ -63,7 +66,7 @@ const EventDetailScreen = () => {
         );
         return () => unsubscribe();
     }, [event]);
-    
+
     return (
         <ScrollView
             style={styles.container}
@@ -167,40 +170,52 @@ const EventDetailScreen = () => {
                     </Text>
                 </View>
                 <View style={styles.ratingRight}>
-                    <Text style={styles.tapToRate}>Toque para avaliar</Text>
+                    {!rating?.userRating && (
+                        <Text style={styles.tapToRate}>Toque para avaliar</Text>
+                    )}
                     <View style={styles.starsRowSmall}>
                         {[...Array(5)].map((_, i) => (
                             <FontAwesome
                                 key={i}
-                                name={i < userRating ? "star" : "star-o"}
+                                name={i < starsToShow ? "star" : "star-o"}
                                 size={22}
-                                color={i < userRating ? "#FFD700" : "#B0B0B0"}
+                                color={i < starsToShow ? "#FFD700" : "#B0B0B0"}
                                 style={{ marginRight: 1 }}
-                                onPress={() => setUserRating(i + 1)}
+                                onPress={
+                                    rating?.userRating
+                                        ? undefined // desabilita clique se já avaliou
+                                        : () => setUserRating(i + 1)
+                                }
                             />
                         ))}
                     </View>
                     <Button
-                        title="Enviar Avaliação"
-                        onPress={() => {
-                            rate(
-                                user?.campusId,
-                                event?.cursus_ids[0],
-                                "events",
-                                event?.id,
-                                user?.id,
-                                userRating,
-                                () =>
-                                    showSuccess(
-                                        "SUCESSO",
-                                        "Avaliação enviada com sucesso!"
-                                    ),
-                                (error) => showError("ERRO", error.message)
-                            );
-                        }}
-                        disabled={
-                            userRating === 0 || rating?.userRating != undefined
+                        title={
+                            rating?.userRating
+                                ? `${rating.userRating} estrela${
+                                      rating.userRating > 1 ? "s" : ""
+                                  }`
+                                : "Enviar Avaliação"
                         }
+                        onPress={() => {
+                            if (!rating?.userRating) {
+                                rate(
+                                    user?.campusId,
+                                    event?.cursus_ids[0],
+                                    "events",
+                                    event?.id,
+                                    user?.id,
+                                    userRating,
+                                    () =>
+                                        showSuccess(
+                                            "SUCESSO",
+                                            "Avaliação enviada com sucesso!"
+                                        ),
+                                    (error) => showError("ERRO", error.message)
+                                );
+                            }
+                        }}
+                        disabled={!!rating?.userRating || userRating === 0}
                     />
                 </View>
             </View>
