@@ -301,6 +301,7 @@ const styles = StyleSheet.create({
     },
     headerImage: {
         flex: 1,
+        width: "100%",
         justifyContent: "flex-end",
     },
     headerGradient: {
