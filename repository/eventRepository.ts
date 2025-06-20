@@ -3,7 +3,7 @@ import useAlert from "@/hooks/useAlert";
 import { Event } from "@/model/Event";
 import useApiInterceptors from "@/services/api";
 import { useQuery } from "@tanstack/react-query";
-import { onValue, ref } from "firebase/database";
+import { onValue, ref, set } from "firebase/database";
 
 interface GetEventsParams {
     campusId: number;
@@ -93,4 +93,28 @@ export function fetchRatings(
     });
 
     return unsubscribe; // Chame para parar de ouvir
+}
+
+export function rate(
+    campusId: string,
+    cursusId: string,
+    type: string,
+    typeId: string,
+    userId: string,
+    rating: number,
+    onSuccess?: () => void,
+    onError?: (error: any) => void
+) {
+    const ratingRef = ref(
+        database,
+        `campus/${campusId}/cursus/${cursusId}/${type}/${typeId}/ratings/${userId}`
+    );
+
+    set(ratingRef, rating)
+        .then(() => {
+            if (onSuccess) onSuccess();
+        })
+        .catch((error) => {
+            if (onError) onError(error);
+        });
 }

@@ -1,4 +1,5 @@
-import { fetchRatings, RatingResult } from "@/repository/eventRepository";
+import useAlert from "@/hooks/useAlert";
+import { fetchRatings, rate, RatingResult } from "@/repository/eventRepository";
 import { encrypt } from "@/utility/AESUtil";
 import { getEventDuration, getTimeUntilEvent } from "@/utility/DateUtil";
 import {
@@ -11,6 +12,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
 import {
   Animated,
+  Button,
   Dimensions,
   ImageBackground,
   ScrollView,
@@ -25,8 +27,10 @@ const QR_ICON = "qrcode";
 const ATTENDANCE_ICON = "clipboard-list-outline";
 
 const EventDetailScreen = () => {
+    const { showError, showSuccess } = useAlert();
     const [rating, setRating] = useState<RatingResult>();
     const { userData, eventData } = useLocalSearchParams();
+    const [userRating, setUserRating] = React.useState<number>(0);
     const user = typeof userData === "string" ? JSON.parse(userData) : null;
     const event = typeof eventData === "string" ? JSON.parse(eventData) : null;
 
@@ -167,13 +171,34 @@ const EventDetailScreen = () => {
                         {[...Array(5)].map((_, i) => (
                             <FontAwesome
                                 key={i}
-                                name={"star-o"}
+                                name={i < userRating ? "star" : "star-o"}
                                 size={22}
-                                color="#B0B0B0"
+                                color={i < userRating ? "#FFD700" : "#B0B0B0"}
                                 style={{ marginRight: 1 }}
+                                onPress={() => setUserRating(i + 1)}
                             />
                         ))}
                     </View>
+                    <Button
+                        title="Enviar Avaliação"
+                        onPress={() => {
+                            rate(
+                                user?.campusId,
+                                event?.cursus_ids[0],
+                                "events",
+                                event?.id,
+                                user?.id,
+                                userRating,
+                                () =>
+                                    showSuccess(
+                                        "SUCESSO",
+                                        "Avaliação enviada com sucesso!"
+                                    ),
+                                (error) => showError("ERRO", error.message)
+                            );
+                        }}
+                        disabled={userRating === 0}
+                    />
                 </View>
             </View>
 
