@@ -1,4 +1,9 @@
 import { useColorCoalition } from "@/components/ColorCoalitionContext";
+import MessageModal from "@/components/ui/MessageModal";
+import {
+    useInfoTmpUserEventMealListener,
+    UseInfoTmpUserEventMealListenerProps,
+} from "@/hooks/useInfoTmpUserEventMealListener";
 import { Stack, useLocalSearchParams } from "expo-router";
 import React from "react";
 import { Text, View } from "react-native";
@@ -6,10 +11,50 @@ import QRCode from "react-native-qrcode-svg";
 
 export default function QrCodeScreen() {
     const { color } = useColorCoalition();
-    const { content, title, description } = useLocalSearchParams();
+    const { content, title, description, isEvent, userId, campusId, cursusId } =
+        useLocalSearchParams();
+
+    const [modalData, setModalData] = React.useState<{
+        title: string;
+        message: string;
+        color: string;
+        imageSource?: { uri: string } | undefined;
+    }>({
+        title: "",
+        message: "",
+        color: "#3A86FF",
+    });
+    const [modalVisible, setModalVisible] = React.useState(false);
+
+    useInfoTmpUserEventMealListener({
+        campusId: campusId,
+        cursusId: cursusId,
+        userStaffId: userId,
+        isEvent: isEvent === "true",
+        showModal: ({ title, message, color, imageSource }) => {
+            setModalVisible(true);
+            setModalData({
+                title,
+                message,
+                color,
+                imageSource,
+            });
+        },
+    } as UseInfoTmpUserEventMealListenerProps);
 
     return (
         <>
+            <MessageModal
+                visible={modalVisible}
+                title={modalData.title}
+                message={modalData.message}
+                color={modalData.color}
+                imageSource={
+                    modalData.imageSource ?? require("@/assets/images/icon.png")
+                }
+                buttonText="OK"
+                onClose={() => setModalVisible(false)}
+            />
             <Stack.Screen
                 options={{
                     headerStyle: {

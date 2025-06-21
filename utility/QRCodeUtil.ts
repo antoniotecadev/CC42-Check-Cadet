@@ -10,6 +10,7 @@ export interface BarcodeResultParams {
     displayName: string;
     cursusId: string;
     campusId: string;
+    imageSource: string;
     setLoading: (loading: boolean) => void;
     showModal: (options: {
         title: string;
@@ -27,6 +28,7 @@ export async function handleQrCode({
     displayName,
     cursusId,
     campusId,
+    imageSource,
     setLoading,
     showModal,
     onResumeCamera,
@@ -40,11 +42,13 @@ export async function handleQrCode({
             const userStaffId = partsQrCode[1];
             markAttendance({
                 eventId,
+                userStaffId,
                 registeredBy: userStaffId,
                 userId,
                 displayName,
                 cursusId,
                 campusId,
+                imageSource,
                 setLoading,
                 showModal,
                 onResumeCamera,

@@ -57,6 +57,7 @@ export default function QrCodeScanner() {
                 displayName: user?.displayname,
                 cursusId: user.cursusId,
                 campusId: user.campusId,
+                imageSource: user.image,
                 setLoading: (loading) => setLoading(loading),
                 showModal: ({
                     title,

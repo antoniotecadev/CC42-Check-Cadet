@@ -130,11 +130,13 @@ export function rate(
 
 export async function markAttendance({
     eventId,
+    userStaffId,
     registeredBy,
     userId,
     displayName,
     cursusId,
     campusId,
+    imageSource,
     setLoading,
     showModal,
     onResumeCamera,
@@ -174,6 +176,18 @@ export async function markAttendance({
 
         const campusRef = ref(database, `campus/${campusId}`);
         await update(campusRef, eventUpdates);
+
+        if (userStaffId) {
+            // Atualiza a presença temporária para o usuário
+            const infoTmpRef = ref(
+                database,
+                `campus/${campusId}/cursus/${cursusId}/infoTmpUserEventMeal/${userStaffId}`
+            );
+            await set(infoTmpRef, {
+                displayName,
+                urlImageUser: imageSource,
+            });
+        }
 
         setLoading(false);
         showModal({

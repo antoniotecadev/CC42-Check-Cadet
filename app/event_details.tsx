@@ -289,6 +289,10 @@ const EventDetailScreen = () => {
                                         ),
                                         title: event?.kind,
                                         description: event?.name,
+                                        isEvent: "true",
+                                        userId: user?.id,
+                                        campusId: user?.campusId,
+                                        cursusId: event?.cursus_ids[0],
                                     },
                                 })
                             }
