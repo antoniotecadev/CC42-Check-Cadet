@@ -2,6 +2,7 @@ import { database } from "@/firebaseConfig";
 import useAlert from "@/hooks/useAlert";
 import { Event } from "@/model/Event";
 import useApiInterceptors from "@/services/api";
+import { decrypt } from "@/utility/AESUtil";
 import { useQuery } from "@tanstack/react-query";
 import { onValue, ref, set } from "firebase/database";
 
@@ -125,4 +126,20 @@ export function rate(
         .catch((error) => {
             if (onError) onError(error);
         });
+}
+
+export function handleQrCode(barcodeResult: string) {
+    const result = decrypt(barcodeResult);
+    if (result && result.startsWith("cc42event")) {
+        const resultQrCode = result.replace("cc42event", "");
+        const partsQrCode = resultQrCode.split("#", 2);
+        if (partsQrCode.length === 2) {
+            // partsQrCode[0] e partsQrCode[1] contêm os dados do QR code
+            // ...sua lógica aqui
+        } else {
+            // QR code inválido
+        }
+    } else {
+        // QR code inválido
+    }
 }
