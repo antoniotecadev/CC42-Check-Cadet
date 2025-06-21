@@ -3,6 +3,7 @@ import React from "react";
 import {
     Dimensions,
     Modal,
+    Platform,
     StyleSheet,
     Text,
     TouchableOpacity,
@@ -37,7 +38,12 @@ const MessageModal: React.FC<MessageModalProps> = ({
             onRequestClose={onClose}
         >
             <View style={styles.overlay}>
-                <ThemedView style={styles.modalContainer}>
+                <ThemedView
+                    style={[
+                        styles.modalContainer,
+                        Platform.OS == "web" ? styles.inner : {},
+                    ]}
+                >
                     {imageSource && (
                         <Image source={imageSource} style={styles.image} />
                     )}
@@ -101,6 +107,12 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: "bold",
         textAlign: "center",
+    },
+    inner: {
+        width: "100%",
+        maxWidth: 400, // limite superior
+        minWidth: 300, // limite inferior (opcional)
+        marginHorizontal: "auto", // centraliza na web (usando style prop em web pura)
     },
 });
 
