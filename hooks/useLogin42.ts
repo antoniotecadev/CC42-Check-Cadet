@@ -31,7 +31,7 @@ export function useLogin42() {
 
     const redirectUri = isWeb
         ? makeRedirectUri({
-              path: "checkcadet42", // Deploy na expo vai usar: https://cc42--d769no9a5g.expo.app/--/checkcadet42
+              path: "checkcadet42",
           }) // fixo para funcionar com 42 na web
         : "cc42://checkcadet42"; // para Android/iOS (dev ou produção)
 
