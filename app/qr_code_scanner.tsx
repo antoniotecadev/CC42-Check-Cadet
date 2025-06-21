@@ -1,9 +1,12 @@
-import { decrypt } from "@/utility/AESUtil";
+import { useColorCoalition } from "@/components/ColorCoalitionContext";
+import MessageModal from "@/components/ui/MessageModal";
+import { handleQrCode } from "@/utility/QRCodeUtil";
 import { useAudioPlayer } from "expo-audio";
 import { CameraView, useCameraPermissions } from "expo-camera";
-import { useNavigation, useRouter } from "expo-router";
-import { useCallback, useRef } from "react";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useCallback, useRef, useState } from "react";
 import {
+    ActivityIndicator,
     Platform,
     StyleSheet,
     Text,
@@ -12,11 +15,29 @@ import {
     View,
 } from "react-native";
 
-
 export default function QrCodeScanner() {
     const [permission, requestPermission] = useCameraPermissions();
     const player = useAudioPlayer(require("../assets/beep.mp3"));
-    const navigation = useNavigation();
+
+    const { color } = useColorCoalition();
+    const { userData } = useLocalSearchParams();
+    const user = typeof userData === "string" ? JSON.parse(userData) : null;
+
+    const [modalData, setModalData] = useState<{
+        title: string;
+        message: string;
+        color: string;
+        imageSource?: { uri: string } | undefined;
+        onClose: () => void;
+    }>({
+        title: "",
+        message: "",
+        color: "#3A86FF",
+        onClose: () => setModalVisible(false),
+    });
+    const [loading, setLoading] = useState(false);
+    const [modalVisible, setModalVisible] = useState(false);
+
     const scannedRef = useRef(false);
     const router = useRouter();
 
@@ -29,12 +50,40 @@ export default function QrCodeScanner() {
             player.play();
             Vibration.vibrate(100);
 
-            alert(decrypt(result.data));
-            if (navigation.canGoBack()) {
-                setTimeout(() => {
-                    //navigation.goBack();
-                }, 500);
-            }
+            const barcode = result.data;
+            await handleQrCode({
+                barcodeResult: barcode,
+                userId: user.id,
+                displayName: user?.displayname,
+                cursusId: user.cursusId,
+                campusId: user.campusId,
+                setLoading: (loading) => setLoading(loading),
+                showModal: ({
+                    title,
+                    message,
+                    color,
+                    imageSource,
+                    onClose,
+                }) => {
+                    setModalVisible(true);
+                    setModalData({
+                        title,
+                        message,
+                        color,
+                        imageSource,
+                        onClose,
+                    });
+                },
+                onResumeCamera: () => {
+                    if (modalData.title === "Sucesso") {
+                        router.back();
+                    } else {
+                        player.seekTo(0); // Reinicia o som
+                        setModalVisible(false);
+                        scannedRef.current = false;
+                    }
+                },
+            });
         },
         []
     );
@@ -61,6 +110,15 @@ export default function QrCodeScanner() {
 
     return (
         <View style={styles.container}>
+            <MessageModal
+                visible={modalVisible}
+                title={modalData.title}
+                message={modalData.message}
+                color={modalData.color}
+                imageSource={user.image ?? require("@/assets/images/icon.png")}
+                buttonText="OK"
+                onClose={() => modalData.onClose()}
+            />
             <CameraView
                 style={styles.camera}
                 facing="back"
@@ -76,6 +134,9 @@ export default function QrCodeScanner() {
                     style={styles.closeBtn}
                     onPress={() => router.back()}
                 >
+                    {loading && (
+                        <ActivityIndicator size="large" color={color} />
+                    )}
                     <Text style={styles.closeText}>Fechar</Text>
                 </TouchableOpacity>
             </CameraView>

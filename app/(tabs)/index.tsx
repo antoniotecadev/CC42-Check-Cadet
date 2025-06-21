@@ -149,7 +149,20 @@ export default function HomeScreen() {
                         onPress={() =>
                             router.push({
                                 pathname: "/qr_code_scanner",
-                                params: {},
+                                params: {
+                                    userData: JSON.stringify({
+                                        id: user?.id,
+                                        login: user?.login,
+                                        displayname: user?.displayname,
+                                        cursusId:
+                                            user?.projects_users?.[0]
+                                                ?.cursus_ids?.[0] || 0,
+                                        campusId: user?.campus?.[0]?.id || 0,
+                                        image:
+                                            user?.image?.link?.trim() ||
+                                            undefined,
+                                    }),
+                                },
                             })
                         }
                         type="title"

@@ -61,7 +61,7 @@ export default function RootLayout() {
                             name="qr_code"
                             options={{
                                 headerShown: true,
-                                title: "Código QR",
+                                title: "QR Code",
                                 headerBackTitle: "Voltar", // iOS: texto do botão
                                 headerBackVisible: true, // mostrar ou ocultar botão de voltar
                             }}
@@ -70,7 +70,7 @@ export default function RootLayout() {
                             name="qr_code_scanner"
                             options={{
                                 headerShown: Platform.OS === "web",
-                                title: "Scanear Código QR",
+                                title: "Scanear QR Code",
                                 headerBackTitle: "Voltar", // iOS: texto do botão
                                 headerBackVisible: true, // mostrar ou ocultar botão de voltar
                             }}

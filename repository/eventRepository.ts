@@ -2,9 +2,9 @@ import { database } from "@/firebaseConfig";
 import useAlert from "@/hooks/useAlert";
 import { Event } from "@/model/Event";
 import useApiInterceptors from "@/services/api";
-import { decrypt } from "@/utility/AESUtil";
+import { BarcodeResultParams } from "@/utility/QRCodeUtil";
 import { useQuery } from "@tanstack/react-query";
-import { onValue, ref, set } from "firebase/database";
+import { get, onValue, ref, set, update } from "firebase/database";
 
 interface GetEventsParams {
     campusId: number;
@@ -29,7 +29,7 @@ export function useEvents(params: GetEventsParams) {
             const response = await api.get<Event[]>(url);
             return response.data;
         } catch (error) {
-            showError("Evento", "Erro ao buscar eventos: " + error);
+            showError("ERRO", "Erro ao buscar eventos: " + error);
             return [];
         }
     };
@@ -128,18 +128,67 @@ export function rate(
         });
 }
 
-export function handleQrCode(barcodeResult: string) {
-    const result = decrypt(barcodeResult);
-    if (result && result.startsWith("cc42event")) {
-        const resultQrCode = result.replace("cc42event", "");
-        const partsQrCode = resultQrCode.split("#", 2);
-        if (partsQrCode.length === 2) {
-            // partsQrCode[0] e partsQrCode[1] contêm os dados do QR code
-            // ...sua lógica aqui
-        } else {
-            // QR code inválido
+export async function markAttendance({
+    eventId,
+    registeredBy,
+    userId,
+    displayName,
+    cursusId,
+    campusId,
+    setLoading,
+    showModal,
+    onResumeCamera,
+}: BarcodeResultParams) {
+    try {
+        setLoading(true);
+
+        // Referência para participantes do evento
+        const participantsRef = ref(
+            database,
+            `campus/${campusId}/cursus/${cursusId}/events/${eventId}/participants/${userId}`
+        );
+
+        // Verifica se já marcou presença
+        const snapshot = await get(participantsRef);
+        if (snapshot.exists()) {
+            setLoading(false);
+            showModal({
+                title: "Aviso",
+                message: `${displayName}\nVocê já marcou presença neste evento.`,
+                color: "#FDD835",
+                onClose: onResumeCamera,
+            });
+            return;
         }
-    } else {
-        // QR code inválido
+
+        // Marca presença
+        const participantData = {
+            [userId]: true,
+            registeredBy,
+        };
+
+        const eventUpdates = {
+            [`cursus/${cursusId}/events/${eventId}/participants/${userId}`]:
+                participantData,
+        };
+
+        const campusRef = ref(database, `campus/${campusId}`);
+        await update(campusRef, eventUpdates);
+
+        setLoading(false);
+        showModal({
+            title: "Sucesso",
+            message: `${displayName}\nPresença marcada com sucesso!`,
+            color: "#4CAF50",
+            onClose: onResumeCamera,
+        });
+    } catch (e: any) {
+        setLoading(false);
+        showModal({
+            title: "Erro",
+            message: `Erro ao marcar presença: ${e.message}`,
+            color: "#E53935",
+            onClose: onResumeCamera,
+        });
     }
 }
