@@ -17,6 +17,7 @@ import React, { useEffect } from "react";
 
 import { useReactQueryDevTools } from "@dev-plugins/react-query";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Platform } from "react-native";
 
 const queryClient = new QueryClient({});
 
@@ -60,7 +61,16 @@ export default function RootLayout() {
                             name="qr_code"
                             options={{
                                 headerShown: true,
-                                title: "QR Code",
+                                title: "Código QR",
+                                headerBackTitle: "Voltar", // iOS: texto do botão
+                                headerBackVisible: true, // mostrar ou ocultar botão de voltar
+                            }}
+                        />
+                        <Stack.Screen
+                            name="qr_code_scanner"
+                            options={{
+                                headerShown: Platform.OS === "web",
+                                title: "Scanear Código QR",
                                 headerBackTitle: "Voltar", // iOS: texto do botão
                                 headerBackVisible: true, // mostrar ou ocultar botão de voltar
                             }}

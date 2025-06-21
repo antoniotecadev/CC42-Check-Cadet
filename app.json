@@ -11,7 +11,10 @@
         "userInterfaceStyle": "automatic",
         "newArchEnabled": true,
         "ios": {
-            "supportsTablet": true
+            "supportsTablet": true,
+            "infoPlist": {
+                "UIBackgroundModes": ["audio"]
+            }
         },
         "android": {
             "adaptiveIcon": {
@@ -35,7 +38,14 @@
                     "configureAndroidBackup": true,
                     "faceIDPermission": "Allow $(PRODUCT_NAME) to access your Face ID biometric data."
                 }
-            ]
+            ],
+            [
+                "expo-camera",
+                {
+                    "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera"
+                }
+            ],
+            "expo-audio"
         ],
         "experiments": {
             "typedRoutes": true

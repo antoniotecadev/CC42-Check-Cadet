@@ -146,6 +146,12 @@ export default function HomeScreen() {
                         </ThemedText>
                     </ThemedView>
                     <ThemedText
+                        onPress={() =>
+                            router.push({
+                                pathname: "/qr_code_scanner",
+                                params: {},
+                            })
+                        }
                         type="title"
                         style={{
                             color: "#fff",
