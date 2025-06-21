@@ -319,7 +319,7 @@ const styles = StyleSheet.create({
         position: "absolute",
     },
     alignText: {
-        alignItems: "center",
+        alignSelf: "center",
         justifyContent: "center",
     },
     text: {

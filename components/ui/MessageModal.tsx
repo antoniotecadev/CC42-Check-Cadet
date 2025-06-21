@@ -8,6 +8,7 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
+import { ThemedView } from "../ThemedView";
 
 interface MessageModalProps {
     visible: boolean;
@@ -36,12 +37,9 @@ const MessageModal: React.FC<MessageModalProps> = ({
             onRequestClose={onClose}
         >
             <View style={styles.overlay}>
-                <View style={styles.modalContainer}>
+                <ThemedView style={styles.modalContainer}>
                     {imageSource && (
-                        <Image
-                            source={imageSource}
-                            style={styles.image}
-                        />
+                        <Image source={imageSource} style={styles.image} />
                     )}
                     <Text style={[styles.title, { color }]}>{title}</Text>
                     <Text style={styles.message}>{message}</Text>
@@ -52,7 +50,7 @@ const MessageModal: React.FC<MessageModalProps> = ({
                     >
                         <Text style={styles.buttonText}>{buttonText}</Text>
                     </TouchableOpacity>
-                </View>
+                </ThemedView>
             </View>
         </Modal>
     );
@@ -69,7 +67,6 @@ const styles = StyleSheet.create({
     },
     modalContainer: {
         width: width * 0.85,
-        backgroundColor: "#fff",
         borderRadius: 18,
         alignItems: "center",
         padding: 24,
