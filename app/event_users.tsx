@@ -91,9 +91,37 @@ export default function EventUsersScreen() {
             <div class="header">
                 <img src="${logoUri}" class="logo" />
                 <div class="title">Lista de Presença</div>
-                <div class="subtitle">${eventName || ""} - ${eventDate || ""}</div>
+                <div class="subtitle">${eventName || ""} - ${
+            eventDate || ""
+        }</div>
             </div>
-            ${pages.map((page, pageIndex) => `
+            <table>
+                <tr>
+                    <th>#</th>
+                    <th>Nome Completo</th>
+                    <th>Login</th>
+                    <th>Presença</th>
+                </tr>
+                ${pages[0]
+                    .map(
+                        (u, i) => `
+                    <tr>
+                        <td>${i + 1}</td>
+                        <td>${u.displayname}</td>
+                        <td>${u.login}</td>
+                        <td class="${u.isPresent ? "present" : "absent"}">${
+                            u.isPresent ? "Presente" : "Ausente"
+                        }</td>
+                    </tr>
+                `
+                    )
+                    .join("")}
+            </table>
+            <div class="footer">Lista de presença gerada em ${new Date().toLocaleString()}</div>
+            ${pages
+                .slice(1)
+                .map(
+                    (page, pageIndex) => `
                 <table>
                     <tr>
                         <th>#</th>
@@ -105,18 +133,26 @@ export default function EventUsersScreen() {
                         .map(
                             (u, i) => `
                         <tr>
-                            <td>${pageIndex * pageSize + i + 1}</td>
+                            <td>${(pageIndex + 1) * pageSize + i + 1}</td>
                             <td>${u.displayname}</td>
                             <td>${u.login}</td>
-                            <td class="${u.isPresent ? "present" : "absent"}">${u.isPresent ? "Presente" : "Ausente"}</td>
+                            <td class="${u.isPresent ? "present" : "absent"}">${
+                                u.isPresent ? "Presente" : "Ausente"
+                            }</td>
                         </tr>
                     `
                         )
                         .join("")}
                 </table>
                 <div class="footer">Lista de presença gerada em ${new Date().toLocaleString()}</div>
-                ${pageIndex < pages.length - 1 ? '<div class="page-break"></div>' : ''}
-            `).join('')}
+                ${
+                    pageIndex < pages.length - 2
+                        ? '<div class="page-break"></div>'
+                        : ""
+                }
+            `
+                )
+                .join("")}
         </body>
         </html>
         `;
