@@ -2,7 +2,7 @@ import { useColorCoalition } from "@/components/ColorCoalitionContext";
 import MessageModal from "@/components/ui/MessageModal";
 import { handleQrCode } from "@/utility/QRCodeUtil";
 import { useAudioPlayer } from "expo-audio";
-import { CameraView, useCameraPermissions } from "expo-camera";
+import { CameraType, CameraView, useCameraPermissions } from "expo-camera";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useRef, useState } from "react";
 import {
@@ -20,7 +20,11 @@ export default function QrCodeScanner() {
     const player = useAudioPlayer(require("../assets/beep.mp3"));
 
     const { color } = useColorCoalition();
-    const { userData, eventId } = useLocalSearchParams();
+    const { userData, eventId, camera } = useLocalSearchParams<{
+        userData: string;
+        eventId: string;
+        camera: CameraType;
+    }>();
     const user = typeof userData === "string" ? JSON.parse(userData) : null;
 
     const [modalData, setModalData] = useState<{
@@ -53,7 +57,7 @@ export default function QrCodeScanner() {
             const barcode = result.data;
             await handleQrCode({
                 barcodeResult: barcode,
-                eventId: eventId as string,
+                eventId: eventId,
                 userId: user?.id,
                 displayName: user?.displayname,
                 cursusId: user?.cursusId,
@@ -125,7 +129,7 @@ export default function QrCodeScanner() {
             />
             <CameraView
                 style={styles.camera}
-                facing="back"
+                facing={camera ?? "back"}
                 barcodeScannerSettings={{
                     barcodeTypes: ["qr"],
                 }}

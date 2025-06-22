@@ -131,6 +131,7 @@ export default function EventUsersScreen() {
                         router.push({
                             pathname: "/qr_code_scanner",
                             params: {
+                                camera: "back",
                                 eventId: eventId,
                                 userData: JSON.stringify({
                                     id: userId,
@@ -153,7 +154,16 @@ export default function EventUsersScreen() {
                         { backgroundColor: color },
                     ]}
                     onPress={() => {
-                        /* abrir camera frontal */
+                        router.push({
+                            pathname: "/qr_code_scanner",
+                            params: {
+                                camera: "front",
+                                eventId: eventId,
+                                userData: JSON.stringify({
+                                    id: userId,
+                                }),
+                            },
+                        });
                     }}
                     activeOpacity={0.8}
                 >
