@@ -8,6 +8,7 @@ import { useBase64Image } from "@/utility/ImageUtil";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
+import * as FileSystem from "expo-file-system";
 import * as Print from "expo-print";
 import { router, useLocalSearchParams } from "expo-router";
 import * as Sharing from "expo-sharing";
@@ -177,15 +178,47 @@ export default function EventUsersScreen() {
         }
     }
 
+    async function handleExportExcel() {
+        // Monta os dados CSV
+        const header = "Nº;Nome Completo;Login;Presença\n";
+        const rows = usersWithPresence
+            .map(
+                (u, i) =>
+                    `${i + 1};"${u.displayname}";${u.login};${
+                        u.isPresent ? "Presente" : "Ausente"
+                    }`
+            )
+            .join("\n");
+        const csv = header + rows;
+        // Define nome do arquivo
+        const fileName = `lista_presenca_${
+            eventName ? eventName.replace(/\s+/g, "_") : "evento"
+        }.csv`;
+        const fileUri = FileSystem.cacheDirectory + fileName;
+        await FileSystem.writeAsStringAsync(fileUri, csv, {
+            encoding: FileSystem.EncodingType.UTF8,
+        });
+        await Sharing.shareAsync(fileUri, {
+            mimeType: "text/csv",
+            dialogTitle: "Exportar para Excel",
+        });
+    }
+
+    // Adicione ao menu:
     const handleMenuPress = () => {
         ActionSheetIOS.showActionSheetWithOptions(
             {
-                options: ["Imprimir ou Partilhar", "Cancelar"],
-                cancelButtonIndex: 1,
+                options: [
+                    "Imprimir ou Partilhar",
+                    "Exportar para Excel",
+                    "Cancelar",
+                ],
+                cancelButtonIndex: 2,
                 userInterfaceStyle: "dark",
             },
             (selectedIndex) => {
                 if (selectedIndex === 0) handlePrintPdf();
+                if (selectedIndex === 1) handleExportExcel();
             }
         );
     };
