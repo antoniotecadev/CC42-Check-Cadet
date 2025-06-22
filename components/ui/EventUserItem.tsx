@@ -8,6 +8,7 @@ interface EventUserItemProps {
     imageUrl?: string;
     isPresent?: boolean;
     onPress?: () => void;
+    colorscheme: string;
 }
 
 const blurhash =
@@ -19,10 +20,11 @@ export const EventUserItem: React.FC<EventUserItemProps> = ({
     imageUrl,
     isPresent,
     onPress,
+    colorscheme,
 }) => {
     return (
         <TouchableOpacity
-            style={styles.container}
+            style={[styles.container, { backgroundColor: colorscheme }]}
             onPress={onPress}
             activeOpacity={0.7}
         >
@@ -66,7 +68,6 @@ const styles = StyleSheet.create({
     container: {
         flexDirection: "row",
         alignItems: "center",
-        backgroundColor: "#fff",
         borderRadius: 12,
         marginVertical: 6,
         marginHorizontal: 12,
@@ -96,7 +97,7 @@ const styles = StyleSheet.create({
     login: {
         fontWeight: "bold",
         fontSize: 14,
-        color: "#222",
+        color: "#999",
     },
     present: {
         fontSize: 12,
@@ -111,7 +112,7 @@ const styles = StyleSheet.create({
     },
     displayName: {
         fontSize: 12,
-        color: "#555",
+        color: "#888",
         marginTop: 4,
     },
 });

@@ -1,5 +1,7 @@
 import { useColorCoalition } from "@/components/ColorCoalitionContext";
+import { ThemedView } from "@/components/ThemedView";
 import EventUserItem from "@/components/ui/EventUserItem";
+import { useColorScheme } from "@/hooks/useColorScheme";
 import { useEventAttendanceIds } from "@/hooks/useEventAttendanceIds";
 import { useEventUsersPaginated } from "@/repository/useEventUsersPaginated";
 import { useBase64Image } from "@/utility/ImageUtil";
@@ -21,7 +23,9 @@ import {
 
 export default function EventUsersScreen() {
     const navigation = useNavigation();
+    const colorScheme = useColorScheme();
     const { color } = useColorCoalition();
+
     const { eventId, userId, campusId, cursusId, eventName, eventDate } =
         useLocalSearchParams<{
             eventId: string;
@@ -43,6 +47,8 @@ export default function EventUsersScreen() {
     } = useEventUsersPaginated(Number(eventId));
 
     const [refreshing, setRefreshing] = React.useState(false);
+    const colorscheme = colorScheme === "dark" ? "#333" : "#fff";
+
     const users = data?.pages.flatMap((page) => page.users) || [];
     // Marcar presença de acordo com o Firebase
     const usersWithPresence = users.map((u) => ({
@@ -180,10 +186,7 @@ export default function EventUsersScreen() {
         navigation.setOptions &&
             navigation.setOptions({
                 headerRight: () => (
-                    <TouchableOpacity
-                        onPress={handleMenuPress}
-                        style={{ paddingHorizontal: 16 }}
-                    >
+                    <TouchableOpacity onPress={handleMenuPress}>
                         <MaterialCommunityIcons
                             name="dots-vertical"
                             size={28}
@@ -212,26 +215,30 @@ export default function EventUsersScreen() {
     }
 
     return (
-        <View style={{ flex: 1, backgroundColor: "#f7f7f7" }}>
+        <ThemedView lightColor={"#f7f7f7"} style={{ flex: 1 }}>
             {/* Chips de presentes e ausentes - agora absolutos no topo direito */}
             <View style={styles.chipAbsoluteRow} pointerEvents="box-none">
                 <View style={[styles.chip, styles.chipPresent]}>
                     <MaterialCommunityIcons
                         name="account-check"
                         size={18}
-                        color="#fff"
+                        color={colorscheme}
                         style={{ marginRight: 4 }}
                     />
-                    <Text style={styles.chipText}>{presents}</Text>
+                    <Text style={[styles.chipText, { color: colorscheme }]}>
+                        {presents}
+                    </Text>
                 </View>
                 <View style={[styles.chip, styles.chipAbsent]}>
                     <MaterialCommunityIcons
                         name="account-remove"
                         size={18}
-                        color="#fff"
+                        color={colorscheme}
                         style={{ marginRight: 4 }}
                     />
-                    <Text style={styles.chipText}>{absents}</Text>
+                    <Text style={[styles.chipText, { color: colorscheme }]}>
+                        {absents}
+                    </Text>
                 </View>
             </View>
             <FlashList
@@ -239,6 +246,7 @@ export default function EventUsersScreen() {
                 renderItem={({ item }) => (
                     <EventUserItem
                         login={item.login}
+                        colorscheme={colorscheme}
                         displayName={item.displayname}
                         imageUrl={
                             item.image?.link?.toString().trim() || undefined
@@ -289,7 +297,7 @@ export default function EventUsersScreen() {
                     <MaterialCommunityIcons
                         name="camera-rear"
                         size={32}
-                        color="#fff"
+                        color={colorscheme}
                     />
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -315,11 +323,11 @@ export default function EventUsersScreen() {
                     <MaterialCommunityIcons
                         name="camera-front"
                         size={32}
-                        color="#fff"
+                        color={colorscheme}
                     />
                 </TouchableOpacity>
             </View>
-        </View>
+        </ThemedView>
     );
 }
 
@@ -396,7 +404,6 @@ const styles = StyleSheet.create({
         backgroundColor: "#e74c3c",
     },
     chipText: {
-        color: "#fff",
         fontWeight: "bold",
         fontSize: 15,
     },

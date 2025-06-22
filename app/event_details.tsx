@@ -96,7 +96,7 @@ const EventDetailScreen = () => {
         : "";
 
     return (
-        <ThemedView style={[styles.container, isWeb ? styles.inner : {}]}>
+        <ThemedView lightColor={"#f7f7f7"} style={[styles.container, isWeb ? styles.inner : {}]}>
             <ScrollView showsVerticalScrollIndicator={isWeb}>
                 {/* Header with image and gradient */}
                 <View style={styles.headerContainer}>
