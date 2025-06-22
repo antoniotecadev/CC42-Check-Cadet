@@ -316,6 +316,12 @@ const EventDetailScreen = () => {
                             activeOpacity={0.8}
                             onPressIn={handlePressIn}
                             onPressOut={handlePressOut}
+                            onPress={() => {
+                                router.push({
+                                    pathname: "/event_users",
+                                    params: { eventId: event?.id },
+                                });
+                            }}
                         >
                             <MaterialCommunityIcons
                                 name={ATTENDANCE_ICON}

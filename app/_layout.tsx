@@ -71,8 +71,8 @@ export default function RootLayout() {
                             options={{
                                 headerShown: Platform.OS === "web",
                                 title: "Scanear QR Code",
-                                headerBackTitle: "Voltar", // iOS: texto do botão
-                                headerBackVisible: true, // mostrar ou ocultar botão de voltar
+                                headerBackTitle: "Voltar", 
+                                headerBackVisible: true, 
                             }}
                         />
                         <Stack.Screen
@@ -80,6 +80,15 @@ export default function RootLayout() {
                             options={{
                                 headerShown: true,
                                 title: "EVENT",
+                                headerBackTitle: "Voltar",
+                                headerBackVisible: true,
+                            }}
+                        />
+                        <Stack.Screen
+                            name="event_users"
+                            options={{
+                                headerShown: true,
+                                title: "Lista de Presença",
                                 headerBackTitle: "Voltar",
                                 headerBackVisible: true,
                             }}
