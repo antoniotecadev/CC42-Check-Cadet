@@ -21,12 +21,15 @@ import {
 export default function EventUsersScreen() {
     const navigation = useNavigation();
     const { color } = useColorCoalition();
-    const { eventId, userId, campusId, cursusId } = useLocalSearchParams<{
-        eventId: string;
-        userId: string;
-        campusId: string;
-        cursusId: string;
-    }>();
+    const { eventId, userId, campusId, cursusId, eventName, eventDate } =
+        useLocalSearchParams<{
+            eventId: string;
+            userId: string;
+            campusId: string;
+            cursusId: string;
+            eventName?: string;
+            eventDate?: string;
+        }>();
     const attendanceIds = useEventAttendanceIds(campusId, cursusId, eventId);
     const {
         data,
@@ -52,12 +55,6 @@ export default function EventUsersScreen() {
     const ausentes = usersWithPresence.filter(
         (u) => u.isPresent === false
     ).length;
-
-    // Pega nome e data do evento dos params
-    const { eventName, eventDate } = useLocalSearchParams<{
-        eventName?: string;
-        eventDate?: string;
-    }>();
 
     // Função para gerar e compartilhar PDF
     async function handlePrintPdf() {
@@ -163,8 +160,9 @@ export default function EventUsersScreen() {
     const handleMenuPress = () => {
         ActionSheetIOS.showActionSheetWithOptions(
             {
-                options: ["Imprimir lista de presença", "Cancelar"],
+                options: ["Imprimir ou Partilhar", "Cancelar"],
                 cancelButtonIndex: 1,
+                userInterfaceStyle: "dark",
             },
             (selectedIndex) => {
                 if (selectedIndex === 0) handlePrintPdf();

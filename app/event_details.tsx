@@ -91,15 +91,9 @@ const EventDetailScreen = () => {
 
     // Pega nome e data do evento dos params (ou defina fallback)
     const eventName = event?.name || "Evento";
-    const eventDate = event?.begin_at ? new Date(event.begin_at).toLocaleDateString() : "";
-
-    // Passe eventName e eventDate como props para a tela de usuários
-    React.useLayoutEffect(() => {
-        router.setParams({
-            eventName,
-            eventDate,
-        });
-    }, [eventName, eventDate]);
+    const eventDate = event?.begin_at
+        ? new Date(event.begin_at).toLocaleDateString()
+        : "";
 
     return (
         <ThemedView style={[styles.container, isWeb ? styles.inner : {}]}>
@@ -339,6 +333,8 @@ const EventDetailScreen = () => {
                                         userId: userId,
                                         campusId: campusId,
                                         cursusId: cursusId,
+                                        eventName: eventName,
+                                        eventDate: eventDate,
                                     },
                                 });
                             }}
