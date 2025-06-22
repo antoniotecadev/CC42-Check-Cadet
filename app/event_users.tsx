@@ -70,12 +70,12 @@ export default function EventUsersScreen() {
         <html>
         <head>
             <style>
+                @page { size: A4; }
                 body { font-family: Arial, sans-serif; margin: 24px; margin-bottom: 60px; }
                 .header { text-align: center; margin-bottom: 16px; }
-                .logo { width: 60px; height: 30px; margin-bottom: 8px; }
+                .logo { width: 80px; height: 40px; margin-bottom: 8px; }
                 .title { font-size: 20px; font-weight: bold; margin-bottom: 4px; }
-                .subtitle { font-size: 13px; margin-bottom: 8px; }
-                .subsubtitle { font-size: 14px; margin-bottom: 8px; }
+                .subtitle { font-size: 14px; margin-bottom: 8px; }
                 table { width: 100%; border-collapse: collapse; margin-top: 16px; }
                 th, td { border: 1px solid #ccc; padding: 6px 4px; font-size: 12px; text-align: left; }
                 th { background: #f0f0f0; }
@@ -90,7 +90,7 @@ export default function EventUsersScreen() {
                 <img src="${base64Image}" class="logo" />
                 <div class="title">Lista de Presença</div>
                 <div class="subtitle">Presente: ${presents} | Ausente: ${absents}</div>
-                <div class="subsubtitle">${eventName || ""} - ${
+                <div class="subtitle">${eventName || ""} - ${
             eventDate || ""
         }</div>
             </div>
