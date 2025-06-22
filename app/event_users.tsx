@@ -2,7 +2,7 @@ import { useColorCoalition } from "@/components/ColorCoalitionContext";
 import EventUserItem from "@/components/ui/EventUserItem";
 import { useEventAttendanceIds } from "@/hooks/useEventAttendanceIds";
 import { useEventUsersPaginated } from "@/repository/useEventUsersPaginated";
-import { logoBase64 } from "@/utility/ImageUtil";
+import { useBase64Image } from "@/utility/ImageUtil";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
@@ -57,6 +57,8 @@ export default function EventUsersScreen() {
         (u) => u.isPresent === false
     ).length;
 
+    const base64Image = useBase64Image();
+
     async function handlePrintPdf() {
         // Divide os usuários em páginas de 28 linhas
         const pageSize = 28;
@@ -85,7 +87,7 @@ export default function EventUsersScreen() {
         </head>
         <body>
             <div class="header">
-                <img src="${logoBase64}" class="logo" />
+                <img src="${base64Image}" class="logo" />
                 <div class="title">Lista de Presença</div>
                 <div class="subtitle">Presente: ${presents} | Ausente: ${absents}</div>
                 <div class="subsubtitle">${eventName || ""} - ${
@@ -154,7 +156,11 @@ export default function EventUsersScreen() {
         </html>
         `;
         const { uri } = await Print.printToFileAsync({ html, base64: false });
-        await Sharing.shareAsync(uri);
+        await Sharing.shareAsync(uri, {
+            dialogTitle: "Imprimir ou Partilhar Lista de Presença",
+            UTI: ".pdf",
+            mimeType: "application/pdf",
+        });
     }
 
     const handleMenuPress = () => {
