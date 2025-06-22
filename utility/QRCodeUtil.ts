@@ -35,7 +35,7 @@ export async function handleQrCode({
     onResumeCamera,
 }: BarcodeResultParams) {
     const result = barcodeResult ? decrypt(barcodeResult) : null;
-    if (result && result.startsWith("cc42event")) {
+    if (!eventId && result && result.startsWith("cc42event")) {
         const resultQrCode = result.replace("cc42event", "");
         const partsQrCode = resultQrCode.split("#", 2);
         if (partsQrCode.length === 2) {
@@ -56,9 +56,9 @@ export async function handleQrCode({
             });
         } else {
             showModal({
-                title: "Erro",
+                title: "Aviso!",
                 message: "QR code inválido",
-                color: "#E53935",
+                color: "#FDD835",
                 onClose: onResumeCamera,
             });
         }
@@ -88,17 +88,17 @@ export async function handleQrCode({
             });
         } else {
             showModal({
-                title: "Erro",
+                title: "Aviso!",
                 message: "QR code inválido",
-                color: "#E53935",
+                color: "#FDD835",
                 onClose: onResumeCamera,
             });
         }
     } else {
         showModal({
-            title: "Erro",
+            title: "Aviso!",
             message: "QR code inválido",
-            color: "#E53935",
+            color: "#FDD835",
             onClose: onResumeCamera,
         });
     }

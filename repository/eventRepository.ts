@@ -155,7 +155,7 @@ export async function markAttendance({
         if (snapshot.exists()) {
             setLoading(false);
             showModal({
-                title: "Aviso",
+                title: "Aviso!",
                 message: `${displayName}\nVocê já marcou presença neste evento.`,
                 color: "#FDD835",
                 imageSource: { uri: imageSource },
@@ -192,7 +192,7 @@ export async function markAttendance({
 
         setLoading(false);
         showModal({
-            title: "Sucesso",
+            title: "Sucesso!",
             message: `${displayName}\nPresença marcada com sucesso!`,
             color: "#4CAF50",
             imageSource: { uri: imageSource },
@@ -201,7 +201,7 @@ export async function markAttendance({
     } catch (e: any) {
         setLoading(false);
         showModal({
-            title: "Erro",
+            title: "Erro!",
             message: `Erro ao marcar presença: ${e.message}`,
             color: "#E53935",
             imageSource: { uri: imageSource },
