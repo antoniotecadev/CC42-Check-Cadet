@@ -20,6 +20,7 @@ export default function EventUsersScreen() {
     } = useEventUsersPaginated(Number(eventId));
 
     const users = data?.pages.flatMap((page) => page.users) || []; // Combina todas as páginas em um único array
+    const [refreshing, setRefreshing] = React.useState(false);
 
     if (isLoading) {
         return (
@@ -64,6 +65,12 @@ export default function EventUsersScreen() {
                     ) : null
                 }
                 keyExtractor={(item) => String(item.id)}
+                refreshing={refreshing}
+                onRefresh={async () => {
+                    setRefreshing(true);
+                    await refetch();
+                    setRefreshing(false);
+                }}
             />
         </View>
     );
