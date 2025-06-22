@@ -6,6 +6,7 @@ export interface EventUser {
     login: string;
     displayname: string;
     image?: string;
+    isPresent: boolean | null;
 }
 
 export function useEventUsersPaginated(eventId: number, pageSize = 30) {
@@ -13,7 +14,8 @@ export function useEventUsersPaginated(eventId: number, pageSize = 30) {
 
     return useInfiniteQuery({
         queryKey: ["event-users", eventId], // Chave única para identificar a query
-        queryFn: async ({ pageParam = 1 }) => { // Função que busca os usuários do evento
+        queryFn: async ({ pageParam = 1 }) => {
+            // Função que busca os usuários do evento
             const res = await api.get<EventUser[]>(
                 `/v2/events/${eventId}/users?page[number]=${pageParam}&page[size]=${pageSize}`
             );

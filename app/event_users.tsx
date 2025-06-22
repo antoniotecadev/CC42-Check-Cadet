@@ -29,6 +29,10 @@ export default function EventUsersScreen() {
     const users = data?.pages.flatMap((page) => page.users) || []; // Combina todas as páginas em um único array
     const [refreshing, setRefreshing] = React.useState(false);
 
+    // Contagem de presentes e ausentes
+    const presentes = users.filter((u) => u.isPresent === true).length;
+    const ausentes = users.filter((u) => u.isPresent === false).length;
+
     if (isLoading) {
         return (
             <View style={styles.centered}>
@@ -49,6 +53,27 @@ export default function EventUsersScreen() {
 
     return (
         <View style={{ flex: 1, backgroundColor: "#f7f7f7" }}>
+            {/* Chips de presentes e ausentes - agora absolutos no topo direito */}
+            <View style={styles.chipAbsoluteRow} pointerEvents="box-none">
+                <View style={[styles.chip, styles.chipPresent]}>
+                    <MaterialCommunityIcons
+                        name="account-check"
+                        size={18}
+                        color="#fff"
+                        style={{ marginRight: 4 }}
+                    />
+                    <Text style={styles.chipText}>{presentes}</Text>
+                </View>
+                <View style={[styles.chip, styles.chipAbsent]}>
+                    <MaterialCommunityIcons
+                        name="account-remove"
+                        size={18}
+                        color="#fff"
+                        style={{ marginRight: 4 }}
+                    />
+                    <Text style={styles.chipText}>{ausentes}</Text>
+                </View>
+            </View>
             <FlashList
                 data={users}
                 renderItem={({ item }) => (
@@ -158,5 +183,43 @@ const styles = StyleSheet.create({
     },
     fabRight: {
         alignSelf: "flex-end",
+    },
+    chipAbsoluteRow: {
+        position: "absolute",
+        top: 32,
+        right: 16,
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 12,
+        zIndex: 10,
+        pointerEvents: "box-none",
+    },
+    chipRow: {
+        flexDirection: "row",
+        justifyContent: "flex-end",
+        alignItems: "center",
+        marginTop: 16,
+        marginRight: 16,
+        gap: 12,
+    },
+    chip: {
+        flexDirection: "row",
+        alignItems: "center",
+        borderRadius: 16,
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        marginLeft: 8,
+        elevation: 2,
+    },
+    chipPresent: {
+        backgroundColor: "#2ecc40",
+    },
+    chipAbsent: {
+        backgroundColor: "#e74c3c",
+    },
+    chipText: {
+        color: "#fff",
+        fontWeight: "bold",
+        fontSize: 15,
     },
 });
