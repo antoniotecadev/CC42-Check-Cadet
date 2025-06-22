@@ -4,7 +4,7 @@ import { useEventAttendanceIds } from "@/hooks/useEventAttendanceIds";
 import { useEventUsersPaginated } from "@/repository/useEventUsersPaginated";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { FlashList } from "@shopify/flash-list";
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import React from "react";
 import {
     ActivityIndicator,
@@ -16,8 +16,9 @@ import {
 
 export default function EventUsersScreen() {
     const { color } = useColorCoalition();
-    const { eventId, campusId, cursusId } = useLocalSearchParams<{
+    const { eventId, userId, campusId, cursusId } = useLocalSearchParams<{
         eventId: string;
+        userId: string;
         campusId: string;
         cursusId: string;
     }>();
@@ -127,7 +128,15 @@ export default function EventUsersScreen() {
                         { backgroundColor: color },
                     ]}
                     onPress={() => {
-                        /* abrir camera traseira */
+                        router.push({
+                            pathname: "/qr_code_scanner",
+                            params: {
+                                eventId: eventId,
+                                userData: JSON.stringify({
+                                    id: userId,
+                                }),
+                            },
+                        });
                     }}
                     activeOpacity={0.8}
                 >

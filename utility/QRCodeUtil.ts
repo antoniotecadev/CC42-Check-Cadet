@@ -24,6 +24,7 @@ export interface BarcodeResultParams {
 
 export async function handleQrCode({
     barcodeResult,
+    eventId,
     userId,
     displayName,
     cursusId,
@@ -49,6 +50,38 @@ export async function handleQrCode({
                 cursusId,
                 campusId,
                 imageSource,
+                setLoading,
+                showModal,
+                onResumeCamera,
+            });
+        } else {
+            showModal({
+                title: "Erro",
+                message: "QR code inválido",
+                color: "#E53935",
+                onClose: onResumeCamera,
+            });
+        }
+    } else if (eventId && result && result.startsWith("cc42user")) {
+        const resultQrCode = result.replace("cc42user", "");
+        const partsQrCode = resultQrCode.split("#", 6);
+        if (partsQrCode.length === 6) {
+            const userStaffId = userId;
+            const userStudentId = partsQrCode[0];
+            const userLogin = partsQrCode[1];
+            const userDisplayName = partsQrCode[2];
+            const userCursusId = partsQrCode[3];
+            const userCampusId = partsQrCode[4];
+            const userImageUrl = partsQrCode[5];
+            markAttendance({
+                eventId,
+                userStaffId: undefined, // Não é necessário para usuários
+                registeredBy: userStaffId,
+                userId: userStudentId,
+                displayName: userDisplayName,
+                cursusId: userCursusId,
+                campusId: userCampusId,
+                imageSource: userImageUrl,
                 setLoading,
                 showModal,
                 onResumeCamera,

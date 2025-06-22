@@ -20,7 +20,7 @@ export default function QrCodeScanner() {
     const player = useAudioPlayer(require("../assets/beep.mp3"));
 
     const { color } = useColorCoalition();
-    const { userData } = useLocalSearchParams();
+    const { userData, eventId } = useLocalSearchParams();
     const user = typeof userData === "string" ? JSON.parse(userData) : null;
 
     const [modalData, setModalData] = useState<{
@@ -53,11 +53,12 @@ export default function QrCodeScanner() {
             const barcode = result.data;
             await handleQrCode({
                 barcodeResult: barcode,
-                userId: user.id,
+                eventId: eventId as string,
+                userId: user?.id,
                 displayName: user?.displayname,
-                cursusId: user.cursusId,
-                campusId: user.campusId,
-                imageSource: user.image,
+                cursusId: user?.cursusId,
+                campusId: user?.campusId,
+                imageSource: user?.image,
                 setLoading: (loading) => setLoading(loading),
                 showModal: ({
                     title,
@@ -116,7 +117,9 @@ export default function QrCodeScanner() {
                 title={modalData.title}
                 message={modalData.message}
                 color={modalData.color}
-                imageSource={user.image ?? require("@/assets/images/icon.png")}
+                imageSource={
+                    modalData.imageSource ?? require("@/assets/images/icon.png")
+                }
                 buttonText="OK"
                 onClose={() => modalData.onClose()}
             />

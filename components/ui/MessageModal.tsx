@@ -11,6 +11,9 @@ import {
 } from "react-native";
 import { ThemedView } from "../ThemedView";
 
+const blurhash =
+    "|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuayj[";
+
 interface MessageModalProps {
     visible: boolean;
     title: string;
@@ -45,7 +48,12 @@ const MessageModal: React.FC<MessageModalProps> = ({
                     ]}
                 >
                     {imageSource && (
-                        <Image source={imageSource} style={styles.image} />
+                        <Image
+                            source={imageSource}
+                            style={styles.image}
+                            placeholder={{ blurhash }}
+                            transition={1000}
+                        />
                     )}
                     <Text style={[styles.title, { color }]}>{title}</Text>
                     <Text style={styles.message}>{message}</Text>

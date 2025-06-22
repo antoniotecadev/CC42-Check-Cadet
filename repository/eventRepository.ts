@@ -158,6 +158,7 @@ export async function markAttendance({
                 title: "Aviso",
                 message: `${displayName}\nVocê já marcou presença neste evento.`,
                 color: "#FDD835",
+                imageSource: { uri: imageSource },
                 onClose: onResumeCamera,
             });
             return;
@@ -194,6 +195,7 @@ export async function markAttendance({
             title: "Sucesso",
             message: `${displayName}\nPresença marcada com sucesso!`,
             color: "#4CAF50",
+            imageSource: { uri: imageSource },
             onClose: onResumeCamera,
         });
     } catch (e: any) {
@@ -202,6 +204,7 @@ export async function markAttendance({
             title: "Erro",
             message: `Erro ao marcar presença: ${e.message}`,
             color: "#E53935",
+            imageSource: { uri: imageSource },
             onClose: onResumeCamera,
         });
     }
