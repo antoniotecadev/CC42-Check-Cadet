@@ -44,9 +44,15 @@ const EventDetailScreen = () => {
     const { showError, showSuccess } = useAlert();
     const [rating, setRating] = useState<RatingResult>();
     const { userData, eventData } = useLocalSearchParams();
-    const [userRating, setUserRating] = React.useState<number>(0);
     const user = typeof userData === "string" ? JSON.parse(userData) : null;
     const event = typeof eventData === "string" ? JSON.parse(eventData) : null;
+
+    const userId = user?.id?.toString();
+    const campusId = user?.campusId?.toString();
+    const cursusId = event?.cursus_ids?.[0]?.toString();
+    const eventId = event?.id?.toString();
+
+    const [userRating, setUserRating] = React.useState<number>(0);
 
     const color = colorScheme === "dark" ? "#333" : "#fff";
 
@@ -73,11 +79,11 @@ const EventDetailScreen = () => {
 
     React.useEffect(() => {
         const unsubscribe = fetchRatings(
-            user?.campusId,
-            event?.cursus_ids[0],
+            campusId,
+            cursusId,
             "events",
-            event?.id,
-            user?.id,
+            eventId,
+            userId,
             setRating
         );
         return () => unsubscribe();
@@ -243,11 +249,11 @@ const EventDetailScreen = () => {
                             onPress={() => {
                                 if (!rating?.userRating) {
                                     rate(
-                                        user?.campusId,
-                                        event?.cursus_ids[0],
+                                        campusId,
+                                        cursusId,
                                         "events",
-                                        event?.id,
-                                        user?.id,
+                                        eventId,
+                                        userId,
                                         userRating,
                                         () =>
                                             showSuccess(
@@ -282,17 +288,14 @@ const EventDetailScreen = () => {
                                     pathname: "/qr_code",
                                     params: {
                                         content: encrypt(
-                                            "cc42event" +
-                                                event?.id +
-                                                "#" +
-                                                user?.id
+                                            "cc42event" + eventId + "#" + userId
                                         ),
                                         title: event?.kind,
                                         description: event?.name,
                                         isEvent: "true",
-                                        userId: user?.id,
-                                        campusId: user?.campusId,
-                                        cursusId: event?.cursus_ids[0],
+                                        userId: userId,
+                                        campusId: campusId,
+                                        cursusId: cursusId,
                                     },
                                 })
                             }
@@ -319,7 +322,12 @@ const EventDetailScreen = () => {
                             onPress={() => {
                                 router.push({
                                     pathname: "/event_users",
-                                    params: { eventId: event?.id },
+                                    params: {
+                                        eventId: eventId,
+                                        userId: userId,
+                                        campusId: campusId,
+                                        cursusId: cursusId,
+                                    },
                                 });
                             }}
                         >

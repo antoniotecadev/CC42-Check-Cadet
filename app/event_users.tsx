@@ -1,5 +1,6 @@
 import { useColorCoalition } from "@/components/ColorCoalitionContext";
 import EventUserItem from "@/components/ui/EventUserItem";
+import { useEventAttendanceIds } from "@/hooks/useEventAttendanceIds";
 import { useEventUsersPaginated } from "@/repository/useEventUsersPaginated";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { FlashList } from "@shopify/flash-list";
@@ -15,7 +16,12 @@ import {
 
 export default function EventUsersScreen() {
     const { color } = useColorCoalition();
-    const { eventId } = useLocalSearchParams<{ eventId: string }>();
+    const { eventId, campusId, cursusId } = useLocalSearchParams<{
+        eventId: string;
+        campusId: string;
+        cursusId: string;
+    }>();
+    const attendanceIds = useEventAttendanceIds(campusId, cursusId, eventId);
     const {
         data,
         isLoading,
@@ -26,12 +32,20 @@ export default function EventUsersScreen() {
         refetch,
     } = useEventUsersPaginated(Number(eventId));
 
-    const users = data?.pages.flatMap((page) => page.users) || []; // Combina todas as páginas em um único array
     const [refreshing, setRefreshing] = React.useState(false);
-
+    const users = data?.pages.flatMap((page) => page.users) || [];
+    // Marcar presença de acordo com o Firebase
+    const usersWithPresence = users.map((u) => ({
+        ...u,
+        isPresent: attendanceIds.includes(String(u.id)),
+    }));
     // Contagem de presentes e ausentes
-    const presentes = users.filter((u) => u.isPresent === true).length;
-    const ausentes = users.filter((u) => u.isPresent === false).length;
+    const presentes = usersWithPresence.filter(
+        (u) => u.isPresent === true
+    ).length;
+    const ausentes = usersWithPresence.filter(
+        (u) => u.isPresent === false
+    ).length;
 
     if (isLoading) {
         return (
@@ -75,7 +89,7 @@ export default function EventUsersScreen() {
                 </View>
             </View>
             <FlashList
-                data={users}
+                data={usersWithPresence}
                 renderItem={({ item }) => (
                     <EventUserItem
                         login={item.login}
@@ -83,7 +97,7 @@ export default function EventUsersScreen() {
                         imageUrl={
                             item.image?.link?.toString().trim() || undefined
                         }
-                        isPresent={undefined} // Adapte se tiver info de presença
+                        isPresent={item.isPresent}
                     />
                 )}
                 estimatedItemSize={80}

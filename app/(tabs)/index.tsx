@@ -295,7 +295,7 @@ function EventsList({
                             pathname: "/event_details",
                             params: {
                                 userData: JSON.stringify({
-                                    id: userData.id,
+                                    id: userData?.id || 0,
                                     campusId: userData?.campus?.[0]?.id || 0,
                                 }),
                                 eventData: JSON.stringify(item),
