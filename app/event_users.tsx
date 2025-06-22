@@ -63,11 +63,17 @@ export default function EventUsersScreen() {
     async function handlePrintPdf() {
         // Usa os dados reais do evento
         const logoUri = require("@/assets/images/icon.png"); // Use require para assets locais
+        // Divide os usuários em páginas de 28 linhas
+        const pageSize = 28;
+        const pages = [];
+        for (let i = 0; i < usersWithPresence.length; i += pageSize) {
+            pages.push(usersWithPresence.slice(i, i + pageSize));
+        }
         const html = `
         <html>
         <head>
             <style>
-                body { font-family: Arial, sans-serif; margin: 24px; }
+                body { font-family: Arial, sans-serif; margin: 24px; margin-bottom: 60px; }
                 .header { text-align: center; margin-bottom: 16px; }
                 .logo { width: 60px; height: 60px; margin-bottom: 8px; }
                 .title { font-size: 20px; font-weight: bold; margin-bottom: 4px; }
@@ -77,38 +83,40 @@ export default function EventUsersScreen() {
                 th { background: #f0f0f0; }
                 .present { color: #2ecc40; font-weight: bold; }
                 .absent { color: #e74c3c; font-weight: bold; }
+                .footer { width: 100%; margin-top: 32px; text-align: center; font-size: 11px; color: #888; }
+                .page-break { page-break-after: always; }
             </style>
         </head>
         <body>
             <div class="header">
                 <img src="${logoUri}" class="logo" />
                 <div class="title">Lista de Presença</div>
-                <div class="subtitle">${eventName || ""} - ${
-            eventDate || ""
-        }</div>
+                <div class="subtitle">${eventName || ""} - ${eventDate || ""}</div>
             </div>
-            <table>
-                <tr>
-                    <th>#</th>
-                    <th>Nome Completo</th>
-                    <th>Login</th>
-                    <th>Presença</th>
-                </tr>
-                ${usersWithPresence
-                    .map(
-                        (u, i) => `
+            ${pages.map((page, pageIndex) => `
+                <table>
                     <tr>
-                        <td>${i + 1}</td>
-                        <td>${u.displayname}</td>
-                        <td>${u.login}</td>
-                        <td class="${u.isPresent ? "present" : "absent"}">${
-                            u.isPresent ? "Presente" : "Ausente"
-                        }</td>
+                        <th>#</th>
+                        <th>Nome Completo</th>
+                        <th>Login</th>
+                        <th>Presença</th>
                     </tr>
-                `
-                    )
-                    .join("")}
-            </table>
+                    ${page
+                        .map(
+                            (u, i) => `
+                        <tr>
+                            <td>${pageIndex * pageSize + i + 1}</td>
+                            <td>${u.displayname}</td>
+                            <td>${u.login}</td>
+                            <td class="${u.isPresent ? "present" : "absent"}">${u.isPresent ? "Presente" : "Ausente"}</td>
+                        </tr>
+                    `
+                        )
+                        .join("")}
+                </table>
+                <div class="footer">Lista de presença gerada em ${new Date().toLocaleString()}</div>
+                ${pageIndex < pages.length - 1 ? '<div class="page-break"></div>' : ''}
+            `).join('')}
         </body>
         </html>
         `;
