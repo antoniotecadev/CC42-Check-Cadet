@@ -15,6 +15,7 @@ import React from "react";
 import {
     ActionSheetIOS,
     ActivityIndicator,
+    Platform,
     StyleSheet,
     Text,
     TouchableOpacity,
@@ -161,12 +162,19 @@ export default function EventUsersScreen() {
         </body>
         </html>
         `;
-        const { uri } = await Print.printToFileAsync({ html, base64: false });
-        await Sharing.shareAsync(uri, {
-            dialogTitle: "Imprimir ou Partilhar Lista de Presença",
-            UTI: ".pdf",
-            mimeType: "application/pdf",
-        });
+        if (Platform.OS === "web") {
+            await Print.printAsync({ html });
+        } else {
+            const { uri } = await Print.printToFileAsync({
+                html,
+                base64: false,
+            });
+            await Sharing.shareAsync(uri, {
+                dialogTitle: "Imprimir ou Partilhar Lista de Presença",
+                UTI: ".pdf",
+                mimeType: "application/pdf",
+            });
+        }
     }
 
     const handleMenuPress = () => {
@@ -185,14 +193,22 @@ export default function EventUsersScreen() {
     React.useLayoutEffect(() => {
         navigation.setOptions &&
             navigation.setOptions({
-                headerRight: () => (
-                    <TouchableOpacity onPress={handleMenuPress}>
-                        <MaterialCommunityIcons
-                            name="dots-vertical"
-                            size={28}
-                        />
-                    </TouchableOpacity>
-                ),
+                headerRight: () =>
+                    Platform.OS === "web" ? (
+                        <TouchableOpacity
+                            onPress={handlePrintPdf}
+                            style={{ marginRight: 16 }}
+                        >
+                            <MaterialCommunityIcons name="printer" size={28} />
+                        </TouchableOpacity>
+                    ) : (
+                        <TouchableOpacity onPress={handleMenuPress}>
+                            <MaterialCommunityIcons
+                                name="dots-vertical"
+                                size={28}
+                            />
+                        </TouchableOpacity>
+                    ),
             });
     }, [navigation, color, usersWithPresence]);
 
@@ -215,7 +231,10 @@ export default function EventUsersScreen() {
     }
 
     return (
-        <ThemedView lightColor={"#f7f7f7"} style={{ flex: 1 }}>
+        <ThemedView
+            lightColor={"#f7f7f7"}
+            style={[{ flex: 1 }, Platform.OS === "web" ? styles.inner : {}]}
+        >
             {/* Chips de presentes e ausentes - agora absolutos no topo direito */}
             <View style={styles.chipAbsoluteRow} pointerEvents="box-none">
                 <View style={[styles.chip, styles.chipPresent]}>
@@ -406,5 +425,11 @@ const styles = StyleSheet.create({
     chipText: {
         fontWeight: "bold",
         fontSize: 15,
+    },
+    inner: {
+        width: "100%",
+        maxWidth: 600, // limite superior
+        minWidth: 480, // limite inferior (opcional)
+        marginHorizontal: "auto", // centraliza na web (usando style prop em web pura)
     },
 });
