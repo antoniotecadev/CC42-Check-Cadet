@@ -3,10 +3,14 @@ import EventUserItem from "@/components/ui/EventUserItem";
 import { useEventAttendanceIds } from "@/hooks/useEventAttendanceIds";
 import { useEventUsersPaginated } from "@/repository/useEventUsersPaginated";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
+import * as Print from "expo-print";
 import { router, useLocalSearchParams } from "expo-router";
+import * as Sharing from "expo-sharing";
 import React from "react";
 import {
+    ActionSheetIOS,
     ActivityIndicator,
     StyleSheet,
     Text,
@@ -15,6 +19,7 @@ import {
 } from "react-native";
 
 export default function EventUsersScreen() {
+    const navigation = useNavigation();
     const { color } = useColorCoalition();
     const { eventId, userId, campusId, cursusId } = useLocalSearchParams<{
         eventId: string;
@@ -47,6 +52,98 @@ export default function EventUsersScreen() {
     const ausentes = usersWithPresence.filter(
         (u) => u.isPresent === false
     ).length;
+
+    // Pega nome e data do evento dos params
+    const { eventName, eventDate } = useLocalSearchParams<{
+        eventName?: string;
+        eventDate?: string;
+    }>();
+
+    // Função para gerar e compartilhar PDF
+    async function handlePrintPdf() {
+        // Usa os dados reais do evento
+        const logoUri = require("@/assets/images/icon.png"); // Use require para assets locais
+        const html = `
+        <html>
+        <head>
+            <style>
+                body { font-family: Arial, sans-serif; margin: 24px; }
+                .header { text-align: center; margin-bottom: 16px; }
+                .logo { width: 60px; height: 60px; margin-bottom: 8px; }
+                .title { font-size: 20px; font-weight: bold; margin-bottom: 4px; }
+                .subtitle { font-size: 14px; margin-bottom: 8px; }
+                table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+                th, td { border: 1px solid #ccc; padding: 6px 4px; font-size: 12px; text-align: left; }
+                th { background: #f0f0f0; }
+                .present { color: #2ecc40; font-weight: bold; }
+                .absent { color: #e74c3c; font-weight: bold; }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <img src="${logoUri}" class="logo" />
+                <div class="title">Lista de Presença</div>
+                <div class="subtitle">${eventName || ""} - ${
+            eventDate || ""
+        }</div>
+            </div>
+            <table>
+                <tr>
+                    <th>#</th>
+                    <th>Nome Completo</th>
+                    <th>Login</th>
+                    <th>Presença</th>
+                </tr>
+                ${usersWithPresence
+                    .map(
+                        (u, i) => `
+                    <tr>
+                        <td>${i + 1}</td>
+                        <td>${u.displayname}</td>
+                        <td>${u.login}</td>
+                        <td class="${u.isPresent ? "present" : "absent"}">${
+                            u.isPresent ? "Presente" : "Ausente"
+                        }</td>
+                    </tr>
+                `
+                    )
+                    .join("")}
+            </table>
+        </body>
+        </html>
+        `;
+        const { uri } = await Print.printToFileAsync({ html, base64: false });
+        await Sharing.shareAsync(uri);
+    }
+
+    const handleMenuPress = () => {
+        ActionSheetIOS.showActionSheetWithOptions(
+            {
+                options: ["Imprimir lista de presença", "Cancelar"],
+                cancelButtonIndex: 1,
+            },
+            (selectedIndex) => {
+                if (selectedIndex === 0) handlePrintPdf();
+            }
+        );
+    };
+
+    React.useLayoutEffect(() => {
+        navigation.setOptions &&
+            navigation.setOptions({
+                headerRight: () => (
+                    <TouchableOpacity
+                        onPress={handleMenuPress}
+                        style={{ paddingHorizontal: 16 }}
+                    >
+                        <MaterialCommunityIcons
+                            name="dots-vertical"
+                            size={28}
+                        />
+                    </TouchableOpacity>
+                ),
+            });
+    }, [navigation, color, usersWithPresence]);
 
     if (isLoading) {
         return (
