@@ -2,6 +2,7 @@ import { useColorCoalition } from "@/components/ColorCoalitionContext";
 import EventUserItem from "@/components/ui/EventUserItem";
 import { useEventAttendanceIds } from "@/hooks/useEventAttendanceIds";
 import { useEventUsersPaginated } from "@/repository/useEventUsersPaginated";
+import { logoBase64 } from "@/utility/ImageUtil";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
@@ -49,17 +50,14 @@ export default function EventUsersScreen() {
         isPresent: attendanceIds.includes(String(u.id)),
     }));
     // Contagem de presentes e ausentes
-    const presentes = usersWithPresence.filter(
+    const presents = usersWithPresence.filter(
         (u) => u.isPresent === true
     ).length;
-    const ausentes = usersWithPresence.filter(
+    const absents = usersWithPresence.filter(
         (u) => u.isPresent === false
     ).length;
 
-    // Função para gerar e compartilhar PDF
     async function handlePrintPdf() {
-        // Usa os dados reais do evento
-        const logoUri = require("@/assets/images/icon.png"); // Use require para assets locais
         // Divide os usuários em páginas de 28 linhas
         const pageSize = 28;
         const pages = [];
@@ -72,9 +70,10 @@ export default function EventUsersScreen() {
             <style>
                 body { font-family: Arial, sans-serif; margin: 24px; margin-bottom: 60px; }
                 .header { text-align: center; margin-bottom: 16px; }
-                .logo { width: 60px; height: 60px; margin-bottom: 8px; }
+                .logo { width: 60px; height: 30px; margin-bottom: 8px; }
                 .title { font-size: 20px; font-weight: bold; margin-bottom: 4px; }
-                .subtitle { font-size: 14px; margin-bottom: 8px; }
+                .subtitle { font-size: 13px; margin-bottom: 8px; }
+                .subsubtitle { font-size: 14px; margin-bottom: 8px; }
                 table { width: 100%; border-collapse: collapse; margin-top: 16px; }
                 th, td { border: 1px solid #ccc; padding: 6px 4px; font-size: 12px; text-align: left; }
                 th { background: #f0f0f0; }
@@ -86,9 +85,10 @@ export default function EventUsersScreen() {
         </head>
         <body>
             <div class="header">
-                <img src="${logoUri}" class="logo" />
+                <img src="${logoBase64}" class="logo" />
                 <div class="title">Lista de Presença</div>
-                <div class="subtitle">${eventName || ""} - ${
+                <div class="subtitle">Presente: ${presents} | Ausente: ${absents}</div>
+                <div class="subsubtitle">${eventName || ""} - ${
             eventDate || ""
         }</div>
             </div>
@@ -216,7 +216,7 @@ export default function EventUsersScreen() {
                         color="#fff"
                         style={{ marginRight: 4 }}
                     />
-                    <Text style={styles.chipText}>{presentes}</Text>
+                    <Text style={styles.chipText}>{presents}</Text>
                 </View>
                 <View style={[styles.chip, styles.chipAbsent]}>
                     <MaterialCommunityIcons
@@ -225,7 +225,7 @@ export default function EventUsersScreen() {
                         color="#fff"
                         style={{ marginRight: 4 }}
                     />
-                    <Text style={styles.chipText}>{ausentes}</Text>
+                    <Text style={styles.chipText}>{absents}</Text>
                 </View>
             </View>
             <FlashList
