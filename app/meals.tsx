@@ -5,7 +5,7 @@ import { database } from "@/firebaseConfig";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { Ionicons } from "@expo/vector-icons";
 import { FlashList } from "@shopify/flash-list";
-import { Stack, useLocalSearchParams } from "expo-router";
+import { router, Stack, useLocalSearchParams } from "expo-router";
 import {
     endBefore,
     limitToLast,
@@ -140,13 +140,26 @@ export default function MealsScreen() {
                     data={meals}
                     keyExtractor={(item) => item.id}
                     renderItem={({ item }) => (
-                        <MealItem
-                            item={item}
-                            color={color}
-                            borderColor={
-                                colorScheme === "light" ? "#eee" : "#333"
-                            }
-                        />
+                        <TouchableOpacity
+                            onPress={() => {
+                                router.push({
+                                    pathname: "/meal_detail",
+                                    params: {
+                                        campusId,
+                                        cursusId,
+                                        mealData: JSON.stringify(item),
+                                    },
+                                });
+                            }}
+                        >
+                            <MealItem
+                                item={item}
+                                color={color}
+                                borderColor={
+                                    colorScheme === "light" ? "#eee" : "#333"
+                                }
+                            />
+                        </TouchableOpacity>
                     )}
                     estimatedItemSize={70}
                     refreshing={refreshing}
