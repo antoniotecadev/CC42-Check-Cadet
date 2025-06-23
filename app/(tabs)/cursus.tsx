@@ -78,7 +78,7 @@ export default function CursusScreen() {
                 {isLoading || isFetching ? (
                     <ActivityIndicator
                         size="large"
-                        color="#007AFF"
+                        color={color}
                         style={{ marginTop: 32 }}
                     />
                 ) : isError ? (
@@ -114,13 +114,13 @@ export default function CursusScreen() {
                                 </View>
                             </TouchableOpacity>
                         )}
-                        estimatedItemSize={60}
+                        estimatedItemSize={75}
                         refreshing={refreshing}
                         onRefresh={onRefresh}
                     />
                 )}
                 <TouchableOpacity style={styles.fab} onPress={onRefresh}>
-                    <Ionicons name="refresh" size={28} color="#fff" />
+                    <Ionicons name="refresh" size={28} color={color} />
                 </TouchableOpacity>
             </View>
         </>
