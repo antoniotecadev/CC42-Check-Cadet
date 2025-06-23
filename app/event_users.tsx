@@ -187,6 +187,12 @@ export default function EventUsersScreen() {
             });
     }, [navigation, color, usersWithPresence]);
 
+    const onRefresh = useCallback(async () => {
+        setRefreshing(true);
+        await refetch();
+        setRefreshing(false);
+    }, [refetch]);
+
     if (isLoading) {
         return (
             <View style={styles.centered}>
@@ -204,12 +210,6 @@ export default function EventUsersScreen() {
             </View>
         );
     }
-
-    const onRefresh = useCallback(async () => {
-        setRefreshing(true);
-        await refetch();
-        setRefreshing(false);
-    }, [refetch]);
 
     return (
         <ThemedView
