@@ -32,7 +32,7 @@ export default function MealDetailScreen() {
         <>
             <Stack.Screen
                 options={{
-                    title: meal.type || "Detalhes da Refeição",
+                    title: "Detalhes",
                 }}
             />
             <ScrollView contentContainerStyle={styles.scrollContainer}>
