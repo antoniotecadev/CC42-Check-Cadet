@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     modalContainer: {
-        width: width * 0.85,
+        width: Math.min(Math.max(width * 0.85, 320), 400), // entre 320 e 400px
         borderRadius: 18,
         alignItems: "center",
         padding: 24,
