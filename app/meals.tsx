@@ -1,3 +1,4 @@
+import { useColorCoalition } from "@/components/ColorCoalitionContext";
 import MealItem from "@/components/ui/MealItem";
 import { database } from "@/firebaseConfig";
 import { FlashList } from "@shopify/flash-list";
@@ -22,10 +23,11 @@ interface Meal {
     quantity: number;
     numberSubscribed: number;
     isSubscribed: boolean;
-    imageUrl?: string;
+    pathImage?: string;
 }
 
 export default function MealsScreen() {
+    const { color } = useColorCoalition();
     const { campusId, cursusId } = useLocalSearchParams<{
         campusId: string;
         cursusId: string;
@@ -111,7 +113,9 @@ export default function MealsScreen() {
             <FlashList
                 data={meals}
                 keyExtractor={(item) => item.id}
-                renderItem={({ item }) => <MealItem item={item} />}
+                renderItem={({ item }) => (
+                    <MealItem item={item} color={color} />
+                )}
                 estimatedItemSize={70}
                 refreshing={refreshing}
                 onRefresh={onRefresh}

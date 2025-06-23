@@ -1,10 +1,11 @@
 import { Image } from "expo-image";
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
+import { IconSymbol } from "./IconSymbol";
 
 interface MealItemProps {
     item: {
-        imageUrl?: string;
+        pathImage?: string;
         name: string;
         type: string;
         description: string;
@@ -13,23 +14,24 @@ interface MealItemProps {
         createdDate: string;
         isSubscribed: boolean;
     };
+    color: string;
 }
 
-const MealItem: React.FC<MealItemProps> = ({ item }) => {
+const MealItem: React.FC<MealItemProps> = ({ item, color }) => {
     return (
         <View style={styles.itemRow}>
-            <Image
-                source={
-                    item.imageUrl
-                        ? { uri: item.imageUrl }
-                        : require("@/assets/images/icon.png")
-                }
-                style={styles.mealImage}
-                contentFit="cover"
-            />
+            {item.pathImage ? (
+                <Image
+                    source={{ uri: item.pathImage }}
+                    style={styles.mealImage}
+                    contentFit="cover"
+                />
+            ) : (
+                <IconSymbol size={60} name="fork.knife" color={color} />
+            )}
             <View style={styles.infoCol}>
-                <Text style={styles.name}>{item.name}</Text>
                 <Text style={styles.type}>{item.type}</Text>
+                <Text style={styles.name}>{item.name}</Text>
                 <Text style={styles.desc}>{item.description}</Text>
                 <Text style={styles.qty}>
                     Qtd: {item.quantity} / {item.numberSubscribed}
