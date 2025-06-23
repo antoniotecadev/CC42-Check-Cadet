@@ -1,3 +1,4 @@
+import MealItem from "@/components/ui/MealItem";
 import { database } from "@/firebaseConfig";
 import { FlashList } from "@shopify/flash-list";
 import { useLocalSearchParams } from "expo-router";
@@ -10,7 +11,7 @@ import {
     ref,
 } from "firebase/database";
 import { useCallback, useEffect, useState } from "react";
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, StyleSheet, View } from "react-native";
 
 interface Meal {
     id: string;
@@ -21,6 +22,7 @@ interface Meal {
     quantity: number;
     numberSubscribed: number;
     isSubscribed: boolean;
+    imageUrl?: string;
 }
 
 export default function MealsScreen() {
@@ -109,25 +111,7 @@ export default function MealsScreen() {
             <FlashList
                 data={meals}
                 keyExtractor={(item) => item.id}
-                renderItem={({ item }) => (
-                    <View style={styles.item}>
-                        <Text style={styles.name}>{item.name}</Text>
-                        <Text style={styles.type}>{item.type}</Text>
-                        <Text style={styles.desc}>{item.description}</Text>
-                        <Text style={styles.qty}>
-                            Qtd: {item.quantity} / {item.numberSubscribed}
-                        </Text>
-                        <Text style={styles.date}>{item.createdDate}</Text>
-                        <Text
-                            style={[
-                                styles.sub,
-                                { color: item.isSubscribed ? "green" : "red" },
-                            ]}
-                        >
-                            {item.isSubscribed ? "Inscrito" : "Não inscrito"}
-                        </Text>
-                    </View>
-                )}
+                renderItem={({ item }) => <MealItem item={item} />}
                 estimatedItemSize={70}
                 refreshing={refreshing}
                 onRefresh={onRefresh}
