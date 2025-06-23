@@ -6,7 +6,8 @@ export interface EventUser {
     login: string;
     displayname: string;
     image?: string;
-    isPresent: boolean | null;
+    isPresent: boolean;
+    isSubscribed: boolean;
 }
 
 export function useEventUsersPaginated(eventId: number, pageSize = 30) {
