@@ -27,8 +27,10 @@ import {
 export default function EventUsersScreen() {
     const navigation = useNavigation();
     const colorScheme = useColorScheme();
+    const base64Image = useBase64Image();
     const { color } = useColorCoalition();
 
+    const isWeb = Platform.OS === "web";
     const { eventId, userId, campusId, cursusId, eventName, eventDate } =
         useLocalSearchParams<{
             eventId: string;
@@ -66,8 +68,6 @@ export default function EventUsersScreen() {
         (u) => u.isPresent === false
     ).length;
 
-    const base64Image = useBase64Image();
-
     async function handlePrintPdf() {
         const html = generateAttendanceHtml({
             title: "Lista de Presença",
@@ -78,7 +78,7 @@ export default function EventUsersScreen() {
             absents,
             usersWithPresence,
         });
-        if (Platform.OS === "web") {
+        if (isWeb) {
             await Print.printAsync({ html });
         } else {
             const { uri } = await Print.printToFileAsync({
@@ -109,7 +109,7 @@ export default function EventUsersScreen() {
         const fileName = `lista_presenca_${
             eventName ? eventName.replace(/\s+/g, "_") : "evento"
         }.csv`;
-        if (Platform.OS === "web") {
+        if (isWeb) {
             // Cria um blob e faz download directo no navegador
             const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
             const url = window.URL.createObjectURL(blob);
@@ -155,7 +155,7 @@ export default function EventUsersScreen() {
         navigation.setOptions &&
             navigation.setOptions({
                 headerRight: () =>
-                    Platform.OS === "web" ? (
+                    isWeb ? (
                         <>
                             <TouchableOpacity
                                 onPress={handlePrintPdf}
@@ -214,8 +214,15 @@ export default function EventUsersScreen() {
     return (
         <ThemedView
             lightColor={"#f7f7f7"}
-            style={[{ flex: 1 }, Platform.OS === "web" ? styles.inner : {}]}
+            style={[{ flex: 1 }, isWeb ? styles.inner : {}]}
         >
+            {isWeb && refreshing && (
+                <ActivityIndicator
+                    size="large"
+                    color={color}
+                    style={{ marginTop: 16 }}
+                />
+            )}
             {/* Chips de presentes e ausentes - agora absolutos no topo direito */}
             <View style={styles.chipAbsoluteRow} pointerEvents="box-none">
                 <View style={[styles.chip, styles.chipPresent]}>
@@ -296,7 +303,7 @@ export default function EventUsersScreen() {
                         color={colorscheme}
                     />
                 </TouchableOpacity>
-                {Platform.OS === "web" && (
+                {isWeb && (
                     <TouchableOpacity
                         style={[styles.fab, { backgroundColor: color }]}
                         onPress={onRefresh}
