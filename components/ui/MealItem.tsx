@@ -1,8 +1,8 @@
+import { MaterialIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { ThemedText } from "../ThemedText";
-import { IconSymbol } from "./IconSymbol";
 
 interface MealItemProps {
     item: {
@@ -29,7 +29,12 @@ const MealItem: React.FC<MealItemProps> = ({ item, color, borderColor }) => {
                     contentFit="cover"
                 />
             ) : (
-                <IconSymbol size={60} name="fork.knife" color={color} />
+                <MaterialIcons
+                    size={60}
+                    style={{ marginRight: 16 }}
+                    name="restaurant"
+                    color={color}
+                />
             )}
             <View style={styles.infoCol}>
                 <Text style={styles.type}>{item.type}</Text>

@@ -7,6 +7,7 @@ import { HapticTab } from "@/components/HapticTab";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import TabBarBackground from "@/components/ui/TabBarBackground";
 import { useColorScheme } from "@/hooks/useColorScheme";
+import { MaterialIcons } from "@expo/vector-icons";
 
 export default function TabLayout() {
     const colorScheme = useColorScheme();
@@ -50,7 +51,7 @@ export default function TabLayout() {
                     title: "Refeição",
                     headerTitle: "Cursus",
                     tabBarIcon: ({ color }) => (
-                        <IconSymbol size={28} name="fork.knife" color={color} />
+                        <MaterialIcons size={28} name="restaurant" color={color} />
                     ),
                 }}
             />

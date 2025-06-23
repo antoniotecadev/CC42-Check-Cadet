@@ -3,6 +3,7 @@ import { ThemedView } from "@/components/ThemedView";
 import MealItem from "@/components/ui/MealItem";
 import { database } from "@/firebaseConfig";
 import { useColorScheme } from "@/hooks/useColorScheme";
+import { Ionicons } from "@expo/vector-icons";
 import { FlashList } from "@shopify/flash-list";
 import { Stack, useLocalSearchParams } from "expo-router";
 import {
@@ -14,7 +15,12 @@ import {
     ref,
 } from "firebase/database";
 import { useCallback, useEffect, useState } from "react";
-import { ActivityIndicator, StyleSheet } from "react-native";
+import {
+    ActivityIndicator,
+    Platform,
+    StyleSheet,
+    TouchableOpacity,
+} from "react-native";
 
 interface Meal {
     id: string;
@@ -116,7 +122,13 @@ export default function MealsScreen() {
                     title: cursusName || "Refeições",
                 }}
             />
-            <ThemedView lightColor="#fff" style={styles.container}>
+            <ThemedView
+                lightColor="#fff"
+                style={[
+                    styles.container,
+                    Platform.OS === "web" ? styles.inner : {},
+                ]}
+            >
                 {loading && (
                     <ActivityIndicator
                         size="large"
@@ -142,6 +154,14 @@ export default function MealsScreen() {
                     onEndReached={loadMore}
                     onEndReachedThreshold={0.2}
                 />
+                {Platform.OS === "web" && (
+                    <TouchableOpacity
+                        style={[styles.fab, { backgroundColor: color }]}
+                        onPress={onRefresh}
+                    >
+                        <Ionicons name="refresh" size={28} color="#fff" />
+                    </TouchableOpacity>
+                )}
             </ThemedView>
         </>
     );
@@ -156,4 +176,21 @@ const styles = StyleSheet.create({
     qty: { fontSize: 12, color: "#007AFF" },
     date: { fontSize: 10, color: "#888" },
     sub: { fontSize: 12, fontWeight: "bold" },
+    fab: {
+        position: "absolute",
+        bottom: 32,
+        right: 24,
+        borderRadius: 25,
+        width: 50,
+        height: 50,
+        alignItems: "center",
+        justifyContent: "center",
+        elevation: 4,
+    },
+    inner: {
+        width: "100%",
+        maxWidth: 600, // limite superior
+        minWidth: 480, // limite inferior (opcional)
+        marginHorizontal: "auto", // centraliza na web (usando style prop em web pura)
+    },
 });
