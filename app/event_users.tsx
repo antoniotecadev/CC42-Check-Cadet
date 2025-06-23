@@ -179,7 +179,7 @@ export default function EventUsersScreen() {
     }
 
     async function handleExportExcel() {
-        // Monta os dados CSV
+        const title = `Lista de Presença - ${eventName}\n`;
         const header = "Nº;Nome Completo;Login;Presença\n";
         const rows = usersWithPresence
             .map(
@@ -189,7 +189,8 @@ export default function EventUsersScreen() {
                     }`
             )
             .join("\n");
-        const csv = header + rows;
+        // Adiciona BOM UTF-8 para compatibilidade com Excel
+        const csv = "\uFEFF" + title + header + rows;
         // Define nome do arquivo
         const fileName = `lista_presenca_${
             eventName ? eventName.replace(/\s+/g, "_") : "evento"
