@@ -1,6 +1,8 @@
 import { useColorCoalition } from "@/components/ColorCoalitionContext";
+import { ThemedView } from "@/components/ThemedView";
 import MealItem from "@/components/ui/MealItem";
 import { database } from "@/firebaseConfig";
+import { useColorScheme } from "@/hooks/useColorScheme";
 import { FlashList } from "@shopify/flash-list";
 import { Stack, useLocalSearchParams } from "expo-router";
 import {
@@ -12,7 +14,7 @@ import {
     ref,
 } from "firebase/database";
 import { useCallback, useEffect, useState } from "react";
-import { ActivityIndicator, StyleSheet, View } from "react-native";
+import { ActivityIndicator, StyleSheet } from "react-native";
 
 interface Meal {
     id: string;
@@ -27,6 +29,7 @@ interface Meal {
 }
 
 export default function MealsScreen() {
+    const colorScheme = useColorScheme();
     const { color } = useColorCoalition();
     const { campusId, cursusId, cursusName } = useLocalSearchParams<{
         campusId: string;
@@ -113,30 +116,39 @@ export default function MealsScreen() {
                     title: cursusName || "Refeições",
                 }}
             />
-            <View style={styles.container}>
+            <ThemedView lightColor="#fff" style={styles.container}>
                 {loading && (
-                    <ActivityIndicator size="large" style={{ marginTop: 32 }} />
+                    <ActivityIndicator
+                        size="large"
+                        color={color}
+                        style={{ marginTop: 16 }}
+                    />
                 )}
                 <FlashList
                     data={meals}
                     keyExtractor={(item) => item.id}
                     renderItem={({ item }) => (
-                        <MealItem item={item} color={color} />
+                        <MealItem
+                            item={item}
+                            color={color}
+                            borderColor={
+                                colorScheme === "light" ? "#eee" : "#333"
+                            }
+                        />
                     )}
                     estimatedItemSize={70}
                     refreshing={refreshing}
                     onRefresh={onRefresh}
                     onEndReached={loadMore}
                     onEndReachedThreshold={0.2}
-                    ListFooterComponent={loading ? <ActivityIndicator /> : null}
                 />
-            </View>
+            </ThemedView>
         </>
     );
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: "#fff" },
+    container: { flex: 1 },
     item: { padding: 16, borderBottomWidth: 1, borderColor: "#eee" },
     name: { fontWeight: "bold", fontSize: 16 },
     type: { fontSize: 12, color: "#888" },

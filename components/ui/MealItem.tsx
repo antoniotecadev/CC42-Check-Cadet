@@ -1,6 +1,7 @@
 import { Image } from "expo-image";
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
+import { ThemedText } from "../ThemedText";
 import { IconSymbol } from "./IconSymbol";
 
 interface MealItemProps {
@@ -15,11 +16,12 @@ interface MealItemProps {
         isSubscribed: boolean;
     };
     color: string;
+    borderColor: string;
 }
 
-const MealItem: React.FC<MealItemProps> = ({ item, color }) => {
+const MealItem: React.FC<MealItemProps> = ({ item, color, borderColor }) => {
     return (
-        <View style={styles.itemRow}>
+        <View style={[styles.itemRow, { borderColor }]}>
             {item.pathImage ? (
                 <Image
                     source={{ uri: item.pathImage }}
@@ -31,7 +33,7 @@ const MealItem: React.FC<MealItemProps> = ({ item, color }) => {
             )}
             <View style={styles.infoCol}>
                 <Text style={styles.type}>{item.type}</Text>
-                <Text style={styles.name}>{item.name}</Text>
+                <ThemedText style={styles.name}>{item.name}</ThemedText>
                 <Text style={styles.desc}>{item.description}</Text>
                 <Text style={styles.qty}>
                     Qtd: {item.quantity} / {item.numberSubscribed}
@@ -57,7 +59,6 @@ const styles = StyleSheet.create({
         alignItems: "center",
         padding: 16,
         borderBottomWidth: 1,
-        borderColor: "#eee",
     },
     mealImage: {
         width: 60,
