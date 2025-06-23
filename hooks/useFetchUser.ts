@@ -1,12 +1,14 @@
 import { useColorCoalition } from "@/components/ColorCoalitionContext";
 import { Colors } from "@/constants/Colors";
 import axios from "axios";
+import useItemStorage from "./storage/useItemStorage";
 import useTokenStorage from "./storage/useTokenStorage";
 import useUserStorage from "./storage/useUserStorage";
 import useAlert from "./useAlert";
 
 const useFetchUser = () => {
     const { showError } = useAlert();
+    const { setItem } = useItemStorage();
     const { setColor } = useColorCoalition();
     const { saveUser } = useUserStorage();
     const { getAccessToken } = useTokenStorage();
@@ -55,6 +57,7 @@ const useFetchUser = () => {
             setColor(coalition?.color?.trim() || Colors.light_blue_900.default);
             // 4. Salvar localmente
             await saveUser(userWithCoalition);
+            await setItem("campus_id", `${userWithCoalition?.campus?.[0]?.id ?? 0}`);
             return true;
         } catch (e) {
             showError("Erro", "Erro ao buscar dados do usuário: " + e);

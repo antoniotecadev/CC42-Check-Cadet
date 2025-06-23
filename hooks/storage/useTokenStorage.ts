@@ -1,8 +1,7 @@
+import useItemStorage from "@/hooks/storage/useItemStorage";
 import { fetchApiKeyFromDatabase } from "@/services/firebaseApiKey";
 import axios from "axios";
-import * as SecureStore from "expo-secure-store";
 import { useCallback } from "react";
-import { Platform } from "react-native";
 import useAlert from "../useAlert";
 
 const ACCESS_TOKEN_KEY = "access_token";
@@ -11,31 +10,8 @@ const EXPIRATION_KEY = "token_expiration_time";
 const API_42_URL = process.env.EXPO_PUBLIC_API_URL;
 const API_42_CLIENT_ID = process.env.EXPO_PUBLIC_API_KEY;
 
-function isWeb() {
-    return Platform.OS === "web";
-}
-
-async function setItem(key: string, value: string) {
-    if (isWeb()) {
-        localStorage.setItem(key, value);
-    } else {
-        await SecureStore.setItemAsync(key, value);
-    }
-}
-
-async function getItem(key: string): Promise<string | null> {
-    return isWeb() ? localStorage.getItem(key) : SecureStore.getItemAsync(key);
-}
-
-async function removeItem(key: string) {
-    if (isWeb()) {
-        localStorage.removeItem(key);
-    } else {
-        await SecureStore.deleteItemAsync(key);
-    }
-}
-
 export default function useTokenStorage() {
+    const { setItem, getItem, removeItem } = useItemStorage();
     const { showError } = useAlert();
     const saveToken = useCallback(
         async (token: {

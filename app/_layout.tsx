@@ -93,6 +93,15 @@ export default function RootLayout() {
                                 headerBackVisible: true,
                             }}
                         />
+                        <Stack.Screen
+                            name="meals"
+                            options={{
+                                headerShown: true,
+                                title: "Refeições",
+                                headerBackTitle: "Voltar",
+                                headerBackVisible: true,
+                            }}
+                        />
                         <Stack.Screen name="+not-found" />
                     </StackHeader>
                     <StatusBar style="auto" />

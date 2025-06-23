@@ -8,6 +8,7 @@ import {
 import * as WebBrowser from "expo-web-browser";
 import { useEffect, useState } from "react";
 import { Platform } from "react-native";
+import useItemStorage from "./storage/useItemStorage";
 import useTokenStorage from "./storage/useTokenStorage";
 import useAlert from "./useAlert";
 import useFetchUser from "./useFetchUser";
@@ -25,6 +26,7 @@ const discovery = {
 export function useLogin42() {
     const { showError } = useAlert();
     const { fetchUser } = useFetchUser();
+    const { removeItem } = useItemStorage();
     const { saveToken, clearTokens } = useTokenStorage();
     const isWeb = Platform.OS === "web";
     const isDev = __DEV__;
@@ -74,6 +76,7 @@ export function useLogin42() {
                     sucess = await fetchUser(); // Busca os dados do usuário após salvar o token
                     if (!sucess) {
                         clearTokens(); // Limpa os tokens se falhar ao buscar usuário
+                        removeItem("campus_id"); // Remove campus_id se falhar
                     }
                     setSucess(sucess);
                 } else {

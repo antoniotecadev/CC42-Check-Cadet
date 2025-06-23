@@ -1,14 +1,15 @@
 import { useColorCoalition } from "@/components/ColorCoalitionContext";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
+import useItemStorage from "@/hooks/storage/useItemStorage";
 import { useColorScheme } from "@/hooks/useColorScheme.web";
 import useApiInterceptors from "@/services/api";
 import { Ionicons } from "@expo/vector-icons";
 import { FlashList } from "@shopify/flash-list";
 import { useQuery } from "@tanstack/react-query";
 import { AxiosInstance } from "axios";
-import { Stack } from "expo-router";
-import React, { useCallback, useState } from "react";
+import { Stack, router } from "expo-router";
+import React, { useCallback, useEffect, useState } from "react";
 import {
     ActivityIndicator,
     Platform,
@@ -38,11 +39,25 @@ const fetchCursus = async (
 };
 
 export default function CursusScreen() {
+    const { getItem } = useItemStorage();
     const colorScheme = useColorScheme();
     const { api } = useApiInterceptors();
     const { color } = useColorCoalition();
     const [search, setSearch] = useState("");
     const [refreshing, setRefreshing] = useState(false);
+    const [campusId, setCampusId] = useState<string | null>(null);
+
+    useEffect(() => {
+        const fetchCampusId = async () => {
+            const campusId = await getItem("campus_id");
+            if (campusId) {
+                setCampusId(campusId);
+            } else {
+                console.warn("Campus ID não encontrado");
+            }
+        };
+        fetchCampusId();
+    }, [getItem]);
 
     const { data, isLoading, isError, refetch, isFetching } = useQuery({
         queryKey: ["cursus"],
@@ -141,9 +156,13 @@ export default function CursusScreen() {
                                     },
                                 ]}
                                 onPress={() =>
-                                    alert(
-                                        `Cursus: ${item.name}\nID: ${item.id}`
-                                    )
+                                    router.push({
+                                        pathname: "/meals",
+                                        params: {
+                                            campusId: campusId,
+                                            cursusId: item.id,
+                                        },
+                                    })
                                 }
                             >
                                 <Ionicons
