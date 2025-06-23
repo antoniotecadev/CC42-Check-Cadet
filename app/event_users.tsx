@@ -6,14 +6,14 @@ import { useEventAttendanceIds } from "@/hooks/useEventAttendanceIds";
 import { useEventUsersPaginated } from "@/repository/useEventUsersPaginated";
 import { generateAttendanceHtml } from "@/utility/HTMLUtil";
 import { useBase64Image } from "@/utility/ImageUtil";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
 import * as FileSystem from "expo-file-system";
 import * as Print from "expo-print";
 import { router, useLocalSearchParams } from "expo-router";
 import * as Sharing from "expo-sharing";
-import React from "react";
+import React, { useCallback } from "react";
 import {
     ActionSheetIOS,
     ActivityIndicator,
@@ -205,6 +205,12 @@ export default function EventUsersScreen() {
         );
     }
 
+    const onRefresh = useCallback(async () => {
+        setRefreshing(true);
+        await refetch();
+        setRefreshing(false);
+    }, [refetch]);
+
     return (
         <ThemedView
             lightColor={"#f7f7f7"}
@@ -260,11 +266,7 @@ export default function EventUsersScreen() {
                 }
                 keyExtractor={(item) => String(item.id)}
                 refreshing={refreshing}
-                onRefresh={async () => {
-                    setRefreshing(true);
-                    await refetch();
-                    setRefreshing(false);
-                }}
+                onRefresh={onRefresh}
             />
             {/* Floating Action Buttons */}
             <View style={styles.fabContainer} pointerEvents="box-none">
@@ -294,6 +296,14 @@ export default function EventUsersScreen() {
                         color={colorscheme}
                     />
                 </TouchableOpacity>
+                {Platform.OS === "web" && (
+                    <TouchableOpacity
+                        style={[styles.fab, { backgroundColor: color }]}
+                        onPress={onRefresh}
+                    >
+                        <Ionicons name="refresh" size={28} color="#fff" />
+                    </TouchableOpacity>
+                )}
                 <TouchableOpacity
                     style={[
                         styles.fab,

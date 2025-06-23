@@ -165,12 +165,14 @@ export default function CursusScreen() {
                         onRefresh={onRefresh}
                     />
                 )}
-                <TouchableOpacity
-                    style={[styles.fab, { backgroundColor: color }]}
-                    onPress={onRefresh}
-                >
-                    <Ionicons name="refresh" size={28} color="#fff" />
-                </TouchableOpacity>
+                {Platform.OS === "web" && (
+                    <TouchableOpacity
+                        style={[styles.fab, { backgroundColor: color }]}
+                        onPress={onRefresh}
+                    >
+                        <Ionicons name="refresh" size={28} color="#fff" />
+                    </TouchableOpacity>
+                )}
             </ThemedView>
         </>
     );
