@@ -38,8 +38,8 @@ export function useEvents(params: GetEventsParams) {
         queryKey: ["events", params],
         queryFn: () => (params ? getEvents(params) : Promise.resolve([])),
         enabled: !!params,
-        staleTime: 1000 * 60 * 5, // cache por 5 minutos
-        retry: 1, // tenta 1x se falhar
+        staleTime: 1000 * 60 * 60 * 24, // Dados ficam "frescos" por 24 horas
+        retry: 2, // tenta 2x se falhar
     });
 }
 
