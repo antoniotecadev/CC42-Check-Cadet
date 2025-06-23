@@ -76,6 +76,7 @@ export function useLogin42() {
                     sucess = await fetchUser(); // Busca os dados do usuário após salvar o token
                     if (!sucess) {
                         clearTokens(); // Limpa os tokens se falhar ao buscar usuário
+                        removeItem("user_id"); // Remove user_id se falhar
                         removeItem("campus_id"); // Remove campus_id se falhar
                     }
                     setSucess(sucess);

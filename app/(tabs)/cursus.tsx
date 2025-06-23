@@ -45,15 +45,18 @@ export default function CursusScreen() {
     const { color } = useColorCoalition();
     const [search, setSearch] = useState("");
     const [refreshing, setRefreshing] = useState(false);
+    const [userId, setUserId] = useState<string | null>(null);
     const [campusId, setCampusId] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchCampusId = async () => {
+            const userId = await getItem("user_id");
             const campusId = await getItem("campus_id");
-            if (campusId) {
+            if (campusId && userId) {
+                setUserId(userId);
                 setCampusId(campusId);
             } else {
-                console.warn("Campus ID não encontrado");
+                console.warn("User ID | Campus ID não encontrado");
             }
         };
         fetchCampusId();
@@ -159,6 +162,7 @@ export default function CursusScreen() {
                                     router.push({
                                         pathname: "/meals",
                                         params: {
+                                            userId: userId,
                                             campusId: campusId,
                                             cursusId: item.id,
                                             cursusName: item.name,

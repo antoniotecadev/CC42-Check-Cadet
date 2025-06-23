@@ -1,9 +1,17 @@
 import { useColorCoalition } from "@/components/ColorCoalitionContext";
 import { ThemedText } from "@/components/ThemedText";
-import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
+import useAlert from "@/hooks/useAlert";
+import { fetchRatings, rate, RatingResult } from "@/repository/eventRepository";
+import {
+    FontAwesome,
+    MaterialCommunityIcons,
+    MaterialIcons,
+} from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { Stack, useLocalSearchParams } from "expo-router";
+import { useEffect, useState } from "react";
 import {
+    Button,
     ScrollView,
     StyleSheet,
     Text,
@@ -13,12 +21,29 @@ import {
 
 export default function MealDetailScreen() {
     const { color } = useColorCoalition();
-    const { campusId, cursusId, mealData } = useLocalSearchParams<{
+    const { showError, showSuccess } = useAlert();
+    const [rating, setRating] = useState<RatingResult>();
+    const [userRating, setUserRating] = useState<number>(0);
+    const starsToShow = rating?.userRating ?? userRating; // userRating = estado local para seleção
+    const { userId, campusId, cursusId, mealData } = useLocalSearchParams<{
+        userId: string;
         campusId: string;
         cursusId: string;
         mealData: string;
     }>();
     const meal = JSON.parse(mealData);
+
+    useEffect(() => {
+        const unsubscribe = fetchRatings(
+            campusId,
+            cursusId,
+            "meals",
+            meal.id,
+            userId,
+            setRating
+        );
+        return () => unsubscribe();
+    }, [meal]);
 
     if (!meal) {
         return (
@@ -54,7 +79,97 @@ export default function MealDetailScreen() {
                             name="restaurant"
                         />
                     )}
-                    {/* Aqui você pode adicionar o componente de rating, média, etc. */}
+                    {/* Rating Section */}
+                    <View
+                        style={[
+                            styles.ratingContainer,
+                            { backgroundColor: "#fff" },
+                        ]}
+                    >
+                        <View style={styles.ratingLeft}>
+                            <Text style={styles.ratingValue}>
+                                {rating?.ratingValue?.toFixed(1) ?? "-"}
+                            </Text>
+                            <View style={styles.starsRow}>
+                                {rating?.stars.map((star, i) => (
+                                    <FontAwesome
+                                        key={i}
+                                        name={
+                                            star === "star-half"
+                                                ? "star-half-full"
+                                                : star
+                                        }
+                                        size={28}
+                                        color="#FFD700"
+                                        style={{ marginRight: 2 }}
+                                    />
+                                ))}
+                            </View>
+                            <Text style={styles.ratingCount}>
+                                {rating?.ratingCount ?? 0} avaliações
+                            </Text>
+                        </View>
+                        <View style={styles.ratingRight}>
+                            {!rating?.userRating && (
+                                <Text style={styles.tapToRate}>
+                                    Toque para avaliar
+                                </Text>
+                            )}
+                            <View style={styles.starsRowSmall}>
+                                {[...Array(5)].map((_, i) => (
+                                    <FontAwesome
+                                        key={i}
+                                        name={
+                                            i < starsToShow ? "star" : "star-o"
+                                        }
+                                        size={22}
+                                        color={
+                                            i < starsToShow
+                                                ? "#FFD700"
+                                                : "#B0B0B0"
+                                        }
+                                        style={{ marginRight: 1 }}
+                                        onPress={
+                                            rating?.userRating
+                                                ? undefined // desabilita clique se já avaliou
+                                                : () => setUserRating(i + 1)
+                                        }
+                                    />
+                                ))}
+                            </View>
+                            <Button
+                                title={
+                                    rating?.userRating
+                                        ? `${rating.userRating} estrela${
+                                              rating.userRating > 1 ? "s" : ""
+                                          }`
+                                        : "Enviar Avaliação"
+                                }
+                                onPress={() => {
+                                    if (!rating?.userRating) {
+                                        rate(
+                                            campusId,
+                                            cursusId,
+                                            "meals",
+                                            meal.id,
+                                            userId,
+                                            userRating,
+                                            () =>
+                                                showSuccess(
+                                                    "SUCESSO",
+                                                    "Avaliação enviada com sucesso!"
+                                                ),
+                                            (error) =>
+                                                showError("ERRO", error.message)
+                                        );
+                                    }
+                                }}
+                                disabled={
+                                    !!rating?.userRating || userRating === 0
+                                }
+                            />
+                        </View>
+                    </View>
                     <View style={styles.divider} />
                     <Text style={styles.date}>{meal.createdDate}</Text>
                     <Text style={styles.qty}>
@@ -177,5 +292,54 @@ const styles = StyleSheet.create({
         fontSize: 13,
         fontWeight: "bold",
         color: "#007AFF",
+    },
+    ratingContainer: {
+        flexDirection: "row",
+        borderRadius: 18,
+        marginHorizontal: 4,
+        padding: 18,
+        marginBottom: 18,
+        alignItems: "center",
+        elevation: 2,
+        shadowColor: "#000",
+        shadowOpacity: 0.07,
+        shadowRadius: 6,
+        shadowOffset: { width: 0, height: 2 },
+    },
+    ratingLeft: {
+        flex: 1,
+        alignItems: "center",
+        borderRightWidth: 1,
+        borderRightColor: "#F0F0F0",
+        paddingRight: 12,
+    },
+    ratingValue: {
+        fontSize: 38,
+        fontWeight: "bold",
+        color: "#3A86FF",
+        marginBottom: 2,
+    },
+    starsRow: {
+        flexDirection: "row",
+        marginBottom: 2,
+    },
+    ratingCount: {
+        color: "#888",
+        fontSize: 13,
+        marginTop: 2,
+    },
+    ratingRight: {
+        flex: 1,
+        alignItems: "center",
+        paddingLeft: 12,
+    },
+    tapToRate: {
+        color: "#3A86FF",
+        fontWeight: "bold",
+        fontSize: 15,
+        marginBottom: 4,
+    },
+    starsRowSmall: {
+        flexDirection: "row",
     },
 });

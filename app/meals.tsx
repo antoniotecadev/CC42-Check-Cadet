@@ -37,7 +37,8 @@ interface Meal {
 export default function MealsScreen() {
     const colorScheme = useColorScheme();
     const { color } = useColorCoalition();
-    const { campusId, cursusId, cursusName } = useLocalSearchParams<{
+    const { userId, campusId, cursusId, cursusName } = useLocalSearchParams<{
+        userId: string;
         campusId: string;
         cursusId: string;
         cursusName: string;
@@ -145,6 +146,7 @@ export default function MealsScreen() {
                                 router.push({
                                     pathname: "/meal_detail",
                                     params: {
+                                        userId,
                                         campusId,
                                         cursusId,
                                         mealData: JSON.stringify(item),
