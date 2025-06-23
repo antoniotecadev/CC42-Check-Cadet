@@ -11,6 +11,7 @@ import { Stack } from "expo-router";
 import React, { useCallback, useState } from "react";
 import {
     ActivityIndicator,
+    Platform,
     StyleSheet,
     Text,
     TextInput,
@@ -86,7 +87,12 @@ export default function CursusScreen() {
     return (
         <>
             <Stack.Screen options={{ headerShown: true }} />
-            <ThemedView style={styles.container}>
+            <ThemedView
+                style={[
+                    styles.container,
+                    Platform.OS === "web" ? styles.inner : {},
+                ]}
+            >
                 <View style={styles.header}>
                     <TextInput
                         style={styles.input}
@@ -159,8 +165,11 @@ export default function CursusScreen() {
                         onRefresh={onRefresh}
                     />
                 )}
-                <TouchableOpacity style={styles.fab} onPress={onRefresh}>
-                    <Ionicons name="refresh" size={28} color={color} />
+                <TouchableOpacity
+                    style={[styles.fab, { backgroundColor: color }]}
+                    onPress={onRefresh}
+                >
+                    <Ionicons name="refresh" size={28} color="#fff" />
                 </TouchableOpacity>
             </ThemedView>
         </>
@@ -197,12 +206,17 @@ const styles = StyleSheet.create({
         position: "absolute",
         bottom: 32,
         right: 24,
-        backgroundColor: "#007AFF",
         borderRadius: 25,
         width: 50,
         height: 50,
         alignItems: "center",
         justifyContent: "center",
         elevation: 4,
+    },
+    inner: {
+        width: "100%",
+        maxWidth: 600, // limite superior
+        minWidth: 480, // limite inferior (opcional)
+        marginHorizontal: "auto", // centraliza na web (usando style prop em web pura)
     },
 });
