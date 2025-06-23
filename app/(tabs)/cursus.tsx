@@ -1,4 +1,7 @@
 import { useColorCoalition } from "@/components/ColorCoalitionContext";
+import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/components/ThemedView";
+import { useColorScheme } from "@/hooks/useColorScheme.web";
 import useApiInterceptors from "@/services/api";
 import { Ionicons } from "@expo/vector-icons";
 import { FlashList } from "@shopify/flash-list";
@@ -34,6 +37,7 @@ const fetchCursus = async (
 };
 
 export default function CursusScreen() {
+    const colorScheme = useColorScheme();
     const { api } = useApiInterceptors();
     const { color } = useColorCoalition();
     const [search, setSearch] = useState("");
@@ -82,7 +86,7 @@ export default function CursusScreen() {
     return (
         <>
             <Stack.Screen options={{ headerShown: true }} />
-            <View style={styles.container}>
+            <ThemedView style={styles.container}>
                 <View style={styles.header}>
                     <TextInput
                         style={styles.input}
@@ -101,20 +105,28 @@ export default function CursusScreen() {
                         style={{ marginTop: 32 }}
                     />
                 ) : isError ? (
-                    <Text style={styles.notFound}>
+                    <ThemedText lightColor="#888" style={styles.notFound}>
                         Erro ao carregar cursus.
-                    </Text>
+                    </ThemedText>
                 ) : filtered.length === 0 ? (
-                    <Text style={styles.notFound}>
+                    <ThemedText lightColor="#888" style={styles.notFound}>
                         Nenhum cursus encontrado.
-                    </Text>
+                    </ThemedText>
                 ) : (
                     <FlashList
                         data={sortedFiltered}
                         keyExtractor={(item) => item.id.toString()}
                         renderItem={({ item }) => (
                             <TouchableOpacity
-                                style={styles.item}
+                                style={[
+                                    styles.item,
+                                    {
+                                        borderColor:
+                                            colorScheme === "light"
+                                                ? "#f0f0f0"
+                                                : "#333",
+                                    },
+                                ]}
                                 onPress={() =>
                                     alert(
                                         `Cursus: ${item.name}\nID: ${item.id}`
@@ -128,7 +140,7 @@ export default function CursusScreen() {
                                     style={{ marginRight: 12 }}
                                 />
                                 <View>
-                                    <Text
+                                    <ThemedText
                                         style={[
                                             styles.name,
                                             priorityIds.includes(item.id) && {
@@ -137,7 +149,7 @@ export default function CursusScreen() {
                                         ]}
                                     >
                                         {item.name}
-                                    </Text>
+                                    </ThemedText>
                                     <Text style={styles.id}>ID: {item.id}</Text>
                                 </View>
                             </TouchableOpacity>
@@ -150,13 +162,13 @@ export default function CursusScreen() {
                 <TouchableOpacity style={styles.fab} onPress={onRefresh}>
                     <Ionicons name="refresh" size={28} color={color} />
                 </TouchableOpacity>
-            </View>
+            </ThemedView>
         </>
     );
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: "#fff" },
+    container: { flex: 1 },
     header: { flexDirection: "row", alignItems: "center", padding: 16 },
     input: {
         flex: 1,
@@ -177,11 +189,10 @@ const styles = StyleSheet.create({
         alignItems: "center",
         padding: 16,
         borderBottomWidth: 1,
-        borderColor: "#f0f0f0",
     },
     name: { fontSize: 16, fontWeight: "bold" },
     id: { fontSize: 12, color: "#888" },
-    notFound: { textAlign: "center", marginTop: 32, color: "#888" },
+    notFound: { textAlign: "center", marginTop: 32 },
     fab: {
         position: "absolute",
         bottom: 32,
