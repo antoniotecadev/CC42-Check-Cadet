@@ -179,7 +179,7 @@ export default function EventUsersScreen() {
     }
 
     async function handleExportExcel() {
-        const title = `Lista de Presença - ${eventName}\n`;
+        // Monta os dados CSV
         const header = "Nº;Nome Completo;Login;Presença\n";
         const rows = usersWithPresence
             .map(
@@ -190,19 +190,32 @@ export default function EventUsersScreen() {
             )
             .join("\n");
         // Adiciona BOM UTF-8 para compatibilidade com Excel
-        const csv = "\uFEFF" + title + header + rows;
-        // Define nome do arquivo
+        const csv = String.fromCharCode(0xfeff) + header + rows;
         const fileName = `lista_presenca_${
             eventName ? eventName.replace(/\s+/g, "_") : "evento"
         }.csv`;
-        const fileUri = FileSystem.cacheDirectory + fileName;
-        await FileSystem.writeAsStringAsync(fileUri, csv, {
-            encoding: FileSystem.EncodingType.UTF8,
-        });
-        await Sharing.shareAsync(fileUri, {
-            mimeType: "text/csv",
-            dialogTitle: "Exportar para Excel",
-        });
+        if (Platform.OS === "web") {
+            // Cria um blob e faz download directo no navegador
+            const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        } else {
+            // Mobile
+            const fileUri = FileSystem.cacheDirectory + fileName;
+            await FileSystem.writeAsStringAsync(fileUri, csv, {
+                encoding: FileSystem.EncodingType.UTF8,
+            });
+            await Sharing.shareAsync(fileUri, {
+                mimeType: "text/csv",
+                dialogTitle: "Exportar para Excel",
+            });
+        }
     }
 
     // Adicione ao menu:
@@ -229,12 +242,26 @@ export default function EventUsersScreen() {
             navigation.setOptions({
                 headerRight: () =>
                     Platform.OS === "web" ? (
-                        <TouchableOpacity
-                            onPress={handlePrintPdf}
-                            style={{ marginRight: 16 }}
-                        >
-                            <MaterialCommunityIcons name="printer" size={28} />
-                        </TouchableOpacity>
+                        <>
+                            <TouchableOpacity
+                                onPress={handlePrintPdf}
+                                style={{ marginRight: 16 }}
+                            >
+                                <MaterialCommunityIcons
+                                    name="printer"
+                                    size={28}
+                                />
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                onPress={handleExportExcel}
+                                style={{ marginRight: 16 }}
+                            >
+                                <MaterialCommunityIcons
+                                    name="file-excel"
+                                    size={28}
+                                />
+                            </TouchableOpacity>
+                        </>
                     ) : (
                         <TouchableOpacity onPress={handleMenuPress}>
                             <MaterialCommunityIcons
