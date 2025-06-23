@@ -161,6 +161,7 @@ export default function CursusScreen() {
                                         params: {
                                             campusId: campusId,
                                             cursusId: item.id,
+                                            cursusName: item.name,
                                         },
                                     })
                                 }

@@ -2,7 +2,7 @@ import { useColorCoalition } from "@/components/ColorCoalitionContext";
 import MealItem from "@/components/ui/MealItem";
 import { database } from "@/firebaseConfig";
 import { FlashList } from "@shopify/flash-list";
-import { useLocalSearchParams } from "expo-router";
+import { Stack, useLocalSearchParams } from "expo-router";
 import {
     endBefore,
     limitToLast,
@@ -28,9 +28,10 @@ interface Meal {
 
 export default function MealsScreen() {
     const { color } = useColorCoalition();
-    const { campusId, cursusId } = useLocalSearchParams<{
+    const { campusId, cursusId, cursusName } = useLocalSearchParams<{
         campusId: string;
         cursusId: string;
+        cursusName: string;
     }>();
     const [meals, setMeals] = useState<Meal[]>([]);
     const [loading, setLoading] = useState(true);
@@ -106,24 +107,31 @@ export default function MealsScreen() {
     };
 
     return (
-        <View style={styles.container}>
-            {loading && (
-                <ActivityIndicator size="large" style={{ marginTop: 32 }} />
-            )}
-            <FlashList
-                data={meals}
-                keyExtractor={(item) => item.id}
-                renderItem={({ item }) => (
-                    <MealItem item={item} color={color} />
-                )}
-                estimatedItemSize={70}
-                refreshing={refreshing}
-                onRefresh={onRefresh}
-                onEndReached={loadMore}
-                onEndReachedThreshold={0.2}
-                ListFooterComponent={loading ? <ActivityIndicator /> : null}
+        <>
+            <Stack.Screen
+                options={{
+                    title: cursusName || "Refeições",
+                }}
             />
-        </View>
+            <View style={styles.container}>
+                {loading && (
+                    <ActivityIndicator size="large" style={{ marginTop: 32 }} />
+                )}
+                <FlashList
+                    data={meals}
+                    keyExtractor={(item) => item.id}
+                    renderItem={({ item }) => (
+                        <MealItem item={item} color={color} />
+                    )}
+                    estimatedItemSize={70}
+                    refreshing={refreshing}
+                    onRefresh={onRefresh}
+                    onEndReached={loadMore}
+                    onEndReachedThreshold={0.2}
+                    ListFooterComponent={loading ? <ActivityIndicator /> : null}
+                />
+            </View>
+        </>
     );
 }
 
