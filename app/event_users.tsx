@@ -3,7 +3,7 @@ import { ThemedView } from "@/components/ThemedView";
 import EventUserItem from "@/components/ui/EventUserItem";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { useEventAttendanceIds } from "@/hooks/useEventAttendanceIds";
-import { useEventUsersPaginated } from "@/repository/useEventUsersPaginated";
+import { useEventUsersPaginated } from "@/repository/eventRepository";
 import { generateAttendanceHtml } from "@/utility/HTMLUtil";
 import { useBase64Image } from "@/utility/ImageUtil";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
