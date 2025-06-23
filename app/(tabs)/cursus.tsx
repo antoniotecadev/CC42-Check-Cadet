@@ -54,6 +54,25 @@ export default function CursusScreen() {
                 String(cursu.id).includes(search)
         ) || [];
 
+    // IDs prioritários
+    const priorityIds = [21, 66, 9];
+
+    // Ordena os cursus: prioritários primeiro, depois os demais
+    const sortedFiltered = React.useMemo(() => {
+        if (!filtered.length) return [];
+        const priority: Cursu[] = [];
+        const others: Cursu[] = [];
+        for (const c of filtered) {
+            if (priorityIds.includes(c.id)) priority.push(c);
+            else others.push(c);
+        }
+        // Mantém a ordem dos IDs prioritários
+        priority.sort(
+            (a, b) => priorityIds.indexOf(a.id) - priorityIds.indexOf(b.id)
+        );
+        return [...priority, ...others];
+    }, [filtered]);
+
     const onRefresh = useCallback(async () => {
         setRefreshing(true);
         await refetch();
@@ -91,7 +110,7 @@ export default function CursusScreen() {
                     </Text>
                 ) : (
                     <FlashList
-                        data={filtered}
+                        data={sortedFiltered}
                         keyExtractor={(item) => item.id.toString()}
                         renderItem={({ item }) => (
                             <TouchableOpacity
@@ -109,7 +128,16 @@ export default function CursusScreen() {
                                     style={{ marginRight: 12 }}
                                 />
                                 <View>
-                                    <Text style={styles.name}>{item.name}</Text>
+                                    <Text
+                                        style={[
+                                            styles.name,
+                                            priorityIds.includes(item.id) && {
+                                                color: "green",
+                                            },
+                                        ]}
+                                    >
+                                        {item.name}
+                                    </Text>
                                     <Text style={styles.id}>ID: {item.id}</Text>
                                 </View>
                             </TouchableOpacity>
