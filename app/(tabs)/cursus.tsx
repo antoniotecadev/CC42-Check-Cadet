@@ -86,7 +86,14 @@ export default function CursusScreen() {
 
     return (
         <>
-            <Stack.Screen options={{ headerShown: true }} />
+            <Stack.Screen
+                options={{
+                    headerShown: true,
+                    headerStyle: {
+                        backgroundColor: color,
+                    },
+                }}
+            />
             <ThemedView
                 style={[
                     styles.container,
