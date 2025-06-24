@@ -39,11 +39,7 @@ const MealItem: React.FC<MealItemProps> = ({ item, color, borderColor }) => {
             <View style={styles.infoCol}>
                 <Text style={styles.type}>{item.type}</Text>
                 <ThemedText style={styles.name}>{item.name}</ThemedText>
-                <Text style={styles.desc}>{item.description}</Text>
-                <Text style={styles.qty}>
-                    Qtd: {item.quantity} / {item.numberSubscribed}
-                </Text>
-                <Text style={styles.date}>{item.createdDate}</Text>
+                <ThemedText style={styles.desc}>{item.description}</ThemedText>
                 <Text
                     style={[
                         styles.sub,
@@ -52,6 +48,10 @@ const MealItem: React.FC<MealItemProps> = ({ item, color, borderColor }) => {
                 >
                     {item.isSubscribed ? "Assinado" : "Não assinado"}
                 </Text>
+                <Text style={styles.qty}>
+                    Quantidade: {item.quantity} / {item.numberSubscribed}
+                </Text>
+                <Text style={styles.date}>{item.createdDate}</Text>
             </View>
         </View>
     );
