@@ -7,7 +7,7 @@ export const mealType = [
 
 export const carbohydrates = [
   'Arroz',
-  'Massas',
+  'Massa',
   'Funge',
   'Batata',
   'Pão',
