@@ -3,7 +3,12 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import useAlert from "@/hooks/useAlert";
 import { useColorScheme } from "@/hooks/useColorScheme";
-import { fetchRatings, rate, RatingResult } from "@/repository/eventRepository";
+import {
+    fetchRatings,
+    rate,
+    RatingResult,
+    userIsPresentOrSubscribed,
+} from "@/repository/eventRepository";
 import {
     FontAwesome,
     MaterialCommunityIcons,
@@ -29,6 +34,8 @@ export default function MealDetailScreen() {
     const { showError, showSuccess } = useAlert();
     const [rating, setRating] = useState<RatingResult>();
     const [userRating, setUserRating] = useState<number>(0);
+    const [userSubscribed, setUserSubscribed] = useState<boolean>(false);
+
     const starsToShow = rating?.userRating ?? userRating; // userRating = estado local para seleção
     const { userId, campusId, cursusId, mealData } = useLocalSearchParams<{
         userId: string;
@@ -41,6 +48,27 @@ export default function MealDetailScreen() {
     const colorDivider = colorScheme === "dark" ? "#333" : "#eee";
 
     useEffect(() => {
+        let isMounted = true;
+        const checkUserPresence = async () => {
+            try {
+                const isUserSubscribed = await userIsPresentOrSubscribed({
+                    campusId,
+                    cursusId,
+                    type: "meals",
+                    typeId: meal.id,
+                    userId,
+                });
+                setUserSubscribed(isUserSubscribed);
+            } catch (error) {
+                if (isMounted) {
+                    showError(
+                        "ERRO",
+                        "Erro ao verificar assinatura do usuário."
+                    );
+                }
+            }
+        };
+        checkUserPresence();
         const unsubscribe = fetchRatings(
             campusId,
             cursusId,
@@ -49,7 +77,10 @@ export default function MealDetailScreen() {
             userId,
             setRating
         );
-        return () => unsubscribe();
+        return () => {
+            isMounted = false;
+            unsubscribe();
+        };
     }, [meal]);
 
     if (!meal) {
@@ -124,9 +155,29 @@ export default function MealDetailScreen() {
                                 </Text>
                             </View>
                             <View style={styles.ratingRight}>
-                                {!rating?.userRating && (
-                                    <Text style={styles.tapToRate}>
-                                        Toque para avaliar
+                                {!rating?.userRating ? (
+                                    <Text
+                                        style={[
+                                            styles.tapToRate,
+                                            {
+                                                color: userSubscribed
+                                                    ? "#3A86FF"
+                                                    : "red",
+                                            },
+                                        ]}
+                                    >
+                                        {userSubscribed
+                                            ? "Toque para avaliar"
+                                            : "Não assinado"}
+                                    </Text>
+                                ) : (
+                                    <Text
+                                        style={[
+                                            styles.tapToRate,
+                                            { color: "green" },
+                                        ]}
+                                    >
+                                        Assinado
                                     </Text>
                                 )}
                                 <View style={styles.starsRowSmall}>
@@ -146,7 +197,8 @@ export default function MealDetailScreen() {
                                             }
                                             style={{ marginRight: 1 }}
                                             onPress={
-                                                rating?.userRating
+                                                rating?.userRating ||
+                                                !userSubscribed
                                                     ? undefined // desabilita clique se já avaliou
                                                     : () => setUserRating(i + 1)
                                             }
@@ -323,7 +375,6 @@ const styles = StyleSheet.create({
     ratingContainer: {
         flexDirection: "row",
         borderRadius: 18,
-        marginHorizontal: 4,
         padding: 18,
         marginBottom: 18,
         alignItems: "center",
@@ -361,7 +412,6 @@ const styles = StyleSheet.create({
         paddingLeft: 12,
     },
     tapToRate: {
-        color: "#3A86FF",
         fontWeight: "bold",
         fontSize: 15,
         marginBottom: 4,

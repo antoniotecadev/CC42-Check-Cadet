@@ -2,7 +2,12 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import useAlert from "@/hooks/useAlert";
 import { useColorScheme } from "@/hooks/useColorScheme";
-import { fetchRatings, rate, RatingResult } from "@/repository/eventRepository";
+import {
+    fetchRatings,
+    rate,
+    RatingResult,
+    userIsPresentOrSubscribed,
+} from "@/repository/eventRepository";
 import { encrypt } from "@/utility/AESUtil";
 import { getEventDuration, getTimeUntilEvent } from "@/utility/DateUtil";
 import {
@@ -52,7 +57,8 @@ const EventDetailScreen = () => {
     const cursusId = event?.cursus_ids?.[0]?.toString();
     const eventId = event?.id?.toString();
 
-    const [userRating, setUserRating] = React.useState<number>(0);
+    const [userRating, setUserRating] = useState<number>(0);
+    const [userPresent, setUserPresent] = useState<boolean>(false);
 
     const color = colorScheme === "dark" ? "#333" : "#fff";
 
@@ -78,6 +84,24 @@ const EventDetailScreen = () => {
     };
 
     React.useEffect(() => {
+        let isMounted = true;
+        const checkUserPresence = async () => {
+            try {
+                const isUserPresent = await userIsPresentOrSubscribed({
+                    campusId,
+                    cursusId,
+                    type: "events",
+                    typeId: eventId,
+                    userId,
+                });
+                setUserPresent(isUserPresent);
+            } catch (error) {
+                if (isMounted) {
+                    showError("ERRO", "Erro ao verificar presença do usuário.");
+                }
+            }
+        };
+        checkUserPresence();
         const unsubscribe = fetchRatings(
             campusId,
             cursusId,
@@ -86,7 +110,10 @@ const EventDetailScreen = () => {
             userId,
             setRating
         );
-        return () => unsubscribe();
+        return () => {
+            isMounted = false;
+            unsubscribe();
+        };
     }, [event]);
 
     // Pega nome e data do evento dos params (ou defina fallback)
@@ -96,7 +123,10 @@ const EventDetailScreen = () => {
         : "";
 
     return (
-        <ThemedView lightColor={"#f7f7f7"} style={[styles.container, isWeb ? styles.inner : {}]}>
+        <ThemedView
+            lightColor={"#f7f7f7"}
+            style={[styles.container, isWeb ? styles.inner : {}]}
+        >
             <ScrollView showsVerticalScrollIndicator={isWeb}>
                 {/* Header with image and gradient */}
                 <View style={styles.headerContainer}>
@@ -221,9 +251,20 @@ const EventDetailScreen = () => {
                         </Text>
                     </View>
                     <View style={styles.ratingRight}>
-                        {!rating?.userRating && (
-                            <Text style={styles.tapToRate}>
-                                Toque para avaliar
+                        {!rating?.userRating ? (
+                            <Text
+                                style={[
+                                    styles.tapToRate,
+                                    { color: userPresent ? "#3A86FF" : "red" },
+                                ]}
+                            >
+                                {userPresent ? "Toque para avaliar" : "Ausente"}
+                            </Text>
+                        ) : (
+                            <Text
+                                style={[styles.tapToRate, { color: "green" }]}
+                            >
+                                Presente
                             </Text>
                         )}
                         <View style={styles.starsRowSmall}>
@@ -237,7 +278,7 @@ const EventDetailScreen = () => {
                                     }
                                     style={{ marginRight: 1 }}
                                     onPress={
-                                        rating?.userRating
+                                        rating?.userRating || !userPresent
                                             ? undefined // desabilita clique se já avaliou
                                             : () => setUserRating(i + 1)
                                     }
@@ -507,7 +548,6 @@ const styles = StyleSheet.create({
         paddingLeft: 12,
     },
     tapToRate: {
-        color: "#3A86FF",
         fontWeight: "bold",
         fontSize: 15,
         marginBottom: 4,

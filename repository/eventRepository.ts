@@ -48,7 +48,29 @@ export type RatingResult = {
     ratingCount: number;
     stars: ("star" | "star-half" | "star-o")[];
     userRating: number | undefined;
+    userPresent?: boolean;
 };
+
+export async function userIsPresentOrSubscribed({
+    campusId,
+    cursusId,
+    type,
+    typeId,
+    userId,
+}: {
+    campusId: string;
+    cursusId: string;
+    type: "events" | "meals";
+    typeId: string;
+    userId: string;
+}): Promise<boolean> {
+    const participantsRef = ref(
+        database,
+        `campus/${campusId}/cursus/${cursusId}/${type}/${typeId}/participants/${userId}`
+    );
+    const snapshot = await get(participantsRef);
+    return snapshot.exists();
+}
 
 export function fetchRatings(
     campusId: string,
