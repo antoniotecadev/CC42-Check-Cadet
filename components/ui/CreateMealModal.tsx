@@ -51,6 +51,7 @@ export default function CreateMealModal({
     userId,
     onCreated,
 }: Props) {
+    const isWeb = Platform.OS === "web";
     const [name, setName] = useState("");
     const [showPicker, setShowPicker] = useState({
         mealType: false,
@@ -140,7 +141,7 @@ export default function CreateMealModal({
             >
                 <View style={styles.overlay}>
                     <ThemedView style={styles.container}>
-                        <ScrollView>
+                        <ScrollView showsVerticalScrollIndicator={isWeb}>
                             <ThemedText style={styles.title}>
                                 Criar Refeição
                             </ThemedText>
