@@ -1,6 +1,8 @@
 import { useColorCoalition } from "@/components/ColorCoalitionContext";
 import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/components/ThemedView";
 import useAlert from "@/hooks/useAlert";
+import { useColorScheme } from "@/hooks/useColorScheme";
 import { fetchRatings, rate, RatingResult } from "@/repository/eventRepository";
 import {
     FontAwesome,
@@ -12,6 +14,7 @@ import { Stack, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import {
     Button,
+    Platform,
     ScrollView,
     StyleSheet,
     Text,
@@ -20,6 +23,7 @@ import {
 } from "react-native";
 
 export default function MealDetailScreen() {
+    const colorScheme = useColorScheme();
     const { color } = useColorCoalition();
     const { showError, showSuccess } = useAlert();
     const [rating, setRating] = useState<RatingResult>();
@@ -32,6 +36,8 @@ export default function MealDetailScreen() {
         mealData: string;
     }>();
     const meal = JSON.parse(mealData);
+    const colorCard = colorScheme === "dark" ? "#333" : "#fff";
+    const colorDivider = colorScheme === "dark" ? "#333" : "#eee";
 
     useEffect(() => {
         const unsubscribe = fetchRatings(
@@ -54,17 +60,25 @@ export default function MealDetailScreen() {
     }
 
     return (
-        <>
+        <ThemedView
+            lightColor={"#f7f7f7"}
+            style={[Platform.OS === "web" ? styles.inner : {}]}
+        >
             <Stack.Screen
                 options={{
                     title: "Detalhes",
                 }}
             />
             <ScrollView contentContainerStyle={styles.scrollContainer}>
-                <View style={styles.card}>
-                    <Text style={styles.type}>{meal.type}</Text>
-                    <View style={styles.divider} />
-                    <Text style={styles.name}>{meal.name}</Text>
+                <ThemedView darkColor="#222" style={styles.card}>
+                    <ThemedText style={styles.type}>{meal.type}</ThemedText>
+                    <View
+                        style={[
+                            styles.divider,
+                            { backgroundColor: colorDivider },
+                        ]}
+                    />
+                    <ThemedText style={styles.name}>{meal.name}</ThemedText>
                     <Text style={styles.desc}>{meal.description}</Text>
                     {meal.pathImage ? (
                         <Image
@@ -80,11 +94,9 @@ export default function MealDetailScreen() {
                         />
                     )}
                     {/* Rating Section */}
-                    <View
-                        style={[
-                            styles.ratingContainer,
-                            { backgroundColor: "#fff" },
-                        ]}
+                    <ThemedView
+                        darkColor="#333"
+                        style={[styles.ratingContainer]}
                     >
                         <View style={styles.ratingLeft}>
                             <Text style={styles.ratingValue}>
@@ -169,15 +181,22 @@ export default function MealDetailScreen() {
                                 }
                             />
                         </View>
-                    </View>
-                    <View style={styles.divider} />
+                    </ThemedView>
+                    <View
+                        style={[
+                            styles.divider,
+                            { backgroundColor: colorDivider },
+                        ]}
+                    />
                     <Text style={styles.date}>{meal.createdDate}</Text>
                     <Text style={styles.qty}>
                         Quantidade: {meal.quantity} / {meal.numberSubscribed}
                     </Text>
-                </View>
+                </ThemedView>
                 <View style={styles.fabRow}>
-                    <TouchableOpacity style={styles.fab}>
+                    <TouchableOpacity
+                        style={[styles.fab, { backgroundColor: colorCard }]}
+                    >
                         <MaterialCommunityIcons
                             name="qrcode"
                             size={44}
@@ -185,7 +204,9 @@ export default function MealDetailScreen() {
                         />
                         {/* <Text style={styles.fabText}>QR Code</Text> */}
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.fab}>
+                    <TouchableOpacity
+                        style={[styles.fab, { backgroundColor: colorCard }]}
+                    >
                         <MaterialCommunityIcons
                             name="clipboard-list-outline"
                             size={44}
@@ -195,18 +216,16 @@ export default function MealDetailScreen() {
                     </TouchableOpacity>
                 </View>
             </ScrollView>
-        </>
+        </ThemedView>
     );
 }
 
 const styles = StyleSheet.create({
     scrollContainer: {
         padding: 0,
-        backgroundColor: "#f7f7f7",
         alignItems: "center",
     },
     card: {
-        backgroundColor: "#fff",
         borderRadius: 12,
         elevation: 4,
         margin: 16,
@@ -227,7 +246,6 @@ const styles = StyleSheet.create({
     divider: {
         width: "100%",
         height: 1,
-        backgroundColor: "#eee",
         marginVertical: 8,
     },
     name: {
@@ -270,7 +288,6 @@ const styles = StyleSheet.create({
         gap: 24,
     },
     fab: {
-        backgroundColor: "#fff",
         borderRadius: 50,
         width: 90,
         height: 90,
@@ -341,5 +358,11 @@ const styles = StyleSheet.create({
     },
     starsRowSmall: {
         flexDirection: "row",
+    },
+    inner: {
+        width: "100%",
+        maxWidth: 600, // limite superior
+        minWidth: 480, // limite inferior (opcional)
+        marginHorizontal: "auto", // centraliza na web (usando style prop em web pura)
     },
 });
