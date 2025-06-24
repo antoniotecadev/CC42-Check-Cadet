@@ -22,11 +22,13 @@ export function useCreateMeal() {
     const [error, setError] = useState<string | null>(null);
 
     // Substitua por suas credenciais Cloudinary
-    const CLOUDINARY_URL =
-        "https://api.cloudinary.com/v1_1/<SEU_CLOUD_NAME>/image/upload";
-    const CLOUDINARY_UPLOAD_PRESET = "<SEU_UPLOAD_PRESET>";
+    const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/cc42/image/upload";
+    const CLOUDINARY_UPLOAD_PRESET = "ml_default";
 
-    async function uploadImageToCloudinary(imageUri: string): Promise<string> {
+    async function uploadImageToCloudinary(
+        imageUri: string,
+        campusId: string
+    ): Promise<string> {
         const formData = new FormData();
         formData.append("file", {
             uri: imageUri,
@@ -34,6 +36,7 @@ export function useCreateMeal() {
             name: "meal.jpg",
         } as any);
         formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+        formData.append("folder", `campus/${campusId}/meals`); // 👈 pasta dinâmica
         const response = await axios.post(CLOUDINARY_URL, formData, {
             headers: { "Content-Type": "multipart/form-data" },
         });
@@ -52,7 +55,8 @@ export function useCreateMeal() {
         try {
             let imageUrl = "";
             if (imageUri) {
-                imageUrl = await uploadImageToCloudinary(imageUri);
+                imageUrl = await uploadImageToCloudinary(imageUri, campusId);
+                alert(imageUrl);
             }
             const mealsRef = ref(
                 database,
