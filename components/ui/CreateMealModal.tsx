@@ -176,6 +176,13 @@ export default function CreateMealModal({
                             </TouchableOpacity>
                         </View>
                         <TextInput
+                            onPress={() =>
+                                setShowPicker((prev) => ({
+                                    ...prev,
+                                    mealType: false,
+                                    mealDescription: false,
+                                }))
+                            }
                             style={[styles.input, { borderColor: color }]}
                             placeholder="Nome da Refeição"
                             value={name}
@@ -307,6 +314,13 @@ export default function CreateMealModal({
                             </Picker>
                         )}
                         <TextInput
+                            onPress={() =>
+                                setShowPicker((prev) => ({
+                                    ...prev,
+                                    mealType: false,
+                                    mealDescription: false,
+                                }))
+                            }
                             style={[styles.input, { borderColor: color }]}
                             placeholder="Quantidade"
                             value={quantity}
