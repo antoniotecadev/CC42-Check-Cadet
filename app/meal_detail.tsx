@@ -23,6 +23,7 @@ import {
 } from "react-native";
 
 export default function MealDetailScreen() {
+    const isWeb = Platform.OS === "web";
     const colorScheme = useColorScheme();
     const { color } = useColorCoalition();
     const { showError, showSuccess } = useAlert();
@@ -60,170 +61,179 @@ export default function MealDetailScreen() {
     }
 
     return (
-        <ThemedView
-            lightColor={"#f7f7f7"}
-            style={[Platform.OS === "web" ? styles.inner : {}]}
-        >
+        <>
             <Stack.Screen
                 options={{
                     title: "Detalhes",
                 }}
             />
-            <ScrollView contentContainerStyle={styles.scrollContainer}>
-                <ThemedView darkColor="#222" style={styles.card}>
-                    <ThemedText style={styles.type}>{meal.type}</ThemedText>
-                    <View
-                        style={[
-                            styles.divider,
-                            { backgroundColor: colorDivider },
-                        ]}
-                    />
-                    <ThemedText style={styles.name}>{meal.name}</ThemedText>
-                    <Text style={styles.desc}>{meal.description}</Text>
-                    {meal.pathImage ? (
-                        <Image
-                            source={{ uri: meal.pathImage }}
-                            style={styles.image}
-                            contentFit="cover"
+            <ThemedView
+                lightColor={"#f7f7f7"}
+                style={[styles.container, isWeb ? styles.inner : {}]}
+            >
+                <ScrollView showsVerticalScrollIndicator={isWeb}>
+                    <ThemedView darkColor="#222" style={styles.card}>
+                        <ThemedText style={styles.type}>{meal.type}</ThemedText>
+                        <View
+                            style={[
+                                styles.divider,
+                                { backgroundColor: colorDivider },
+                            ]}
                         />
-                    ) : (
-                        <MaterialIcons
-                            size={100}
-                            color={color}
-                            name="restaurant"
-                        />
-                    )}
-                    {/* Rating Section */}
-                    <ThemedView
-                        darkColor="#333"
-                        style={[styles.ratingContainer]}
-                    >
-                        <View style={styles.ratingLeft}>
-                            <Text style={styles.ratingValue}>
-                                {rating?.ratingValue?.toFixed(1) ?? "-"}
-                            </Text>
-                            <View style={styles.starsRow}>
-                                {rating?.stars.map((star, i) => (
-                                    <FontAwesome
-                                        key={i}
-                                        name={
-                                            star === "star-half"
-                                                ? "star-half-full"
-                                                : star
-                                        }
-                                        size={28}
-                                        color="#FFD700"
-                                        style={{ marginRight: 2 }}
-                                    />
-                                ))}
-                            </View>
-                            <Text style={styles.ratingCount}>
-                                {rating?.ratingCount ?? 0} avaliações
-                            </Text>
-                        </View>
-                        <View style={styles.ratingRight}>
-                            {!rating?.userRating && (
-                                <Text style={styles.tapToRate}>
-                                    Toque para avaliar
-                                </Text>
-                            )}
-                            <View style={styles.starsRowSmall}>
-                                {[...Array(5)].map((_, i) => (
-                                    <FontAwesome
-                                        key={i}
-                                        name={
-                                            i < starsToShow ? "star" : "star-o"
-                                        }
-                                        size={22}
-                                        color={
-                                            i < starsToShow
-                                                ? "#FFD700"
-                                                : "#B0B0B0"
-                                        }
-                                        style={{ marginRight: 1 }}
-                                        onPress={
-                                            rating?.userRating
-                                                ? undefined // desabilita clique se já avaliou
-                                                : () => setUserRating(i + 1)
-                                        }
-                                    />
-                                ))}
-                            </View>
-                            <Button
-                                title={
-                                    rating?.userRating
-                                        ? `${rating.userRating} estrela${
-                                              rating.userRating > 1 ? "s" : ""
-                                          }`
-                                        : "Enviar Avaliação"
-                                }
-                                onPress={() => {
-                                    if (!rating?.userRating) {
-                                        rate(
-                                            campusId,
-                                            cursusId,
-                                            "meals",
-                                            meal.id,
-                                            userId,
-                                            userRating,
-                                            () =>
-                                                showSuccess(
-                                                    "SUCESSO",
-                                                    "Avaliação enviada com sucesso!"
-                                                ),
-                                            (error) =>
-                                                showError("ERRO", error.message)
-                                        );
-                                    }
-                                }}
-                                disabled={
-                                    !!rating?.userRating || userRating === 0
-                                }
+                        <ThemedText style={styles.name}>{meal.name}</ThemedText>
+                        <Text style={styles.desc}>{meal.description}</Text>
+                        {meal.pathImage ? (
+                            <Image
+                                source={{ uri: meal.pathImage }}
+                                style={styles.image}
+                                contentFit="cover"
                             />
-                        </View>
+                        ) : (
+                            <MaterialIcons
+                                size={100}
+                                color={color}
+                                name="restaurant"
+                            />
+                        )}
+                        {/* Rating Section */}
+                        <ThemedView
+                            darkColor="#333"
+                            style={[styles.ratingContainer]}
+                        >
+                            <View style={styles.ratingLeft}>
+                                <Text style={styles.ratingValue}>
+                                    {rating?.ratingValue?.toFixed(1) ?? "-"}
+                                </Text>
+                                <View style={styles.starsRow}>
+                                    {rating?.stars.map((star, i) => (
+                                        <FontAwesome
+                                            key={i}
+                                            name={
+                                                star === "star-half"
+                                                    ? "star-half-full"
+                                                    : star
+                                            }
+                                            size={28}
+                                            color="#FFD700"
+                                            style={{ marginRight: 2 }}
+                                        />
+                                    ))}
+                                </View>
+                                <Text style={styles.ratingCount}>
+                                    {rating?.ratingCount ?? 0} avaliações
+                                </Text>
+                            </View>
+                            <View style={styles.ratingRight}>
+                                {!rating?.userRating && (
+                                    <Text style={styles.tapToRate}>
+                                        Toque para avaliar
+                                    </Text>
+                                )}
+                                <View style={styles.starsRowSmall}>
+                                    {[...Array(5)].map((_, i) => (
+                                        <FontAwesome
+                                            key={i}
+                                            name={
+                                                i < starsToShow
+                                                    ? "star"
+                                                    : "star-o"
+                                            }
+                                            size={22}
+                                            color={
+                                                i < starsToShow
+                                                    ? "#FFD700"
+                                                    : "#B0B0B0"
+                                            }
+                                            style={{ marginRight: 1 }}
+                                            onPress={
+                                                rating?.userRating
+                                                    ? undefined // desabilita clique se já avaliou
+                                                    : () => setUserRating(i + 1)
+                                            }
+                                        />
+                                    ))}
+                                </View>
+                                <Button
+                                    title={
+                                        rating?.userRating
+                                            ? `${rating.userRating} estrela${
+                                                  rating.userRating > 1
+                                                      ? "s"
+                                                      : ""
+                                              }`
+                                            : "Enviar Avaliação"
+                                    }
+                                    onPress={() => {
+                                        if (!rating?.userRating) {
+                                            rate(
+                                                campusId,
+                                                cursusId,
+                                                "meals",
+                                                meal.id,
+                                                userId,
+                                                userRating,
+                                                () =>
+                                                    showSuccess(
+                                                        "SUCESSO",
+                                                        "Avaliação enviada com sucesso!"
+                                                    ),
+                                                (error) =>
+                                                    showError(
+                                                        "ERRO",
+                                                        error.message
+                                                    )
+                                            );
+                                        }
+                                    }}
+                                    disabled={
+                                        !!rating?.userRating || userRating === 0
+                                    }
+                                />
+                            </View>
+                        </ThemedView>
+                        <View
+                            style={[
+                                styles.divider,
+                                { backgroundColor: colorDivider },
+                            ]}
+                        />
+                        <Text style={styles.date}>{meal.createdDate}</Text>
+                        <Text style={styles.qty}>
+                            Quantidade: {meal.quantity} /{" "}
+                            {meal.numberSubscribed}
+                        </Text>
                     </ThemedView>
-                    <View
-                        style={[
-                            styles.divider,
-                            { backgroundColor: colorDivider },
-                        ]}
-                    />
-                    <Text style={styles.date}>{meal.createdDate}</Text>
-                    <Text style={styles.qty}>
-                        Quantidade: {meal.quantity} / {meal.numberSubscribed}
-                    </Text>
-                </ThemedView>
-                <View style={styles.fabRow}>
-                    <TouchableOpacity
-                        style={[styles.fab, { backgroundColor: colorCard }]}
-                    >
-                        <MaterialCommunityIcons
-                            name="qrcode"
-                            size={44}
-                            color="#3A86FF"
-                        />
-                        {/* <Text style={styles.fabText}>QR Code</Text> */}
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={[styles.fab, { backgroundColor: colorCard }]}
-                    >
-                        <MaterialCommunityIcons
-                            name="clipboard-list-outline"
-                            size={44}
-                            color="#3A86FF"
-                        />
-                        {/* <Text style={styles.fabText}>Inscrições</Text> */}
-                    </TouchableOpacity>
-                </View>
-            </ScrollView>
-        </ThemedView>
+                    <View style={styles.fabRow}>
+                        <TouchableOpacity
+                            style={[styles.fab, { backgroundColor: colorCard }]}
+                        >
+                            <MaterialCommunityIcons
+                                name="qrcode"
+                                size={44}
+                                color="#3A86FF"
+                            />
+                            {/* <Text style={styles.fabText}>QR Code</Text> */}
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={[styles.fab, { backgroundColor: colorCard }]}
+                        >
+                            <MaterialCommunityIcons
+                                name="clipboard-list-outline"
+                                size={44}
+                                color="#3A86FF"
+                            />
+                            {/* <Text style={styles.fabText}>Inscrições</Text> */}
+                        </TouchableOpacity>
+                    </View>
+                </ScrollView>
+            </ThemedView>
+        </>
     );
 }
 
 const styles = StyleSheet.create({
-    scrollContainer: {
-        padding: 0,
-        alignItems: "center",
+    container: {
+        flex: 1,
     },
     card: {
         borderRadius: 12,
