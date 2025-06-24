@@ -1,4 +1,10 @@
 // Listas de opções para criação de refeições
+export const mealType = [
+  'Lanche',
+  'Almoço',
+  'Jantar',
+];
+
 export const carbohydrates = [
   'Arroz',
   'Massas',

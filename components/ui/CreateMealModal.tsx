@@ -1,5 +1,6 @@
-import { carbohydrates } from "@/constants/mealOptions";
+import { carbohydrates, mealType } from "@/constants/mealOptions";
 import { useCreateMeal } from "@/hooks/useCreateMeal";
+import { Picker } from "@react-native-picker/picker";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import React, { useState } from "react";
@@ -34,9 +35,13 @@ export default function CreateMealModal({
     onCreated,
 }: Props) {
     const [name, setName] = useState("");
-    const [type, setType] = useState(carbohydrates[0]);
-    const [description, setDescription] = useState("");
+    const [showPicker, setShowPicker] = useState({
+        mealType: false,
+        mealDescription: false,
+    });
     const [quantity, setQuantity] = useState("");
+    const [type, setType] = useState(mealType[0]);
+    const [description, setDescription] = useState("");
     const [image, setImage] = useState<string | null>(null);
     const { createMeal, loading } = useCreateMeal();
 
@@ -141,18 +146,65 @@ export default function CreateMealModal({
                             onChangeText={setName}
                         />
                         <TextInput
+                            onPress={() =>
+                                setShowPicker((prev) => ({
+                                    ...prev,
+                                    mealType: !showPicker.mealType,
+                                    mealDescription: false,
+                                }))
+                            }
+                            editable={false}
                             style={styles.input}
-                            placeholder="Tipo (ex: Arroz, Massas...)"
+                            placeholder="Tipo (ex: lanche, almoço...)"
                             value={type}
                             onChangeText={setType}
                         />
+                        {showPicker.mealType && (
+                            <Picker
+                                selectedValue={type}
+                                onValueChange={setType}
+                                style={{ color: "#333" }} // ou ajuste conforme seu tema
+                            >
+                                {mealType.map((item) => (
+                                    <Picker.Item
+                                        key={item}
+                                        label={item}
+                                        value={item}
+                                    />
+                                ))}
+                            </Picker>
+                        )}
                         <TextInput
+                            onPress={() =>
+                                setShowPicker((prev) => ({
+                                    ...prev,
+                                    mealDescription:
+                                        !showPicker.mealDescription,
+                                    mealType: false,
+                                }))
+                            }
+                            editable={false}
                             style={styles.input}
                             placeholder="Descrição"
                             value={description}
                             onChangeText={setDescription}
                             multiline
                         />
+                        {showPicker.mealDescription && (
+                            <Picker
+                                selectedValue={description}
+                                onValueChange={setDescription}
+                                style={{ color: "#333" }} // ou ajuste conforme seu tema
+                            >
+                                {carbohydrates.map((item) => (
+                                    <Picker.Item
+                                        key={item}
+                                        label={item}
+                                        value={item}
+                                    />
+                                ))}
+                            </Picker>
+                        )}
                         <TextInput
                             style={styles.input}
                             placeholder="Quantidade"
@@ -245,7 +297,7 @@ const styles = StyleSheet.create({
     input: {
         color: "#888",
         borderWidth: 1,
-        borderColor: "#ccc",
+        borderColor: "orange",
         borderRadius: 8,
         padding: 10,
         marginBottom: 10,
