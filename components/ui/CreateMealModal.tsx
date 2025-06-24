@@ -99,7 +99,7 @@ export default function CreateMealModal({
 
     async function handleSubmit() {
         if (!name || !type || !description || !quantity) {
-            showInfo("Erro", "Preencha todos os campos obrigatórios.");
+            showInfo("Aviso ", "Preencha todos os campos.");
             return;
         }
         try {
