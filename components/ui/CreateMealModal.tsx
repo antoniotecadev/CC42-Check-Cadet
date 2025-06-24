@@ -65,10 +65,15 @@ export default function CreateMealModal({
 
     function resetForm() {
         setName("");
-        setType(carbohydrates[0]);
+        setType(mealType[0]);
         setDescription("");
         setQuantity("");
         setImage(null);
+        setShowPicker((prev) => ({
+            ...prev,
+            mealType: false,
+            mealDescription: false,
+        }));
     }
 
     async function pickImage() {
