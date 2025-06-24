@@ -75,14 +75,22 @@ export default function MealsScreen() {
                     let newLastKey: string | null = null;
                     snapshot.forEach((dataSnapshot) => {
                         const meal = dataSnapshot.val();
+                        const subscription =
+                            dataSnapshot.child("subscriptions");
                         meal.id = dataSnapshot.key;
-                        meal.numberSubscribed =
-                            dataSnapshot.child?.("subscriptions")?.size || 0;
+                        meal.numberSubscribed = subscription?.size || 0;
                         meal.quantity = Math.max(
                             (meal.quantity || 0) - meal.numberSubscribed,
                             0
                         );
-                        meal.isSubscribed = false; // Adapte para lógica do usuário
+                        if (subscription.exists()) {
+                            subscription.forEach((sub) => {
+                                if (sub.key === userId) {
+                                    meal.isSubscribed = true;
+                                    return;
+                                }
+                            });
+                        }
                         mealList.push(meal);
                         newLastKey = dataSnapshot.key;
                     });
