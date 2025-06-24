@@ -1,26 +1,15 @@
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
-import useAlert from "@/hooks/useAlert";
+import RatingSection from "@/components/ui/RatingSection";
 import { useColorScheme } from "@/hooks/useColorScheme";
-import {
-    fetchRatings,
-    rate,
-    RatingResult,
-    userIsPresentOrSubscribed,
-} from "@/repository/eventRepository";
 import { encrypt } from "@/utility/AESUtil";
 import { getEventDuration, getTimeUntilEvent } from "@/utility/DateUtil";
-import {
-    FontAwesome,
-    MaterialCommunityIcons,
-    MaterialIcons,
-} from "@expo/vector-icons";
+import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
-import React, { useState } from "react";
+import React from "react";
 import {
     Animated,
-    Button,
     Dimensions,
     ImageBackground,
     Platform,
@@ -46,8 +35,6 @@ const ATTENDANCE_ICON = "clipboard-list-outline";
 const EventDetailScreen = () => {
     const isWeb = Platform.OS === "web";
     const colorScheme = useColorScheme();
-    const { showError, showSuccess } = useAlert();
-    const [rating, setRating] = useState<RatingResult>();
     const { userData, eventData } = useLocalSearchParams();
     const user = typeof userData === "string" ? JSON.parse(userData) : null;
     const event = typeof eventData === "string" ? JSON.parse(eventData) : null;
@@ -57,13 +44,7 @@ const EventDetailScreen = () => {
     const cursusId = event?.cursus_ids?.[0]?.toString();
     const eventId = event?.id?.toString();
 
-    const [userRating, setUserRating] = useState<number>(0);
-    const [userPresent, setUserPresent] = useState<boolean>(false);
-
     const color = colorScheme === "dark" ? "#333" : "#fff";
-
-    // Se o usuário já avaliou, mostra a nota dele, senão mostra o que ele está selecionando
-    const starsToShow = rating?.userRating ?? userRating; // userRating = estado local para seleção
 
     // Animation for floating buttons
     const scaleAnim = React.useRef(new Animated.Value(1)).current;
@@ -82,39 +63,6 @@ const EventDetailScreen = () => {
             useNativeDriver: true,
         }).start();
     };
-
-    React.useEffect(() => {
-        let isMounted = true;
-        const checkUserPresence = async () => {
-            try {
-                const isUserPresent = await userIsPresentOrSubscribed({
-                    campusId,
-                    cursusId,
-                    type: "events",
-                    typeId: eventId,
-                    userId,
-                });
-                setUserPresent(isUserPresent);
-            } catch (error) {
-                if (isMounted) {
-                    showError("ERRO", "Erro ao verificar presença do usuário.");
-                }
-            }
-        };
-        checkUserPresence();
-        const unsubscribe = fetchRatings(
-            campusId,
-            cursusId,
-            "events",
-            eventId,
-            userId,
-            setRating
-        );
-        return () => {
-            isMounted = false;
-            unsubscribe();
-        };
-    }, [event]);
 
     // Pega nome e data do evento dos params (ou defina fallback)
     const eventName = event?.name || "Evento";
@@ -224,99 +172,14 @@ const EventDetailScreen = () => {
                     </ThemedText>
                 </View>
                 {/* Rating Section */}
-                <View
-                    style={[styles.ratingContainer, { backgroundColor: color }]}
-                >
-                    <View style={styles.ratingLeft}>
-                        <Text style={styles.ratingValue}>
-                            {rating?.ratingValue?.toFixed(1) ?? "-"}
-                        </Text>
-                        <View style={styles.starsRow}>
-                            {rating?.stars.map((star, i) => (
-                                <FontAwesome
-                                    key={i}
-                                    name={
-                                        star === "star-half"
-                                            ? "star-half-full"
-                                            : star
-                                    }
-                                    size={28}
-                                    color="#FFD700"
-                                    style={{ marginRight: 2 }}
-                                />
-                            ))}
-                        </View>
-                        <Text style={styles.ratingCount}>
-                            {rating?.ratingCount ?? 0} avaliações
-                        </Text>
-                    </View>
-                    <View style={styles.ratingRight}>
-                        {!rating?.userRating ? (
-                            <Text
-                                style={[
-                                    styles.tapToRate,
-                                    { color: userPresent ? "#3A86FF" : "red" },
-                                ]}
-                            >
-                                {userPresent ? "Toque para avaliar" : "Ausente"}
-                            </Text>
-                        ) : (
-                            <Text
-                                style={[styles.tapToRate, { color: "green" }]}
-                            >
-                                Presente
-                            </Text>
-                        )}
-                        <View style={styles.starsRowSmall}>
-                            {[...Array(5)].map((_, i) => (
-                                <FontAwesome
-                                    key={i}
-                                    name={i < starsToShow ? "star" : "star-o"}
-                                    size={22}
-                                    color={
-                                        i < starsToShow ? "#FFD700" : "#B0B0B0"
-                                    }
-                                    style={{ marginRight: 1 }}
-                                    onPress={
-                                        rating?.userRating || !userPresent
-                                            ? undefined // desabilita clique se já avaliou
-                                            : () => setUserRating(i + 1)
-                                    }
-                                />
-                            ))}
-                        </View>
-                        <Button
-                            title={
-                                rating?.userRating
-                                    ? `${rating.userRating} estrela${
-                                          rating.userRating > 1 ? "s" : ""
-                                      }`
-                                    : "Enviar Avaliação"
-                            }
-                            onPress={() => {
-                                if (!rating?.userRating) {
-                                    rate(
-                                        campusId,
-                                        cursusId,
-                                        "events",
-                                        eventId,
-                                        userId,
-                                        userRating,
-                                        () =>
-                                            showSuccess(
-                                                "SUCESSO",
-                                                "Avaliação enviada com sucesso!"
-                                            ),
-                                        (error) =>
-                                            showError("ERRO", error.message)
-                                    );
-                                }
-                            }}
-                            disabled={!!rating?.userRating || userRating === 0}
-                        />
-                    </View>
-                </View>
-
+                <RatingSection
+                    color={color}
+                    campusId={campusId}
+                    cursusId={cursusId}
+                    type="events"
+                    typeId={eventId}
+                    userId={userId}
+                />
                 {/* Floating Action Buttons */}
                 <View style={styles.fabRow}>
                     <Animated.View
@@ -506,54 +369,6 @@ const styles = StyleSheet.create({
         fontSize: 15,
         lineHeight: 22,
         fontFamily: "sans-serif-light",
-    },
-    ratingContainer: {
-        flexDirection: "row",
-        borderRadius: 18,
-        marginHorizontal: 18,
-        padding: 18,
-        marginBottom: 18,
-        alignItems: "center",
-        elevation: 2,
-        shadowColor: "#000",
-        shadowOpacity: 0.07,
-        shadowRadius: 6,
-        shadowOffset: { width: 0, height: 2 },
-    },
-    ratingLeft: {
-        flex: 1,
-        alignItems: "center",
-        borderRightWidth: 1,
-        borderRightColor: "#F0F0F0",
-        paddingRight: 12,
-    },
-    ratingValue: {
-        fontSize: 38,
-        fontWeight: "bold",
-        color: "#3A86FF",
-        marginBottom: 2,
-    },
-    starsRow: {
-        flexDirection: "row",
-        marginBottom: 2,
-    },
-    ratingCount: {
-        color: "#888",
-        fontSize: 13,
-        marginTop: 2,
-    },
-    ratingRight: {
-        flex: 1,
-        alignItems: "center",
-        paddingLeft: 12,
-    },
-    tapToRate: {
-        fontWeight: "bold",
-        fontSize: 15,
-        marginBottom: 4,
-    },
-    starsRowSmall: {
-        flexDirection: "row",
     },
     fabRow: {
         flexDirection: "row",

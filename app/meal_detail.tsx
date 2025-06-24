@@ -1,24 +1,12 @@
 import { useColorCoalition } from "@/components/ColorCoalitionContext";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
-import useAlert from "@/hooks/useAlert";
+import RatingSection from "@/components/ui/RatingSection";
 import { useColorScheme } from "@/hooks/useColorScheme";
-import {
-    fetchRatings,
-    rate,
-    RatingResult,
-    userIsPresentOrSubscribed,
-} from "@/repository/eventRepository";
-import {
-    FontAwesome,
-    MaterialCommunityIcons,
-    MaterialIcons,
-} from "@expo/vector-icons";
+import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { Stack, useLocalSearchParams } from "expo-router";
-import { useEffect, useState } from "react";
 import {
-    Button,
     Platform,
     ScrollView,
     StyleSheet,
@@ -31,12 +19,6 @@ export default function MealDetailScreen() {
     const isWeb = Platform.OS === "web";
     const colorScheme = useColorScheme();
     const { color } = useColorCoalition();
-    const { showError, showSuccess } = useAlert();
-    const [rating, setRating] = useState<RatingResult>();
-    const [userRating, setUserRating] = useState<number>(0);
-    const [userSubscribed, setUserSubscribed] = useState<boolean>(false);
-
-    const starsToShow = rating?.userRating ?? userRating; // userRating = estado local para seleção
     const { userId, campusId, cursusId, mealData } = useLocalSearchParams<{
         userId: string;
         campusId: string;
@@ -46,42 +28,6 @@ export default function MealDetailScreen() {
     const meal = JSON.parse(mealData);
     const colorCard = colorScheme === "dark" ? "#333" : "#fff";
     const colorDivider = colorScheme === "dark" ? "#333" : "#eee";
-
-    useEffect(() => {
-        let isMounted = true;
-        const checkUserPresence = async () => {
-            try {
-                const isUserSubscribed = await userIsPresentOrSubscribed({
-                    campusId,
-                    cursusId,
-                    type: "meals",
-                    typeId: meal.id,
-                    userId,
-                });
-                setUserSubscribed(isUserSubscribed);
-            } catch (error) {
-                if (isMounted) {
-                    showError(
-                        "ERRO",
-                        "Erro ao verificar assinatura do usuário."
-                    );
-                }
-            }
-        };
-        checkUserPresence();
-        const unsubscribe = fetchRatings(
-            campusId,
-            cursusId,
-            "meals",
-            meal.id,
-            userId,
-            setRating
-        );
-        return () => {
-            isMounted = false;
-            unsubscribe();
-        };
-    }, [meal]);
 
     if (!meal) {
         return (
@@ -126,123 +72,14 @@ export default function MealDetailScreen() {
                                 name="restaurant"
                             />
                         )}
-                        {/* Rating Section */}
-                        <ThemedView
-                            darkColor="#333"
-                            style={[styles.ratingContainer]}
-                        >
-                            <View style={styles.ratingLeft}>
-                                <Text style={styles.ratingValue}>
-                                    {rating?.ratingValue?.toFixed(1) ?? "-"}
-                                </Text>
-                                <View style={styles.starsRow}>
-                                    {rating?.stars.map((star, i) => (
-                                        <FontAwesome
-                                            key={i}
-                                            name={
-                                                star === "star-half"
-                                                    ? "star-half-full"
-                                                    : star
-                                            }
-                                            size={28}
-                                            color="#FFD700"
-                                            style={{ marginRight: 2 }}
-                                        />
-                                    ))}
-                                </View>
-                                <Text style={styles.ratingCount}>
-                                    {rating?.ratingCount ?? 0} avaliações
-                                </Text>
-                            </View>
-                            <View style={styles.ratingRight}>
-                                {!rating?.userRating ? (
-                                    <Text
-                                        style={[
-                                            styles.tapToRate,
-                                            {
-                                                color: userSubscribed
-                                                    ? "#3A86FF"
-                                                    : "red",
-                                            },
-                                        ]}
-                                    >
-                                        {userSubscribed
-                                            ? "Toque para avaliar"
-                                            : "Não assinado"}
-                                    </Text>
-                                ) : (
-                                    <Text
-                                        style={[
-                                            styles.tapToRate,
-                                            { color: "green" },
-                                        ]}
-                                    >
-                                        Assinado
-                                    </Text>
-                                )}
-                                <View style={styles.starsRowSmall}>
-                                    {[...Array(5)].map((_, i) => (
-                                        <FontAwesome
-                                            key={i}
-                                            name={
-                                                i < starsToShow
-                                                    ? "star"
-                                                    : "star-o"
-                                            }
-                                            size={22}
-                                            color={
-                                                i < starsToShow
-                                                    ? "#FFD700"
-                                                    : "#B0B0B0"
-                                            }
-                                            style={{ marginRight: 1 }}
-                                            onPress={
-                                                rating?.userRating ||
-                                                !userSubscribed
-                                                    ? undefined // desabilita clique se já avaliou
-                                                    : () => setUserRating(i + 1)
-                                            }
-                                        />
-                                    ))}
-                                </View>
-                                <Button
-                                    title={
-                                        rating?.userRating
-                                            ? `${rating.userRating} estrela${
-                                                  rating.userRating > 1
-                                                      ? "s"
-                                                      : ""
-                                              }`
-                                            : "Enviar Avaliação"
-                                    }
-                                    onPress={() => {
-                                        if (!rating?.userRating) {
-                                            rate(
-                                                campusId,
-                                                cursusId,
-                                                "meals",
-                                                meal.id,
-                                                userId,
-                                                userRating,
-                                                () =>
-                                                    showSuccess(
-                                                        "SUCESSO",
-                                                        "Avaliação enviada com sucesso!"
-                                                    ),
-                                                (error) =>
-                                                    showError(
-                                                        "ERRO",
-                                                        error.message
-                                                    )
-                                            );
-                                        }
-                                    }}
-                                    disabled={
-                                        !!rating?.userRating || userRating === 0
-                                    }
-                                />
-                            </View>
-                        </ThemedView>
+                        <RatingSection
+                            color={colorCard}
+                            campusId={campusId}
+                            cursusId={cursusId}
+                            type="meals"
+                            typeId={meal.id}
+                            userId={userId}
+                        />
                         <View
                             style={[
                                 styles.divider,
@@ -371,53 +208,6 @@ const styles = StyleSheet.create({
         fontSize: 13,
         fontWeight: "bold",
         color: "#007AFF",
-    },
-    ratingContainer: {
-        flexDirection: "row",
-        borderRadius: 18,
-        padding: 18,
-        marginBottom: 18,
-        alignItems: "center",
-        elevation: 2,
-        shadowColor: "#000",
-        shadowOpacity: 0.07,
-        shadowRadius: 6,
-        shadowOffset: { width: 0, height: 2 },
-    },
-    ratingLeft: {
-        flex: 1,
-        alignItems: "center",
-        borderRightWidth: 1,
-        borderRightColor: "#F0F0F0",
-        paddingRight: 12,
-    },
-    ratingValue: {
-        fontSize: 38,
-        fontWeight: "bold",
-        color: "#3A86FF",
-        marginBottom: 2,
-    },
-    starsRow: {
-        flexDirection: "row",
-        marginBottom: 2,
-    },
-    ratingCount: {
-        color: "#888",
-        fontSize: 13,
-        marginTop: 2,
-    },
-    ratingRight: {
-        flex: 1,
-        alignItems: "center",
-        paddingLeft: 12,
-    },
-    tapToRate: {
-        fontWeight: "bold",
-        fontSize: 15,
-        marginBottom: 4,
-    },
-    starsRowSmall: {
-        flexDirection: "row",
     },
     inner: {
         width: "100%",
