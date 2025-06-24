@@ -1,10 +1,12 @@
 import { useColorCoalition } from "@/components/ColorCoalitionContext";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
+import CreateMealModal from "@/components/ui/CreateMealModal";
 import MealItem from "@/components/ui/MealItem";
 import { database } from "@/firebaseConfig";
 import { useColorScheme } from "@/hooks/useColorScheme";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import {
@@ -15,8 +17,9 @@ import {
     query,
     ref,
 } from "firebase/database";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useState } from "react";
 import {
+    ActionSheetIOS,
     ActivityIndicator,
     Platform,
     StyleSheet,
@@ -36,6 +39,7 @@ interface Meal {
 }
 
 export default function MealsScreen() {
+    const navigation = useNavigation();
     const colorScheme = useColorScheme();
     const { color } = useColorCoalition();
     const { userId, campusId, cursusId, cursusName } = useLocalSearchParams<{
@@ -49,6 +53,7 @@ export default function MealsScreen() {
     const [lastKey, setLastKey] = useState<string | null>(null);
     const [refreshing, setRefreshing] = useState(false);
     const [endReached, setEndReached] = useState(false);
+    const [showCreateModal, setShowCreateModal] = useState(false);
 
     const fetchMeals = useCallback(
         (startAtKey: string | null = null, append = false) => {
@@ -125,29 +130,70 @@ export default function MealsScreen() {
         }
     };
 
+    const handleMenuPress = () => {
+        ActionSheetIOS.showActionSheetWithOptions(
+            {
+                options: ["Criar Refeição", "Cancelar"],
+                cancelButtonIndex: 1,
+                userInterfaceStyle: "dark",
+            },
+            (selectedIndex) => {
+                if (selectedIndex === 0) setShowCreateModal(true);
+            }
+        );
+    };
+
+    useLayoutEffect(() => {
+        navigation.setOptions &&
+            navigation.setOptions({
+                headerRight: () => (
+                    <TouchableOpacity onPress={handleMenuPress}>
+                        <MaterialCommunityIcons
+                            name="dots-vertical"
+                            size={28}
+                        />
+                    </TouchableOpacity>
+                ),
+            });
+    }, [navigation, color]);
+
     return (
         <>
             <Stack.Screen
                 options={{
                     title: cursusName || "Refeições",
                 }}
-                />
+            />
+            <CreateMealModal
+                visible={showCreateModal}
+                onClose={() => setShowCreateModal(false)}
+                campusId={campusId}
+                cursusId={cursusId}
+                userId={userId}
+                onCreated={onRefresh}
+            />
             <ThemedView
                 lightColor="#fff"
                 style={[
                     styles.container,
                     Platform.OS === "web" ? styles.inner : {},
                 ]}
-                >
+            >
                 {loading && (
                     <ActivityIndicator
-                    size="large"
-                    color={color}
-                    style={{ marginTop: 16 }}
+                        size="large"
+                        color={color}
+                        style={{ marginTop: 16 }}
                     />
                 )}
                 {!loading && !meals.length && (
-                    <ThemedView style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+                    <ThemedView
+                        style={{
+                            flex: 1,
+                            justifyContent: "center",
+                            alignItems: "center",
+                        }}
+                    >
                         <ThemedText>Refeições não encontradas 😪</ThemedText>
                     </ThemedView>
                 )}
