@@ -1,4 +1,5 @@
 import { useColorCoalition } from "@/components/ColorCoalitionContext";
+import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import MealItem from "@/components/ui/MealItem";
 import { database } from "@/firebaseConfig";
@@ -130,20 +131,25 @@ export default function MealsScreen() {
                 options={{
                     title: cursusName || "Refeições",
                 }}
-            />
+                />
             <ThemedView
                 lightColor="#fff"
                 style={[
                     styles.container,
                     Platform.OS === "web" ? styles.inner : {},
                 ]}
-            >
+                >
                 {loading && (
                     <ActivityIndicator
-                        size="large"
-                        color={color}
-                        style={{ marginTop: 16 }}
+                    size="large"
+                    color={color}
+                    style={{ marginTop: 16 }}
                     />
+                )}
+                {!loading && !meals.length && (
+                    <ThemedView style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+                        <ThemedText>Refeições não encontradas 😪</ThemedText>
+                    </ThemedView>
                 )}
                 <FlashList
                     data={meals}
@@ -171,7 +177,7 @@ export default function MealsScreen() {
                             />
                         </TouchableOpacity>
                     )}
-                    estimatedItemSize={70}
+                    estimatedItemSize={76}
                     refreshing={refreshing}
                     onRefresh={onRefresh}
                     onEndReached={loadMore}
