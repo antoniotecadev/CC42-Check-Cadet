@@ -13,6 +13,8 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
+import { ThemedText } from "../ThemedText";
+import { ThemedView } from "../ThemedView";
 
 interface Props {
     visible: boolean;
@@ -96,9 +98,11 @@ export default function CreateMealModal({
     return (
         <Modal visible={visible} animationType="slide" transparent>
             <View style={styles.overlay}>
-                <View style={styles.container}>
+                <ThemedView style={styles.container}>
                     <ScrollView>
-                        <Text style={styles.title}>Criar Refeição</Text>
+                        <ThemedText style={styles.title}>
+                            Criar Refeição
+                        </ThemedText>
                         <TouchableOpacity
                             style={styles.imagePicker}
                             onPress={pickImage}
@@ -177,7 +181,7 @@ export default function CreateMealModal({
                             </TouchableOpacity>
                         </View>
                     </ScrollView>
-                </View>
+                </ThemedView>
             </View>
         </Modal>
     );
@@ -191,7 +195,6 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     container: {
-        backgroundColor: "#333",
         borderRadius: 12,
         padding: 20,
         width: "90%",
@@ -240,6 +243,7 @@ const styles = StyleSheet.create({
         textAlign: "center",
     },
     input: {
+        color: "#888",
         borderWidth: 1,
         borderColor: "#ccc",
         borderRadius: 8,
