@@ -1,8 +1,8 @@
-import { Asset } from 'expo-asset';
-import { useImageManipulator } from 'expo-image-manipulator';
-import { useEffect, useState } from 'react';
+import { Asset } from "expo-asset";
+import { ImageManipulator, useImageManipulator } from "expo-image-manipulator";
+import { useEffect, useState } from "react";
 
-const IMAGE = Asset.fromModule(require('@/assets/images/logo_42_luanda.webp'));
+const IMAGE = Asset.fromModule(require("@/assets/images/logo_42_luanda.webp"));
 
 export function useBase64Image() {
     const context = useImageManipulator(IMAGE.uri);
@@ -13,10 +13,12 @@ export function useBase64Image() {
             try {
                 await IMAGE.downloadAsync();
                 const manipulatedImage = await context.renderAsync();
-                const result = await manipulatedImage.saveAsync({ base64: true });
+                const result = await manipulatedImage.saveAsync({
+                    base64: true,
+                });
                 setBase64Uri(`data:image/webp;base64,${result.base64}`);
             } catch (error) {
-                console.error('Error:', error);
+                console.error("Error:", error);
                 setBase64Uri(null);
             }
         }
@@ -25,4 +27,13 @@ export function useBase64Image() {
     }, [context]);
 
     return base64Uri;
+}
+
+export async function optimizeImage(uri: any) {
+    const manipulated = await ImageManipulator.manipulateAsync(
+        uri,
+        [{ resize: { width: 1080 } }], // Reduz a largura, proporcionalmente
+        { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG }
+    );
+    return manipulated.uri;
 }
