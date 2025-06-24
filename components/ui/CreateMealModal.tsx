@@ -1,11 +1,11 @@
 import { carbohydrates, mealType } from "@/constants/mealOptions";
+import useAlert from "@/hooks/useAlert";
 import { useCreateMeal } from "@/hooks/useCreateMeal";
 import { Picker } from "@react-native-picker/picker";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import React, { useState } from "react";
 import {
-    Alert,
     Modal,
     ScrollView,
     StyleSheet,
@@ -14,6 +14,7 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
+import { useColorCoalition } from "../ColorCoalitionContext";
 import { ThemedText } from "../ThemedText";
 import { ThemedView } from "../ThemedView";
 
@@ -43,6 +44,9 @@ export default function CreateMealModal({
     const [type, setType] = useState(mealType[0]);
     const [description, setDescription] = useState("");
     const [image, setImage] = useState<string | null>(null);
+
+    const { color } = useColorCoalition();
+    const { showError, showInfo } = useAlert();
     const { createMeal, loading } = useCreateMeal();
 
     function resetForm() {
@@ -76,7 +80,7 @@ export default function CreateMealModal({
 
     async function handleSubmit() {
         if (!name || !type || !description || !quantity) {
-            Alert.alert("Erro", "Preencha todos os campos obrigatórios.");
+            showInfo("Erro", "Preencha todos os campos obrigatórios.");
             return;
         }
         try {
@@ -96,7 +100,7 @@ export default function CreateMealModal({
             onClose();
             onCreated && onCreated();
         } catch (e: any) {
-            Alert.alert("Erro", e.message || "Erro ao criar refeição");
+            showError("Erro", e.message || "Erro ao criar refeição");
         }
     }
 
@@ -125,7 +129,10 @@ export default function CreateMealModal({
                         </TouchableOpacity>
                         <View style={styles.row}>
                             <TouchableOpacity
-                                style={styles.photoBtn}
+                                style={[
+                                    styles.photoBtn,
+                                    { backgroundColor: color },
+                                ]}
                                 onPress={takePhoto}
                             >
                                 <Text style={styles.photoBtnText}>
@@ -133,14 +140,17 @@ export default function CreateMealModal({
                                 </Text>
                             </TouchableOpacity>
                             <TouchableOpacity
-                                style={styles.photoBtn}
+                                style={[
+                                    styles.photoBtn,
+                                    { backgroundColor: color },
+                                ]}
                                 onPress={pickImage}
                             >
                                 <Text style={styles.photoBtnText}>Galeria</Text>
                             </TouchableOpacity>
                         </View>
                         <TextInput
-                            style={styles.input}
+                            style={[styles.input, { borderColor: color }]}
                             placeholder="Nome da Refeição"
                             value={name}
                             onChangeText={setName}
@@ -154,7 +164,7 @@ export default function CreateMealModal({
                                 }))
                             }
                             editable={false}
-                            style={styles.input}
+                            style={[styles.input, { borderColor: color }]}
                             placeholder="Tipo (ex: lanche, almoço...)"
                             value={type}
                             onChangeText={setType}
@@ -184,7 +194,7 @@ export default function CreateMealModal({
                                 }))
                             }
                             editable={false}
-                            style={styles.input}
+                            style={[styles.input, { borderColor: color }]}
                             placeholder="Descrição"
                             value={description}
                             onChangeText={setDescription}
@@ -206,7 +216,7 @@ export default function CreateMealModal({
                             </Picker>
                         )}
                         <TextInput
-                            style={styles.input}
+                            style={[styles.input, { borderColor: color }]}
                             placeholder="Quantidade"
                             value={quantity}
                             onChangeText={setQuantity}
@@ -223,7 +233,10 @@ export default function CreateMealModal({
                                 <Text style={styles.cancelText}>Cancelar</Text>
                             </TouchableOpacity>
                             <TouchableOpacity
-                                style={styles.saveBtn}
+                                style={[
+                                    styles.saveBtn,
+                                    { backgroundColor: color },
+                                ]}
                                 onPress={handleSubmit}
                                 disabled={loading}
                             >
@@ -285,7 +298,6 @@ const styles = StyleSheet.create({
     },
     photoBtn: {
         flex: 1,
-        backgroundColor: "#007AFF",
         marginHorizontal: 4,
         padding: 8,
         borderRadius: 8,
@@ -297,7 +309,6 @@ const styles = StyleSheet.create({
     input: {
         color: "#888",
         borderWidth: 1,
-        borderColor: "orange",
         borderRadius: 8,
         padding: 10,
         marginBottom: 10,
@@ -318,7 +329,6 @@ const styles = StyleSheet.create({
     },
     saveBtn: {
         flex: 1,
-        backgroundColor: "#007AFF",
         padding: 12,
         borderRadius: 8,
         marginLeft: 8,
