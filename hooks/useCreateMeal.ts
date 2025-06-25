@@ -62,7 +62,7 @@ export function useCreateMeal() {
             name: "meal.jpg",
         } as any);
         formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
-        formData.append("folder", `campus/${campusId}/meals`);
+        formData.append("asset_folder", `campus/${campusId}/meals`);
         if (oldImageUrl) {
             const publicId = getPublicIdFromUrl(oldImageUrl);
             if (publicId) {
