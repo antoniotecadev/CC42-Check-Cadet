@@ -33,6 +33,7 @@ import {
 import { useColorCoalition } from "../ColorCoalitionContext";
 import { ThemedText } from "../ThemedText";
 import { ThemedView } from "../ThemedView";
+import Chip from "./Chip";
 
 interface Props {
     visible: boolean;
@@ -59,17 +60,22 @@ export default function CreateMealModal({
     });
     const [quantity, setQuantity] = useState("");
     const [type, setType] = useState(mealType[0]);
-    const [description, setDescription] = useState("");
+    const [tags, setTags] = React.useState<string[]>([]);
+    const [mealValue, setMealValue] = useState<string>("");
     const [image, setImage] = useState<string | null>(null);
 
     const { color } = useColorCoalition();
     const { showError, showInfo } = useAlert();
     const { createMeal, loading } = useCreateMeal();
 
+    const removeTag = (tagToRemove: string) => {
+        setTags(tags.filter((tag) => tag !== tagToRemove));
+    };
+
     function resetForm() {
         setName("");
         setType(mealType[0]);
-        setDescription("");
+        setTags([]);
         setQuantity("");
         setImage(null);
         setShowPicker((prev) => ({
@@ -101,6 +107,7 @@ export default function CreateMealModal({
     }
 
     async function handleSubmit() {
+        const description = tags.toString();
         if (!name || !type || !description || !quantity) {
             showInfo("Aviso ", "Preencha todos os campos.");
             return;
@@ -238,18 +245,36 @@ export default function CreateMealModal({
                                 editable={false}
                                 style={[styles.input, { borderColor: color }]}
                                 placeholder="Descrição"
-                                value={
-                                    isNaN(Number(description))
-                                        ? description
-                                        : ""
-                                }
-                                onChangeText={setDescription}
+                                value={tags.toString()}
                                 multiline
                             />
+                            <View
+                                style={{
+                                    flexDirection: "row",
+                                    flexWrap: "wrap",
+                                }}
+                            >
+                                {tags.map((tag) => (
+                                    <Chip
+                                        key={tag}
+                                        label={tag}
+                                        onRemove={() => removeTag(tag)}
+                                    />
+                                ))}
+                            </View>
                             {showPicker.mealDescription && (
                                 <Picker
-                                    selectedValue={description}
-                                    onValueChange={setDescription}
+                                    selectedValue={mealValue}
+                                    onValueChange={(value) => {
+                                        if (
+                                            typeof value === "string" &&
+                                            isNaN(Number(value)) &&
+                                            !tags.includes(value)
+                                        ) {
+                                            setTags([...tags, value]);
+                                        }
+                                        setMealValue(value);
+                                    }}
                                     style={{ color: "#333" }}
                                 >
                                     <Picker.Item
