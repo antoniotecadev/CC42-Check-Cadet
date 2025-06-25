@@ -48,12 +48,13 @@ export default function MealsScreen() {
         cursusId: string;
         cursusName: string;
     }>();
-    const [meals, setMeals] = useState<Meal[]>([]);
     const [loading, setLoading] = useState(true);
-    const [lastKey, setLastKey] = useState<string | null>(null);
+    const [meals, setMeals] = useState<Meal[]>([]);
     const [refreshing, setRefreshing] = useState(false);
     const [endReached, setEndReached] = useState(false);
+    const [lastKey, setLastKey] = useState<string | null>(null);
     const [showCreateModal, setShowCreateModal] = useState(false);
+    const [editMeal, setEditMeal] = useState<Meal | null>(null);
 
     const fetchMeals = useCallback(
         (startAtKey: string | null = null, append = false) => {
@@ -143,6 +144,19 @@ export default function MealsScreen() {
         );
     };
 
+    const handleItemLongPress = (item: Meal) => {
+        ActionSheetIOS.showActionSheetWithOptions(
+            {
+                options: ["Editar", "Cancelar"],
+                cancelButtonIndex: 1,
+                userInterfaceStyle: "dark",
+            },
+            (selectedIndex) => {
+                if (selectedIndex === 0) setEditMeal(item);
+            }
+        );
+    };
+
     useLayoutEffect(() => {
         navigation.setOptions &&
             navigation.setOptions({
@@ -165,12 +179,27 @@ export default function MealsScreen() {
                 }}
             />
             <CreateMealModal
+                key={0}
                 visible={showCreateModal}
                 onClose={() => setShowCreateModal(false)}
                 campusId={campusId}
                 cursusId={cursusId}
                 userId={userId}
                 onCreated={onRefresh}
+            />
+            <CreateMealModal
+                key={1}
+                visible={!!editMeal}
+                onClose={() => setEditMeal(null)}
+                campusId={campusId}
+                cursusId={cursusId}
+                userId={userId}
+                initialMeal={editMeal}
+                editMode={true}
+                onCreated={() => {
+                    setEditMeal(null);
+                    onRefresh();
+                }}
             />
             <ThemedView
                 lightColor="#fff"
@@ -202,6 +231,7 @@ export default function MealsScreen() {
                     keyExtractor={(item) => item.id}
                     renderItem={({ item }) => (
                         <TouchableOpacity
+                            onLongPress={() => handleItemLongPress(item)}
                             onPress={() => {
                                 router.push({
                                     pathname: "/meal_detail",

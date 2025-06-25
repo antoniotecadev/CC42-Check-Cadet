@@ -18,7 +18,7 @@ import { useCreateMeal } from "@/hooks/useCreateMeal";
 import { Picker } from "@react-native-picker/picker";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     KeyboardAvoidingView,
     Modal,
@@ -50,8 +50,10 @@ export default function CreateMealModal({
     campusId,
     cursusId,
     userId,
+    initialMeal,
+    editMode,
     onCreated,
-}: Props) {
+}: Props & { initialMeal?: any; editMode?: boolean }) {
     const isWeb = Platform.OS === "web";
     const [name, setName] = useState("");
     const [showPicker, setShowPicker] = useState({
@@ -141,6 +143,20 @@ export default function CreateMealModal({
         ));
         return item;
     };
+
+    useEffect(() => {
+        if (editMode && initialMeal) {
+            setName(initialMeal.name || "");
+            setType(initialMeal.type || "");
+            setTags([...tags, initialMeal.description]);
+            setQuantity(
+                initialMeal.quantity ? String(initialMeal.quantity) : "0"
+            );
+            setImage(initialMeal.pathImage || null);
+        } else if (!visible) {
+            resetForm();
+        }
+    }, [editMode, initialMeal, visible]);
 
     return (
         <Modal visible={visible} animationType="slide" transparent>
