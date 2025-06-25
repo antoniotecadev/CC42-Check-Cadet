@@ -68,7 +68,8 @@ export default function CreateMealModal({
 
     const { color } = useColorCoalition();
     const { showError, showInfo } = useAlert();
-    const { createMeal, updateMealData, updateMealImage, loading } = useCreateMeal();
+    const { createMeal, updateMealData, updateMealImage, loading } =
+        useCreateMeal();
 
     const removeTag = (tagToRemove: string) => {
         setTags(tags.filter((tag) => tag !== tagToRemove));
