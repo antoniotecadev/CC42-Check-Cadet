@@ -87,8 +87,9 @@ export default function CreateMealModal({
 
     async function pickImage() {
         const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            mediaTypes: ["images"],
             allowsEditing: true,
+            aspect: [4, 3],
             quality: 0.7,
         });
         if (!result.canceled && result.assets && result.assets.length > 0) {
@@ -99,6 +100,7 @@ export default function CreateMealModal({
     async function takePhoto() {
         const result = await ImagePicker.launchCameraAsync({
             allowsEditing: true,
+            aspect: [4, 3],
             quality: 0.7,
         });
         if (!result.canceled && result.assets && result.assets.length > 0) {
