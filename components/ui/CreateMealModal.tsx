@@ -68,7 +68,7 @@ export default function CreateMealModal({
 
     const { color } = useColorCoalition();
     const { showError, showInfo } = useAlert();
-    const { createMeal, loading } = useCreateMeal();
+    const { createMeal, updateMealData, updateMealImage, loading } = useCreateMeal();
 
     const removeTag = (tagToRemove: string) => {
         setTags(tags.filter((tag) => tag !== tagToRemove));
@@ -111,6 +111,70 @@ export default function CreateMealModal({
     }
 
     async function handleSubmit() {
+        const description = tags.toString();
+        if (!name || !type || !description || !quantity) {
+            showInfo("Erro", "Preencha todos os campos obrigatórios.");
+            return;
+        }
+        try {
+            if (editMode && initialMeal) {
+                // Se só a imagem mudou
+                if (
+                    image &&
+                    image !== initialMeal.pathImage &&
+                    name === initialMeal.name &&
+                    type === initialMeal.type &&
+                    description === initialMeal.description &&
+                    quantity === String(initialMeal.quantity)
+                ) {
+                    await updateMealImage({
+                        campusId,
+                        cursusId,
+                        mealId: initialMeal.id,
+                        imageUri: image,
+                        oldImageUrl: initialMeal.pathImage,
+                    });
+                } else {
+                    // Se outros campos mudaram (pode ou não ter imagem nova)
+                    await updateMealData({
+                        campusId,
+                        cursusId,
+                        mealId: initialMeal.id,
+                        meal: {
+                            name,
+                            type,
+                            description,
+                            quantity: Number(quantity),
+                        },
+                        imageUri:
+                            image !== initialMeal.pathImage ? image : undefined,
+                        oldImageUrl: initialMeal.pathImage,
+                    });
+                }
+            } else {
+                // Criação normal
+                await createMeal({
+                    campusId,
+                    cursusId,
+                    userId,
+                    meal: {
+                        name,
+                        type,
+                        description,
+                        quantity: Number(quantity),
+                    },
+                    imageUri: image,
+                });
+            }
+            resetForm();
+            onClose();
+            onCreated && onCreated();
+        } catch (e: any) {
+            showError("Erro", e.message || "Erro ao salvar refeição");
+        }
+    }
+
+    async function handleSubmit1() {
         const description = tags.toString();
         if (!name || !type || !description || !quantity) {
             showInfo("Aviso ", "Preencha todos os campos.");
