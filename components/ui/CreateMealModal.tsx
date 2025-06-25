@@ -34,6 +34,7 @@ import { useColorCoalition } from "../ColorCoalitionContext";
 import { ThemedText } from "../ThemedText";
 import { ThemedView } from "../ThemedView";
 import Chip from "./Chip";
+import WebCameraCapture from "./WebCameraCapture";
 
 interface Props {
     visible: boolean;
@@ -65,6 +66,7 @@ export default function CreateMealModal({
     const [tags, setTags] = React.useState<string[]>([]);
     const [mealValue, setMealValue] = useState<string>("");
     const [image, setImage] = useState<string | null>(null);
+    const [showCameraWeb, setShowCameraWeb] = useState<boolean>(false);
 
     const { color } = useColorCoalition();
     const { showError, showInfo } = useAlert();
@@ -101,13 +103,17 @@ export default function CreateMealModal({
     }
 
     async function takePhoto() {
-        const result = await ImagePicker.launchCameraAsync({
-            allowsEditing: true,
-            aspect: [4, 3],
-            quality: 0.7,
-        });
-        if (!result.canceled && result.assets && result.assets.length > 0) {
-            setImage(result.assets[0].uri);
+        if (isWeb) {
+            setShowCameraWeb(true);
+        } else {
+            const result = await ImagePicker.launchCameraAsync({
+                allowsEditing: true,
+                aspect: [4, 3],
+                quality: 0.7,
+            });
+            if (!result.canceled && result.assets && result.assets.length > 0) {
+                setImage(result.assets[0].uri);
+            }
         }
     }
 
@@ -232,251 +238,270 @@ export default function CreateMealModal({
             >
                 <View style={[styles.overlay, isWeb ? styles.inner : {}]}>
                     <ThemedView style={styles.container}>
-                        <ScrollView showsVerticalScrollIndicator={isWeb}>
-                            <ThemedText style={styles.title}>
-                                Criar Refeição
-                            </ThemedText>
-                            <TouchableOpacity
-                                style={styles.imagePicker}
-                                onPress={pickImage}
-                            >
-                                {image ? (
-                                    <Image
-                                        source={{ uri: image }}
-                                        style={styles.image}
-                                    />
-                                ) : (
-                                    <Text style={styles.imagePlaceholder}>
-                                        Selecionar Imagem
-                                    </Text>
-                                )}
-                            </TouchableOpacity>
-                            <View style={styles.row}>
+                        {showCameraWeb ? (
+                            <WebCameraCapture
+                                onSetImage={setImage}
+                                onSetShowCameraWeb={setShowCameraWeb}
+                            />
+                        ) : (
+                            <ScrollView showsVerticalScrollIndicator={isWeb}>
+                                <ThemedText style={styles.title}>
+                                    Criar Refeição
+                                </ThemedText>
                                 <TouchableOpacity
-                                    style={[
-                                        styles.photoBtn,
-                                        { backgroundColor: color },
-                                    ]}
-                                    onPress={takePhoto}
-                                >
-                                    <Text style={styles.photoBtnText}>
-                                        Tirar Foto
-                                    </Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity
-                                    style={[
-                                        styles.photoBtn,
-                                        { backgroundColor: color },
-                                    ]}
+                                    style={styles.imagePicker}
                                     onPress={pickImage}
                                 >
-                                    <Text style={styles.photoBtnText}>
-                                        Galeria
-                                    </Text>
+                                    {image ? (
+                                        <Image
+                                            source={{ uri: image }}
+                                            style={styles.image}
+                                        />
+                                    ) : (
+                                        <Text style={styles.imagePlaceholder}>
+                                            Selecionar Imagem
+                                        </Text>
+                                    )}
                                 </TouchableOpacity>
-                            </View>
-                            <TextInput
-                                onPress={() =>
-                                    setShowPicker((prev) => ({
-                                        ...prev,
-                                        mealType: false,
-                                        mealDescription: false,
-                                    }))
-                                }
-                                style={[styles.input, { borderColor: color }]}
-                                placeholder="Nome da Refeição"
-                                value={name}
-                                onChangeText={setName}
-                            />
-                            <TextInput
-                                onPress={() =>
-                                    setShowPicker((prev) => ({
-                                        ...prev,
-                                        mealType: !showPicker.mealType,
-                                        mealDescription: false,
-                                    }))
-                                }
-                                editable={false}
-                                style={[styles.input, { borderColor: color }]}
-                                placeholder="Tipo (ex: lanche, almoço...)"
-                                value={type}
-                                onChangeText={setType}
-                            />
-                            {showPicker.mealType && (
-                                <Picker
-                                    selectedValue={type}
-                                    onValueChange={setType}
-                                    style={{ color: "#333" }} // ou ajuste conforme seu tema
+                                <View style={styles.row}>
+                                    <TouchableOpacity
+                                        style={[
+                                            styles.photoBtn,
+                                            { backgroundColor: color },
+                                        ]}
+                                        onPress={takePhoto}
+                                    >
+                                        <Text style={styles.photoBtnText}>
+                                            Tirar Foto
+                                        </Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        style={[
+                                            styles.photoBtn,
+                                            { backgroundColor: color },
+                                        ]}
+                                        onPress={pickImage}
+                                    >
+                                        <Text style={styles.photoBtnText}>
+                                            Galeria
+                                        </Text>
+                                    </TouchableOpacity>
+                                </View>
+                                <TextInput
+                                    onPress={() =>
+                                        setShowPicker((prev) => ({
+                                            ...prev,
+                                            mealType: false,
+                                            mealDescription: false,
+                                        }))
+                                    }
+                                    style={[
+                                        styles.input,
+                                        { borderColor: color },
+                                    ]}
+                                    placeholder="Nome da Refeição"
+                                    value={name}
+                                    onChangeText={setName}
+                                />
+                                <TextInput
+                                    onPress={() =>
+                                        setShowPicker((prev) => ({
+                                            ...prev,
+                                            mealType: !showPicker.mealType,
+                                            mealDescription: false,
+                                        }))
+                                    }
+                                    editable={false}
+                                    style={[
+                                        styles.input,
+                                        { borderColor: color },
+                                    ]}
+                                    placeholder="Tipo (ex: lanche, almoço...)"
+                                    value={type}
+                                    onChangeText={setType}
+                                />
+                                {showPicker.mealType && (
+                                    <Picker
+                                        selectedValue={type}
+                                        onValueChange={setType}
+                                        style={{ color: "#333" }} // ou ajuste conforme seu tema
+                                    >
+                                        {mealType.map((item) => (
+                                            <Picker.Item
+                                                key={item}
+                                                label={item}
+                                                value={item}
+                                            />
+                                        ))}
+                                    </Picker>
+                                )}
+                                <TextInput
+                                    onPress={() =>
+                                        setShowPicker((prev) => ({
+                                            ...prev,
+                                            mealDescription:
+                                                !showPicker.mealDescription,
+                                            mealType: false,
+                                        }))
+                                    }
+                                    editable={false}
+                                    style={[
+                                        styles.input,
+                                        { borderColor: color },
+                                    ]}
+                                    placeholder="Descrição"
+                                    value={tags.toString()}
+                                    multiline
+                                />
+                                <View
+                                    style={{
+                                        flexDirection: "row",
+                                        flexWrap: "wrap",
+                                    }}
                                 >
-                                    {mealType.map((item) => (
-                                        <Picker.Item
-                                            key={item}
-                                            label={item}
-                                            value={item}
+                                    {tags.map((tag) => (
+                                        <Chip
+                                            key={tag}
+                                            label={tag}
+                                            onRemove={() => removeTag(tag)}
                                         />
                                     ))}
-                                </Picker>
-                            )}
-                            <TextInput
-                                onPress={() =>
-                                    setShowPicker((prev) => ({
-                                        ...prev,
-                                        mealDescription:
-                                            !showPicker.mealDescription,
-                                        mealType: false,
-                                    }))
-                                }
-                                editable={false}
-                                style={[styles.input, { borderColor: color }]}
-                                placeholder="Descrição"
-                                value={tags.toString()}
-                                multiline
-                            />
-                            <View
-                                style={{
-                                    flexDirection: "row",
-                                    flexWrap: "wrap",
-                                }}
-                            >
-                                {tags.map((tag) => (
-                                    <Chip
-                                        key={tag}
-                                        label={tag}
-                                        onRemove={() => removeTag(tag)}
-                                    />
-                                ))}
-                            </View>
-                            {showPicker.mealDescription && (
-                                <Picker
-                                    selectedValue={mealValue}
-                                    onValueChange={(value) => {
-                                        if (
-                                            typeof value === "string" &&
-                                            isNaN(Number(value)) &&
-                                            !tags.includes(value)
-                                        ) {
-                                            setTags([...tags, value]);
-                                        }
-                                        setMealValue(value);
-                                    }}
-                                    style={{ color: "#333" }}
-                                >
-                                    <Picker.Item
-                                        key={0}
-                                        label={"CARBOIDRATO"}
-                                        value={"0"}
-                                    />
-                                    <Picker.Item
-                                        key={1}
-                                        label={carbohydrates[0]}
-                                        value={carbohydrates[0]}
-                                    />
-                                    {PickerItemDescription(riceList)}
-                                    <Picker.Item
-                                        key={2}
-                                        label={carbohydrates[1]}
-                                        value={carbohydrates[1]}
-                                    />
-                                    {PickerItemDescription(pastaList)}
-                                    <Picker.Item
-                                        key={3}
-                                        label={carbohydrates[2]}
-                                        value={carbohydrates[2]}
-                                    />
-                                    {PickerItemDescription(fungeList)}
-                                    <Picker.Item
-                                        key={4}
-                                        label={carbohydrates[3]}
-                                        value={carbohydrates[3]}
-                                    />
-                                    {PickerItemDescription(potatoList)}
-                                    <Picker.Item
-                                        key={5}
-                                        label={carbohydrates[4]}
-                                        value={carbohydrates[4]}
-                                    />
-                                    {PickerItemDescription(breadsList)}
-                                    <Picker.Item
-                                        key={6}
-                                        label={
-                                            "PROTEÍNAS, VEGETAIS E LEGUMENOSES"
-                                        }
-                                        value={"1"}
-                                    />
-                                    <Picker.Item
-                                        key={7}
-                                        label={proteinsLegumesVegetables[0]}
-                                        value={"2"}
-                                    />
-                                    {PickerItemDescription(leguminousList)}
-                                    <Picker.Item
-                                        key={8}
-                                        label={proteinsLegumesVegetables[1]}
-                                        value={"3"}
-                                    />
-                                    {PickerItemDescription(meatsList)}
-                                    <Picker.Item
-                                        key={9}
-                                        label={proteinsLegumesVegetables[2]}
-                                        value={"4"}
-                                    />
-                                    {PickerItemDescription(eggsList)}
-                                    <Picker.Item
-                                        key={10}
-                                        label={proteinsLegumesVegetables[3]}
-                                        value={"5"}
-                                    />
-                                    {PickerItemDescription(
-                                        vegetablesAndSaladsList
-                                    )}
-                                    <Picker.Item
-                                        key={11}
-                                        label={proteinsLegumesVegetables[4]}
-                                        value={"6"}
-                                    />
-                                    {PickerItemDescription(saucesList)}
-                                </Picker>
-                            )}
-                            <TextInput
-                                onPress={() =>
-                                    setShowPicker((prev) => ({
-                                        ...prev,
-                                        mealType: false,
-                                        mealDescription: false,
-                                    }))
-                                }
-                                style={[styles.input, { borderColor: color }]}
-                                placeholder="Quantidade"
-                                value={quantity}
-                                onChangeText={setQuantity}
-                                keyboardType="numeric"
-                            />
-                            <View style={styles.rowBtns}>
-                                <TouchableOpacity
-                                    style={styles.cancelBtn}
-                                    onPress={() => {
-                                        resetForm();
-                                        onClose();
-                                    }}
-                                >
-                                    <Text style={styles.cancelText}>
-                                        Cancelar
-                                    </Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity
+                                </View>
+                                {showPicker.mealDescription && (
+                                    <Picker
+                                        selectedValue={mealValue}
+                                        onValueChange={(value) => {
+                                            if (
+                                                typeof value === "string" &&
+                                                isNaN(Number(value)) &&
+                                                !tags.includes(value)
+                                            ) {
+                                                setTags([...tags, value]);
+                                            }
+                                            setMealValue(value);
+                                        }}
+                                        style={{ color: "#333" }}
+                                    >
+                                        <Picker.Item
+                                            key={0}
+                                            label={"CARBOIDRATO"}
+                                            value={"0"}
+                                        />
+                                        <Picker.Item
+                                            key={1}
+                                            label={carbohydrates[0]}
+                                            value={carbohydrates[0]}
+                                        />
+                                        {PickerItemDescription(riceList)}
+                                        <Picker.Item
+                                            key={2}
+                                            label={carbohydrates[1]}
+                                            value={carbohydrates[1]}
+                                        />
+                                        {PickerItemDescription(pastaList)}
+                                        <Picker.Item
+                                            key={3}
+                                            label={carbohydrates[2]}
+                                            value={carbohydrates[2]}
+                                        />
+                                        {PickerItemDescription(fungeList)}
+                                        <Picker.Item
+                                            key={4}
+                                            label={carbohydrates[3]}
+                                            value={carbohydrates[3]}
+                                        />
+                                        {PickerItemDescription(potatoList)}
+                                        <Picker.Item
+                                            key={5}
+                                            label={carbohydrates[4]}
+                                            value={carbohydrates[4]}
+                                        />
+                                        {PickerItemDescription(breadsList)}
+                                        <Picker.Item
+                                            key={6}
+                                            label={
+                                                "PROTEÍNAS, VEGETAIS E LEGUMENOSES"
+                                            }
+                                            value={"1"}
+                                        />
+                                        <Picker.Item
+                                            key={7}
+                                            label={proteinsLegumesVegetables[0]}
+                                            value={"2"}
+                                        />
+                                        {PickerItemDescription(leguminousList)}
+                                        <Picker.Item
+                                            key={8}
+                                            label={proteinsLegumesVegetables[1]}
+                                            value={"3"}
+                                        />
+                                        {PickerItemDescription(meatsList)}
+                                        <Picker.Item
+                                            key={9}
+                                            label={proteinsLegumesVegetables[2]}
+                                            value={"4"}
+                                        />
+                                        {PickerItemDescription(eggsList)}
+                                        <Picker.Item
+                                            key={10}
+                                            label={proteinsLegumesVegetables[3]}
+                                            value={"5"}
+                                        />
+                                        {PickerItemDescription(
+                                            vegetablesAndSaladsList
+                                        )}
+                                        <Picker.Item
+                                            key={11}
+                                            label={proteinsLegumesVegetables[4]}
+                                            value={"6"}
+                                        />
+                                        {PickerItemDescription(saucesList)}
+                                    </Picker>
+                                )}
+                                <TextInput
+                                    onPress={() =>
+                                        setShowPicker((prev) => ({
+                                            ...prev,
+                                            mealType: false,
+                                            mealDescription: false,
+                                        }))
+                                    }
                                     style={[
-                                        styles.saveBtn,
-                                        { backgroundColor: color },
+                                        styles.input,
+                                        { borderColor: color },
                                     ]}
-                                    onPress={handleSubmit}
-                                    disabled={loading}
-                                >
-                                    <Text style={styles.saveText}>
-                                        {loading ? "Salvando..." : "Salvar"}
-                                    </Text>
-                                </TouchableOpacity>
-                            </View>
-                        </ScrollView>
+                                    placeholder="Quantidade"
+                                    value={quantity}
+                                    onChangeText={setQuantity}
+                                    keyboardType="numeric"
+                                />
+                                <View style={styles.rowBtns}>
+                                    <TouchableOpacity
+                                        style={styles.cancelBtn}
+                                        onPress={() => {
+                                            resetForm();
+                                            onClose();
+                                        }}
+                                    >
+                                        <Text style={styles.cancelText}>
+                                            Cancelar
+                                        </Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        style={[
+                                            styles.saveBtn,
+                                            { backgroundColor: color },
+                                        ]}
+                                        onPress={handleSubmit}
+                                        disabled={loading}
+                                    >
+                                        <Text style={styles.saveText}>
+                                            {loading ? "Salvando..." : "Salvar"}
+                                        </Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </ScrollView>
+                        )}
                     </ThemedView>
                 </View>
             </KeyboardAvoidingView>
