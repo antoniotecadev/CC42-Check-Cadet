@@ -119,15 +119,14 @@ export default function CreateMealModal({
         }
         try {
             if (editMode && initialMeal) {
-                // Se só a imagem mudou
-                if (
-                    image &&
-                    image !== initialMeal.pathImage &&
+                const dataIsEqualse =
                     name === initialMeal.name &&
                     type === initialMeal.type &&
                     description === initialMeal.description &&
-                    quantity === String(initialMeal.quantity)
-                ) {
+                    quantity === String(initialMeal.quantity);
+
+                // Se só a imagem mudou
+                if (image && image !== initialMeal.pathImage && dataIsEqualse) {
                     await updateMealImage({
                         campusId,
                         cursusId,
@@ -135,7 +134,9 @@ export default function CreateMealModal({
                         imageUri: image,
                         oldImageUrl: initialMeal.pathImage,
                     });
-                } else {
+                } else if (
+                    !(image === initialMeal.pathImage && dataIsEqualse) // Se nenhun dado for alterado não actualiza
+                ) {
                     // Se outros campos mudaram (pode ou não ter imagem nova)
                     await updateMealData({
                         campusId,
