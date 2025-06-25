@@ -44,6 +44,8 @@ export default function MealsScreen() {
     const colorScheme = useColorScheme();
     const { color } = useColorCoalition();
     const { height } = useWindowDimensions();
+
+    const isWeb = Platform.OS === "web";
     const { userId, campusId, cursusId, cursusName } = useLocalSearchParams<{
         userId: string;
         campusId: string;
@@ -162,14 +164,25 @@ export default function MealsScreen() {
     useLayoutEffect(() => {
         navigation.setOptions &&
             navigation.setOptions({
-                headerRight: () => (
-                    <TouchableOpacity onPress={handleMenuPress}>
-                        <MaterialCommunityIcons
-                            name="dots-vertical"
-                            size={28}
-                        />
-                    </TouchableOpacity>
-                ),
+                headerRight: () =>
+                    isWeb ? (
+                        <TouchableOpacity
+                            onPress={() => setShowCreateModal(true)}
+                            style={{ marginRight: 16 }}
+                        >
+                            <MaterialCommunityIcons
+                                name="card-plus"
+                                size={28}
+                            />
+                        </TouchableOpacity>
+                    ) : (
+                        <TouchableOpacity onPress={handleMenuPress}>
+                            <MaterialCommunityIcons
+                                name="dots-vertical"
+                                size={28}
+                            />
+                        </TouchableOpacity>
+                    ),
             });
     }, [navigation, color]);
 
@@ -205,12 +218,9 @@ export default function MealsScreen() {
             />
             <ThemedView
                 lightColor="#fff"
-                style={[
-                    styles.container,
-                    Platform.OS === "web" ? styles.inner : {},
-                ]}
+                style={[styles.container, isWeb ? styles.inner : {}]}
             >
-                {Platform.OS === "web" && loading && (
+                {isWeb && loading && (
                     <ActivityIndicator
                         size="large"
                         color={color}
@@ -224,7 +234,7 @@ export default function MealsScreen() {
                             alignItems: "center",
                             justifyContent: "center",
                             width: "100%",
-                            marginTop: (height) / 4,
+                            marginTop: height / 4,
                         }}
                     >
                         <ThemedText style={{ textAlign: "center" }}>
@@ -265,7 +275,7 @@ export default function MealsScreen() {
                     onEndReached={loadMore}
                     onEndReachedThreshold={0.2}
                 />
-                {Platform.OS === "web" && (
+                {isWeb && (
                     <TouchableOpacity
                         style={[styles.fab, { backgroundColor: color }]}
                         onPress={onRefresh}

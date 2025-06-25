@@ -225,12 +225,12 @@ export default function CreateMealModal({
     }, [editMode, initialMeal, visible]);
 
     return (
-        <Modal visible={visible} animationType="slide" transparent>
+        <Modal visible={visible} animationType="fade" transparent>
             <KeyboardAvoidingView
                 behavior={Platform.OS === "ios" ? "padding" : "height"}
                 style={{ flex: 1 }}
             >
-                <View style={styles.overlay}>
+                <View style={[styles.overlay, isWeb ? styles.inner : {}]}>
                     <ThemedView style={styles.container}>
                         <ScrollView showsVerticalScrollIndicator={isWeb}>
                             <ThemedText style={styles.title}>
@@ -574,5 +574,11 @@ const styles = StyleSheet.create({
         color: "#fff",
         textAlign: "center",
         fontWeight: "bold",
+    },
+    inner: {
+        width: "100%",
+        maxWidth: 600, // limite superior
+        minWidth: 480, // limite inferior (opcional)
+        marginHorizontal: "auto", // centraliza na web (usando style prop em web pura)
     },
 });
