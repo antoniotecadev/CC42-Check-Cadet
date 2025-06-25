@@ -182,37 +182,16 @@ export default function CreateMealModal({
         }
     }
 
-    async function handleSubmit1() {
-        const description = tags.toString();
-        if (!name || !type || !description || !quantity) {
-            showInfo("Aviso ", "Preencha todos os campos.");
-            return;
-        }
-        try {
-            await createMeal({
-                campusId,
-                cursusId,
-                userId,
-                meal: {
-                    name,
-                    type,
-                    description,
-                    quantity: Number(quantity),
-                },
-                imageUri: image,
-            });
-            resetForm();
-            onClose();
-            onCreated && onCreated();
-        } catch (e: any) {
-            showError("Erro", e.message || "Erro ao criar refeição");
-        }
-    }
-
     const PickerItemDescription = (arrayDescription: string[]) => {
-        const item = arrayDescription.map((item) => (
-            <Picker.Item key={item} label={item} value={item} />
-        ));
+        const item = arrayDescription.map((item) =>
+            isWeb ? (
+                <option key={item} value={item}>
+                    {item}
+                </option>
+            ) : (
+                <Picker.Item key={item} label={item} value={item} />
+            )
+        );
         return item;
     };
 
@@ -320,21 +299,52 @@ export default function CreateMealModal({
                                     value={type}
                                     onChangeText={setType}
                                 />
-                                {showPicker.mealType && (
-                                    <Picker
-                                        selectedValue={type}
-                                        onValueChange={setType}
-                                        style={{ color: "#333" }} // ou ajuste conforme seu tema
-                                    >
-                                        {mealType.map((item) => (
-                                            <Picker.Item
-                                                key={item}
-                                                label={item}
-                                                value={item}
-                                            />
-                                        ))}
-                                    </Picker>
-                                )}
+                                {(showPicker.mealType || isWeb) &&
+                                    (isWeb ? (
+                                        <select
+                                            value={type}
+                                            onChange={(e) =>
+                                                setType(e.target.value)
+                                            }
+                                            style={{
+                                                padding: "12px 16px",
+                                                fontSize: 16,
+                                                borderRadius: 8,
+                                                border: `1px solid ${color}`,
+                                                background: "#fafafa",
+                                                color: "#333",
+                                                marginBottom: 10,
+                                                outline: "none",
+                                                width: "100%",
+                                                appearance: "none",
+                                                WebkitAppearance: "none",
+                                                MozAppearance: "none",
+                                                boxShadow:
+                                                    "0 1px 4px rgba(0,0,0,0.04)",
+                                                cursor: "pointer",
+                                            }}
+                                        >
+                                            {mealType.map((item) => (
+                                                <option key={item} value={item}>
+                                                    {item}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    ) : (
+                                        <Picker
+                                            selectedValue={type}
+                                            onValueChange={setType}
+                                            style={{ color: "#333" }} // ou ajuste conforme seu tema
+                                        >
+                                            {mealType.map((item) => (
+                                                <Picker.Item
+                                                    key={item}
+                                                    label={item}
+                                                    value={item}
+                                                />
+                                            ))}
+                                        </Picker>
+                                    ))}
                                 <TextInput
                                     onPress={() =>
                                         setShowPicker((prev) => ({
@@ -367,97 +377,219 @@ export default function CreateMealModal({
                                         />
                                     ))}
                                 </View>
-                                {showPicker.mealDescription && (
-                                    <Picker
-                                        selectedValue={mealValue}
-                                        onValueChange={(value) => {
-                                            if (
-                                                typeof value === "string" &&
-                                                isNaN(Number(value)) &&
-                                                !tags.includes(value)
-                                            ) {
-                                                setTags([...tags, value]);
-                                            }
-                                            setMealValue(value);
-                                        }}
-                                        style={{ color: "#333" }}
-                                    >
-                                        <Picker.Item
-                                            key={0}
-                                            label={"CARBOIDRATO"}
-                                            value={"0"}
-                                        />
-                                        <Picker.Item
-                                            key={1}
-                                            label={carbohydrates[0]}
-                                            value={carbohydrates[0]}
-                                        />
-                                        {PickerItemDescription(riceList)}
-                                        <Picker.Item
-                                            key={2}
-                                            label={carbohydrates[1]}
-                                            value={carbohydrates[1]}
-                                        />
-                                        {PickerItemDescription(pastaList)}
-                                        <Picker.Item
-                                            key={3}
-                                            label={carbohydrates[2]}
-                                            value={carbohydrates[2]}
-                                        />
-                                        {PickerItemDescription(fungeList)}
-                                        <Picker.Item
-                                            key={4}
-                                            label={carbohydrates[3]}
-                                            value={carbohydrates[3]}
-                                        />
-                                        {PickerItemDescription(potatoList)}
-                                        <Picker.Item
-                                            key={5}
-                                            label={carbohydrates[4]}
-                                            value={carbohydrates[4]}
-                                        />
-                                        {PickerItemDescription(breadsList)}
-                                        <Picker.Item
-                                            key={6}
-                                            label={
-                                                "PROTEÍNAS, VEGETAIS E LEGUMENOSES"
-                                            }
-                                            value={"1"}
-                                        />
-                                        <Picker.Item
-                                            key={7}
-                                            label={proteinsLegumesVegetables[0]}
-                                            value={"2"}
-                                        />
-                                        {PickerItemDescription(leguminousList)}
-                                        <Picker.Item
-                                            key={8}
-                                            label={proteinsLegumesVegetables[1]}
-                                            value={"3"}
-                                        />
-                                        {PickerItemDescription(meatsList)}
-                                        <Picker.Item
-                                            key={9}
-                                            label={proteinsLegumesVegetables[2]}
-                                            value={"4"}
-                                        />
-                                        {PickerItemDescription(eggsList)}
-                                        <Picker.Item
-                                            key={10}
-                                            label={proteinsLegumesVegetables[3]}
-                                            value={"5"}
-                                        />
-                                        {PickerItemDescription(
-                                            vegetablesAndSaladsList
-                                        )}
-                                        <Picker.Item
-                                            key={11}
-                                            label={proteinsLegumesVegetables[4]}
-                                            value={"6"}
-                                        />
-                                        {PickerItemDescription(saucesList)}
-                                    </Picker>
-                                )}
+                                {(showPicker.mealDescription || isWeb) &&
+                                    (isWeb ? (
+                                        <select
+                                            value={mealValue}
+                                            onChange={(e) => {
+                                                if (
+                                                    typeof e.target.value ===
+                                                        "string" &&
+                                                    isNaN(
+                                                        Number(e.target.value)
+                                                    ) &&
+                                                    !tags.includes(
+                                                        e.target.value
+                                                    )
+                                                ) {
+                                                    setTags([
+                                                        ...tags,
+                                                        e.target.value,
+                                                    ]);
+                                                }
+                                                setMealValue(e.target.value);
+                                            }}
+                                            style={{
+                                                padding: "12px 16px",
+                                                fontSize: 16,
+                                                borderRadius: 8,
+                                                border: `1px solid ${color}`,
+                                                background: "#fafafa",
+                                                color: "#333",
+                                                marginBottom: 10,
+                                                outline: "none",
+                                                width: "100%",
+                                                appearance: "none",
+                                                WebkitAppearance: "none",
+                                                MozAppearance: "none",
+                                                boxShadow:
+                                                    "0 1px 4px rgba(0,0,0,0.04)",
+                                                cursor: "pointer",
+                                            }}
+                                        >
+                                            <option key={0} value={"0"}>
+                                                {"CARBOIDRATO"}
+                                            </option>
+                                            <option
+                                                key={1}
+                                                value={carbohydrates[0]}
+                                            >
+                                                {carbohydrates[0]}
+                                            </option>
+                                            {PickerItemDescription(riceList)}
+                                            <option
+                                                key={2}
+                                                value={carbohydrates[1]}
+                                            >
+                                                {carbohydrates[1]}
+                                            </option>
+                                            {PickerItemDescription(pastaList)}
+                                            <option
+                                                key={3}
+                                                value={carbohydrates[2]}
+                                            >
+                                                {carbohydrates[2]}
+                                            </option>
+                                            {PickerItemDescription(fungeList)}
+                                            <option
+                                                key={4}
+                                                value={carbohydrates[3]}
+                                            >
+                                                {carbohydrates[3]}
+                                            </option>
+                                            {PickerItemDescription(potatoList)}
+                                            <option
+                                                key={5}
+                                                value={carbohydrates[4]}
+                                            >
+                                                {carbohydrates[4]}
+                                            </option>
+                                            {PickerItemDescription(breadsList)}
+                                            <option key={6} value={"1"}>
+                                                {
+                                                    "PROTEÍNAS, VEGETAIS E LEGUMENOSES"
+                                                }
+                                            </option>
+                                            <option key={7} value={"2"}>
+                                                {proteinsLegumesVegetables[0]}
+                                            </option>
+                                            {PickerItemDescription(
+                                                leguminousList
+                                            )}
+                                            <option key={8} value={"3"}>
+                                                {proteinsLegumesVegetables[1]}
+                                            </option>
+                                            {PickerItemDescription(meatsList)}
+
+                                            <option key={9} value={"4"}>
+                                                {proteinsLegumesVegetables[2]}
+                                            </option>
+                                            {PickerItemDescription(eggsList)}
+
+                                            <option key={10} value={"5"}>
+                                                {proteinsLegumesVegetables[3]}
+                                            </option>
+                                            {PickerItemDescription(
+                                                vegetablesAndSaladsList
+                                            )}
+                                            <option key={11} value={"6"}>
+                                                {proteinsLegumesVegetables[4]}
+                                            </option>
+                                            {PickerItemDescription(saucesList)}
+                                        </select>
+                                    ) : (
+                                        <Picker
+                                            selectedValue={mealValue}
+                                            onValueChange={(value) => {
+                                                if (
+                                                    typeof value === "string" &&
+                                                    isNaN(Number(value)) &&
+                                                    !tags.includes(value)
+                                                ) {
+                                                    setTags([...tags, value]);
+                                                }
+                                                setMealValue(value);
+                                            }}
+                                            style={{ color: "#333" }}
+                                        >
+                                            <Picker.Item
+                                                key={0}
+                                                label={"CARBOIDRATO"}
+                                                value={"0"}
+                                            />
+                                            <Picker.Item
+                                                key={1}
+                                                label={carbohydrates[0]}
+                                                value={carbohydrates[0]}
+                                            />
+                                            {PickerItemDescription(riceList)}
+                                            <Picker.Item
+                                                key={2}
+                                                label={carbohydrates[1]}
+                                                value={carbohydrates[1]}
+                                            />
+                                            {PickerItemDescription(pastaList)}
+                                            <Picker.Item
+                                                key={3}
+                                                label={carbohydrates[2]}
+                                                value={carbohydrates[2]}
+                                            />
+                                            {PickerItemDescription(fungeList)}
+                                            <Picker.Item
+                                                key={4}
+                                                label={carbohydrates[3]}
+                                                value={carbohydrates[3]}
+                                            />
+                                            {PickerItemDescription(potatoList)}
+                                            <Picker.Item
+                                                key={5}
+                                                label={carbohydrates[4]}
+                                                value={carbohydrates[4]}
+                                            />
+                                            {PickerItemDescription(breadsList)}
+                                            <Picker.Item
+                                                key={6}
+                                                label={
+                                                    "PROTEÍNAS, VEGETAIS E LEGUMENOSES"
+                                                }
+                                                value={"1"}
+                                            />
+                                            <Picker.Item
+                                                key={7}
+                                                label={
+                                                    proteinsLegumesVegetables[0]
+                                                }
+                                                value={"2"}
+                                            />
+                                            {PickerItemDescription(
+                                                leguminousList
+                                            )}
+                                            <Picker.Item
+                                                key={8}
+                                                label={
+                                                    proteinsLegumesVegetables[1]
+                                                }
+                                                value={"3"}
+                                            />
+                                            {PickerItemDescription(meatsList)}
+                                            <Picker.Item
+                                                key={9}
+                                                label={
+                                                    proteinsLegumesVegetables[2]
+                                                }
+                                                value={"4"}
+                                            />
+                                            {PickerItemDescription(eggsList)}
+                                            <Picker.Item
+                                                key={10}
+                                                label={
+                                                    proteinsLegumesVegetables[3]
+                                                }
+                                                value={"5"}
+                                            />
+                                            {PickerItemDescription(
+                                                vegetablesAndSaladsList
+                                            )}
+                                            <Picker.Item
+                                                key={11}
+                                                label={
+                                                    proteinsLegumesVegetables[4]
+                                                }
+                                                value={"6"}
+                                            />
+                                            {PickerItemDescription(saucesList)}
+                                        </Picker>
+                                    ))}
                                 <TextInput
                                     onPress={() =>
                                         setShowPicker((prev) => ({

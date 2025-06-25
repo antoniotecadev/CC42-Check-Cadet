@@ -2,6 +2,7 @@ import { database } from "@/firebaseConfig";
 import axios from "axios";
 import { push, ref, set, update } from "firebase/database";
 import { useState } from "react";
+import { Platform } from "react-native";
 
 interface MealData {
     name: string;
@@ -50,17 +51,44 @@ export function useCreateMeal() {
         return match ? match[1] : undefined;
     }
 
+    /*
+        URL: blob:http://localhost:19006/a1b2c3d4...
+
+        É apenas um ponteiro para um objeto Blob na memória do navegador.
+
+        Não é um arquivo físico, e não pode ser enviado diretamente por FormData.
+
+        Então, você precisa:
+
+            fetch(blobUrl) → para ler os bytes
+
+            .blob() → para converter em um Blob real
+
+            new File([blob], ...) → criar um objeto File, que o FormData entende.
+     */
+
+    async function prepareFileForUpload(uri: string) {
+        if (Platform.OS === "web") {
+            const blob = await fetch(uri).then((res) => res.blob());
+            return new File([blob], "meal.jpg", { type: "image/jpeg" });
+        } else {
+            alert(uri);
+            return {
+                uri,
+                type: "image/jpeg",
+                name: "meal.jpg",
+            };
+        }
+    }
+
     async function uploadImageToCloudinary(
         imageUri: string,
         campusId: string,
         oldImageUrl?: string
     ): Promise<string> {
+        const file = await prepareFileForUpload(imageUri);
         const formData = new FormData();
-        formData.append("file", {
-            uri: imageUri,
-            type: "image/jpeg",
-            name: "meal.jpg",
-        } as any);
+        formData.append("file", file as any);
         formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
         formData.append("asset_folder", `campus/${campusId}/meals`);
         if (oldImageUrl) {
