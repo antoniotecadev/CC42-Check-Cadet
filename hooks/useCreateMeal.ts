@@ -72,7 +72,6 @@ export function useCreateMeal() {
             const blob = await fetch(uri).then((res) => res.blob());
             return new File([blob], "meal.jpg", { type: "image/jpeg" });
         } else {
-            alert(uri);
             return {
                 uri,
                 type: "image/jpeg",
