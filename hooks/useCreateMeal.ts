@@ -33,7 +33,7 @@ interface UpdateMealImageParams {
     cursusId: string;
     mealId: string;
     imageUri: string;
-    oldImageUrl?: string;
+    oldImageUrl: string;
 }
 
 export function useCreateMeal() {
@@ -45,8 +45,8 @@ export function useCreateMeal() {
 
     // Extrai o public_id de uma URL do Cloudinary
     function getPublicIdFromUrl(url: string) {
-        // Exemplo: https://res.cloudinary.com/cc42/image/upload/v123/campus/1/meals/abc123.jpg
-        const match = url.match(/\/upload\/(?:v\\d+\/)?(.+?)\\.[a-z]+$/i);
+        const match = url.match(/\/upload\/(?:v\d+\/)?(.+?)\.[a-z]+$/i);
+        // const match = url.match(/\/([^\/]+)\.[a-z]+$/i);
         return match ? match[1] : undefined;
     }
 
