@@ -24,6 +24,7 @@ import {
     Platform,
     StyleSheet,
     TouchableOpacity,
+    useWindowDimensions,
 } from "react-native";
 
 interface Meal {
@@ -42,6 +43,7 @@ export default function MealsScreen() {
     const navigation = useNavigation();
     const colorScheme = useColorScheme();
     const { color } = useColorCoalition();
+    const { height } = useWindowDimensions();
     const { userId, campusId, cursusId, cursusName } = useLocalSearchParams<{
         userId: string;
         campusId: string;
@@ -208,7 +210,7 @@ export default function MealsScreen() {
                     Platform.OS === "web" ? styles.inner : {},
                 ]}
             >
-                {loading && (
+                {Platform.OS === "web" && loading && (
                     <ActivityIndicator
                         size="large"
                         color={color}
@@ -219,11 +221,15 @@ export default function MealsScreen() {
                     <ThemedView
                         style={{
                             flex: 1,
-                            justifyContent: "center",
                             alignItems: "center",
+                            justifyContent: "center",
+                            width: "100%",
+                            marginTop: (height) / 4,
                         }}
                     >
-                        <ThemedText>Refeições não encontradas 😪</ThemedText>
+                        <ThemedText style={{ textAlign: "center" }}>
+                            Refeições não encontradas 😪
+                        </ThemedText>
                     </ThemedView>
                 )}
                 <FlashList
@@ -254,7 +260,7 @@ export default function MealsScreen() {
                         </TouchableOpacity>
                     )}
                     estimatedItemSize={76}
-                    refreshing={refreshing}
+                    refreshing={refreshing || loading}
                     onRefresh={onRefresh}
                     onEndReached={loadMore}
                     onEndReachedThreshold={0.2}
