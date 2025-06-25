@@ -149,16 +149,18 @@ export default function MealsScreen() {
     };
 
     const handleItemLongPress = (item: Meal) => {
-        ActionSheetIOS.showActionSheetWithOptions(
-            {
-                options: ["Editar", "Cancelar"],
-                cancelButtonIndex: 1,
-                userInterfaceStyle: "dark",
-            },
-            (selectedIndex) => {
-                if (selectedIndex === 0) setEditMeal(item);
-            }
-        );
+        if (isWeb) setEditMeal(item);
+        else
+            ActionSheetIOS.showActionSheetWithOptions(
+                {
+                    options: ["Editar", "Cancelar"],
+                    cancelButtonIndex: 1,
+                    userInterfaceStyle: "dark",
+                },
+                (selectedIndex) => {
+                    if (selectedIndex === 0) setEditMeal(item);
+                }
+            );
     };
 
     useLayoutEffect(() => {
