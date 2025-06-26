@@ -28,7 +28,7 @@ import {
     Text,
     TextInput,
     TouchableOpacity,
-    View,
+    View
 } from "react-native";
 import { useColorCoalition } from "../ColorCoalitionContext";
 import { ThemedText } from "../ThemedText";
@@ -41,6 +41,7 @@ interface Props {
     onClose: () => void;
     campusId: string;
     cursusId: string;
+    campusName: string;
     userId: string;
     onCreated?: () => void;
 }
@@ -50,6 +51,7 @@ export default function CreateMealModal({
     onClose,
     campusId,
     cursusId,
+    campusName,
     userId,
     initialMeal,
     editMode,
@@ -164,6 +166,7 @@ export default function CreateMealModal({
                 await createMeal({
                     campusId,
                     cursusId,
+                    campusName,
                     userId,
                     meal: {
                         name,

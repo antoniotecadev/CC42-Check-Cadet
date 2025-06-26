@@ -46,12 +46,14 @@ export default function MealsScreen() {
     const { height } = useWindowDimensions();
 
     const isWeb = Platform.OS === "web";
-    const { userId, campusId, cursusId, cursusName } = useLocalSearchParams<{
-        userId: string;
-        campusId: string;
-        cursusId: string;
-        cursusName: string;
-    }>();
+    const { userId, campusId, campusName, cursusId, cursusName } =
+        useLocalSearchParams<{
+            userId: string;
+            campusId: string;
+            campusName: string;
+            cursusId: string;
+            cursusName: string;
+        }>();
     const [loading, setLoading] = useState(true);
     const [meals, setMeals] = useState<Meal[]>([]);
     const [refreshing, setRefreshing] = useState(false);
@@ -201,6 +203,7 @@ export default function MealsScreen() {
                 onClose={() => setShowCreateModal(false)}
                 campusId={campusId}
                 cursusId={cursusId}
+                campusName={campusName}
                 userId={userId}
                 onCreated={onRefresh}
             />
@@ -210,6 +213,7 @@ export default function MealsScreen() {
                 onClose={() => setEditMeal(null)}
                 campusId={campusId}
                 cursusId={cursusId}
+                campusName={campusName}
                 userId={userId}
                 initialMeal={editMeal}
                 editMode={true}

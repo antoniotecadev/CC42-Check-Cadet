@@ -47,14 +47,17 @@ export default function CursusScreen() {
     const [refreshing, setRefreshing] = useState(false);
     const [userId, setUserId] = useState<string | null>(null);
     const [campusId, setCampusId] = useState<string | null>(null);
+    const [campusName, setCampusName] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchCampusId = async () => {
             const userId = await getItem("user_id");
-            const campusId = await getItem("campus_id");
+            const campusId = await getItem("campus_id"); 
+            const campusName = await getItem("campus_name");
             if (campusId && userId) {
                 setUserId(userId);
                 setCampusId(campusId);
+                setCampusName(campusName);
             } else {
                 console.warn("User ID | Campus ID não encontrado");
             }
@@ -164,6 +167,7 @@ export default function CursusScreen() {
                                         params: {
                                             userId: userId,
                                             campusId: campusId,
+                                            campusName: campusName,
                                             cursusId: item.id,
                                             cursusName: item.name,
                                         },

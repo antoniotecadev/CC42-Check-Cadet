@@ -77,7 +77,8 @@ export function useLogin42() {
                     if (!sucess) {
                         clearTokens(); // Limpa os tokens se falhar ao buscar usuário
                         removeItem("user_id"); // Remove user_id se falhar
-                        removeItem("campus_id"); // Remove campus_id se falhar
+                        removeItem("campus_id"); // Remove campus_id se falhar 
+                        removeItem("campus_name");
                     }
                     setSucess(sucess);
                 } else {

@@ -17,7 +17,11 @@ import React, { useEffect } from "react";
 
 import { useReactQueryDevTools } from "@dev-plugins/react-query";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Buffer } from 'buffer';
 import { Platform } from "react-native";
+
+// serve para disponibilizar o objeto Buffer globalmente em ambientes onde ele não está presente por padrão
+global.Buffer = Buffer;
 
 const queryClient = new QueryClient({});
 

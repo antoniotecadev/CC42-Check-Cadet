@@ -1,8 +1,10 @@
 import { database } from "@/firebaseConfig";
+import { getGoogleAccessToken } from "@/services/AccessTokenGeneratorRN";
+import { sendNotificationForTopicDirect } from "@/services/FirebaseNotification";
 import axios from "axios";
 import { push, ref, set, update } from "firebase/database";
 import { useState } from "react";
-import { Platform } from "react-native";
+import { Alert, Platform } from "react-native";
 
 interface MealData {
     name: string;
@@ -15,6 +17,7 @@ interface MealData {
 interface CreateMealParams {
     campusId: string;
     cursusId: string;
+    campusName: string;
     userId: string;
     meal: MealData;
     imageUri?: string | null;
@@ -106,6 +109,7 @@ export function useCreateMeal() {
     async function createMeal({
         campusId,
         cursusId,
+        campusName,
         userId,
         meal,
         imageUri,
@@ -142,6 +146,31 @@ export function useCreateMeal() {
                 ),
                 mealData
             );
+
+            const topicStudent = `meals_${campusId}_${cursusId}`;
+            const topicStaff = `meals_${campusId}_${campusName}`;
+            const topics = [topicStudent, topicStaff];
+            const condition = topics
+                .map((topic) => `'${topic}' in topics`)
+                .join(" || ");
+
+            try {
+                const accessToken = await getGoogleAccessToken();
+                console.log("Obtained Access Token:", accessToken);
+
+                await sendNotificationForTopicDirect(
+                    accessToken,
+                    mealData,
+                    parseInt(cursusId),
+                    undefined, // O campo 'topic' deve ser null quando se usa 'condition'
+                    condition
+                );
+            } catch (error) {
+                Alert.alert(
+                    "Erro Geral",
+                    "Não foi possível completar o envio da notificação."
+                );
+            }
             setLoading(false);
             return mealData;
         } catch (e: any) {

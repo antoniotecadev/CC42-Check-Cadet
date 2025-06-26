@@ -59,6 +59,7 @@ const useFetchUser = () => {
             await saveUser(userWithCoalition);
             await setItem("user_id", `${userWithCoalition.id}`);
             await setItem("campus_id", `${userWithCoalition?.campus?.[0]?.id ?? 0}`);
+            await setItem("campus_name", `${userWithCoalition.campus?.[0]?.name?.trim()}`);
             return true;
         } catch (e) {
             showError("Erro", "Erro ao buscar dados do usuário: " + e);
