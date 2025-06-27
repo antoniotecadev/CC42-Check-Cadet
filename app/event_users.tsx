@@ -203,7 +203,7 @@ export default function EventUsersScreen() {
     if (isError) {
         return (
             <View style={styles.centered}>
-                <Text>Erro ao carregar usuários.</Text>
+                <Text>Erro ao carregar estudantes.</Text>
                 <Text onPress={() => refetch()} style={styles.retry}>
                     Tentar novamente
                 </Text>
