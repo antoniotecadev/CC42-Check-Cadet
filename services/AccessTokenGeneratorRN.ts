@@ -118,7 +118,7 @@ function isWeb() {
     return Platform.OS === "web";
 }
 
-async function setItem(key: string, value: string) {
+export async function setItem(key: string, value: string) {
     if (isWeb()) {
         localStorage.setItem(key, value);
     } else {
@@ -126,6 +126,6 @@ async function setItem(key: string, value: string) {
     }
 }
 
-async function getItem(key: string): Promise<string | null> {
+export async function getItem(key: string): Promise<string | null> {
     return isWeb() ? localStorage.getItem(key) : SecureStore.getItemAsync(key);
 }
