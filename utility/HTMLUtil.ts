@@ -1,4 +1,4 @@
-import { EventUser } from "@/repository/useEventUsersPaginated";
+import { EventUser } from "@/repository/eventRepository";
 
 // Função utilitária para gerar o HTML do PDF
 export function generateAttendanceHtml({
