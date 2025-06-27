@@ -148,6 +148,7 @@ export default function HomeScreen() {
                 removeItem("campus_name");
                 removeItem("expires_in_google");
                 removeItem("access_token_google");
+                router.replace("/login");
             },
             () => {
                 // Código a executar se o usuário cancelar (opcional)
