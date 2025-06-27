@@ -28,7 +28,6 @@ const infoCardWidth =
         ? Math.min(120, (windowWidth - CARD_MARGIN * 2 - CARD_GAP * 3) / 4)
         : (windowWidth - CARD_MARGIN * 2 - CARD_GAP * 3) / 4;
 
-const HEADER_IMAGE = require("../assets/images/back_default_42_16_9_horizontal.png");
 const QR_ICON = "qrcode";
 const ATTENDANCE_ICON = "clipboard-list-outline";
 
@@ -79,7 +78,7 @@ const EventDetailScreen = () => {
                 {/* Header with image and gradient */}
                 <View style={styles.headerContainer}>
                     <ImageBackground
-                        source={HEADER_IMAGE}
+                        source={require("@/assets/images/back_default_42_16_9_horizontal.png")}
                         style={styles.headerImage}
                         resizeMode="cover"
                     >
