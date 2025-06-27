@@ -86,7 +86,7 @@ export function useLogin42() {
                     showError("Erro", "Erro ao salvar o token");
                 }
             } catch (err: any) {
-                showError("Erro", "Erro ao trocar código por token: " + err);
+                showError("Erro", "Erro ao trocar código por token");
             } finally {
                 setLoading(false);
             }
