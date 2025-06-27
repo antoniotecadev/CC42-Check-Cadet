@@ -7,6 +7,7 @@ type Props = {
     onPress?: () => void;
     right?: number;
     left?: number;
+    top?: number;
     bottom?: number;
     width?: number;
     height?: number;
@@ -16,6 +17,7 @@ export default function FloatActionButton({
     nameIcon,
     right,
     left,
+    top,
     bottom,
     width,
     height,
@@ -27,9 +29,10 @@ export default function FloatActionButton({
                 position: "absolute",
                 left: left,
                 right: right,
+                top: top,
                 bottom: bottom,
                 zIndex: 10,
-                backgroundColor: "#fff",
+                backgroundColor: "rgba(255,255,255,0.7)",
                 borderRadius: 28,
                 elevation: 6,
                 shadowColor: "#000",

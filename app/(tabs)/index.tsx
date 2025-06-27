@@ -12,11 +12,17 @@ import { encrypt } from "@/utility/AESUtil";
 import { router, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
+import AboutModal from "@/components/ui/AboutModal";
 import EventItem from "@/components/ui/EventItem";
+import WebMenuModal from "@/components/ui/WebMenuModal";
+import useItemStorage from "@/hooks/storage/useItemStorage";
+import useTokenStorage from "@/hooks/storage/useTokenStorage";
 import { useEvents } from "@/repository/eventRepository";
 import { FlashList } from "@shopify/flash-list";
 import {
+    ActionSheetIOS,
     ActivityIndicator,
+    Alert,
     Platform,
     RefreshControl,
     StyleSheet,
@@ -27,7 +33,10 @@ import {
 export default function HomeScreen() {
     const router = useRouter();
     const { showInfo } = useAlert();
+    const { showConfirm } = useAlert();
     const { getUser } = useUserStorage();
+    const { removeItem } = useItemStorage();
+    const { clearTokens } = useTokenStorage();
     const { color, setColor } = useColorCoalition();
 
     const isWeb = Platform.OS === "web";
@@ -35,6 +44,8 @@ export default function HomeScreen() {
     const refreshRef = useRef<() => void>(null);
 
     const [user, setUser] = useState<any>(null);
+    const [aboutVisible, setAboutVisible] = useState(false);
+    const [webMenuVisible, setWebMenuVisible] = useState(false);
     const [userCrypt, setUserCrypt] = useState<string | null>(null);
 
     const blurhash =
@@ -55,10 +66,10 @@ export default function HomeScreen() {
             const userData = await getUser();
             setUser(userData);
             if (userData) {
-                showInfo(
-                    `Welcome back, ${userData.email}!`,
-                    JSON.stringify(userData.coalition, null, 2)
-                );
+                // showInfo(
+                //     `Welcome back, ${userData.email}!`,
+                //     JSON.stringify(userData.coalition, null, 2)
+                // );
                 setColor(
                     userData?.coalition?.color?.trim() ||
                         Colors.light_blue_900.default
@@ -88,128 +99,203 @@ export default function HomeScreen() {
         fetchUser();
     }, []);
 
-    return (
-        <ParallaxScrollView
-            headerBackgroundColor={{ light: "#A1CEDC", dark: "#1D3D47" }}
-            headerImage={
-                <React.Fragment>
-                    <Image
-                        source={
-                            user?.coalition?.cover_url ||
-                            require("@/assets/images/back_default_42_16_9_horizontal.png")
-                        }
-                        placeholder={{ blurhash }}
-                        transition={1000}
-                        style={styles.coalitionLogo}
-                        contentFit="fill"
-                    />
-                    {/* Texto sobre a imagem */}
-                    <ThemedView
-                        style={{
-                            position: "absolute",
-                            top: 0,
-                            left: 0,
-                            right: 0,
-                            bottom: 0,
-                            justifyContent: "center",
-                            alignItems: "center",
-                            zIndex: 1,
-                            backgroundColor: "transparent",
-                        }}
-                        pointerEvents="none"
-                    >
-                        <ThemedText
-                            type="defaultSemiBold"
-                            style={[
-                                styles.text,
-                                {
-                                    color:
-                                        user?.coalition?.color?.trim() ||
-                                        "#fff",
-                                },
-                            ]}
-                        >
-                            {user?.coalition?.name || "Default Coalition"}
-                        </ThemedText>
-                        <ThemedText
-                            type="default"
-                            style={[
-                                styles.text,
-                                {
-                                    color:
-                                        user?.coalition?.color?.trim() ||
-                                        "#fff",
-                                },
-                            ]}
-                        >
-                            {user?.displayname || ""}
-                        </ThemedText>
-                    </ThemedView>
-                    <ThemedText
-                        onPress={() =>
-                            router.push({
-                                pathname: "/qr_code_scanner",
-                                params: {
-                                    userData: JSON.stringify({
-                                        id: user?.id,
-                                        login: user?.login,
-                                        displayname: user?.displayname,
-                                        cursusId:
-                                            user?.projects_users?.[0]
-                                                ?.cursus_ids?.[0] || 0,
-                                        campusId: user?.campus?.[0]?.id || 0,
-                                        image:
-                                            user?.image?.link?.trim() ||
-                                            undefined,
-                                    }),
-                                },
-                            })
-                        }
-                        type="title"
-                        style={{
-                            color: "#fff",
-                            position: "absolute",
-                            alignSelf: "center",
-                            bottom: 16,
-                        }}
-                    >
-                        {user?.login || ""}
-                    </ThemedText>
-                    <FloatActionButton
-                        nameIcon={isWeb ? "reload-outline" : "arrow.clockwise"}
-                        left={16}
-                        bottom={16}
-                        onPress={onReloadEvents}
-                    />
-                    <FloatActionButton
-                        right={16}
-                        bottom={16}
-                        nameIcon={isWeb ? "qr-code-outline" : "qrcode"}
-                        onPress={() =>
-                            router.push({
-                                pathname: "/qr_code",
-                                params: {
-                                    content: userCrypt,
-                                    title: user?.login,
-                                    description: user?.displayname,
-                                },
-                            })
-                        }
-                    />
-                </React.Fragment>
+    const handleMenuPress = () => {
+        const options = ["QR Code Scanner", "Sobre", "Sair", "Cancelar"];
+        if (Platform.OS === "ios") {
+            ActionSheetIOS.showActionSheetWithOptions(
+                {
+                    options,
+                    cancelButtonIndex: 3,
+                    userInterfaceStyle: "dark",
+                },
+                (selectedIndex) => {
+                    if (selectedIndex === 0) handleQrCodeScanner();
+                    if (selectedIndex === 1) setAboutVisible(true);
+                    if (selectedIndex === 2) handleSignOut();
+                }
+            );
+        } else if (Platform.OS === "web") {
+            setWebMenuVisible(true);
+        } else {
+            Alert.alert("Menu", "Escolha uma opção", [
+                {
+                    text: "QR Code Scanner",
+                    onPress: () => {
+                        handleQrCodeScanner;
+                    },
+                },
+                { text: "Sobre", onPress: () => setAboutVisible(true) },
+                { text: "Sair", onPress: handleSignOut, style: "destructive" },
+                { text: "Cancelar", style: "cancel" },
+            ]);
+        }
+    };
+
+    const handleWebMenuSelect = (option: number) => {
+        if (option === 1) handleQrCodeScanner();
+        if (option === 2) setAboutVisible(true);
+        if (option === 3) handleSignOut();
+    };
+
+    const handleSignOut = () => {
+        showConfirm(
+            "Sair",
+            "Tem certeza que deseja terminar a sessão?",
+            () => {
+                clearTokens(); // Limpa os tokens se falhar ao buscar usuário
+                removeItem("user_id"); // Remove user_id se falhar
+                removeItem("campus_id"); // Remove campus_id se falhar
+                removeItem("campus_name");
+                removeItem("expires_in_google");
+                removeItem("access_token_google");
+            },
+            () => {
+                // Código a executar se o usuário cancelar (opcional)
+                console.log("Cancelado!");
             }
-        >
-            <>
-                {user && (
-                    <EventsList
-                        isWeb={isWeb}
-                        color={color}
-                        userData={user}
-                        onRefreshReady={handleRefreshReady}
-                    />
-                )}
-            </>
-        </ParallaxScrollView>
+        );
+    };
+
+    const handleQrCodeScanner = () => {
+        router.push({
+            pathname: "/qr_code_scanner",
+            params: {
+                userData: JSON.stringify({
+                    id: user?.id,
+                    login: user?.login,
+                    displayname: user?.displayname,
+                    cursusId: user?.projects_users?.[0]?.cursus_ids?.[0] || 0,
+                    campusId: user?.campus?.[0]?.id || 0,
+                    image: user?.image?.link?.trim() || undefined,
+                }),
+            },
+        });
+    };
+
+    return (
+        <>
+            <AboutModal
+                color={color}
+                visible={aboutVisible}
+                onClose={() => setAboutVisible(false)}
+            />
+            <WebMenuModal
+                visible={webMenuVisible}
+                onClose={() => setWebMenuVisible(false)}
+                onSelect={handleWebMenuSelect}
+            />
+            <ParallaxScrollView
+                headerBackgroundColor={{ light: "#A1CEDC", dark: "#1D3D47" }}
+                headerImage={
+                    <React.Fragment>
+                        <Image
+                            source={
+                                user?.coalition?.cover_url ||
+                                require("@/assets/images/back_default_42_16_9_horizontal.png")
+                            }
+                            placeholder={{ blurhash }}
+                            transition={1000}
+                            style={styles.coalitionLogo}
+                            contentFit="fill"
+                        />
+                        {/* Texto sobre a imagem */}
+                        <ThemedView
+                            style={{
+                                position: "absolute",
+                                top: 0,
+                                left: 0,
+                                right: 0,
+                                bottom: 0,
+                                justifyContent: "center",
+                                alignItems: "center",
+                                zIndex: 1,
+                                backgroundColor: "transparent",
+                            }}
+                            pointerEvents="none"
+                        >
+                            <ThemedText
+                                type="defaultSemiBold"
+                                style={[
+                                    styles.text,
+                                    {
+                                        color:
+                                            user?.coalition?.color?.trim() ||
+                                            "#fff",
+                                    },
+                                ]}
+                            >
+                                {user?.coalition?.name || "Default Coalition"}
+                            </ThemedText>
+                            <ThemedText
+                                type="default"
+                                style={[
+                                    styles.text,
+                                    {
+                                        color:
+                                            user?.coalition?.color?.trim() ||
+                                            "#fff",
+                                    },
+                                ]}
+                            >
+                                {user?.displayname || ""}
+                            </ThemedText>
+                        </ThemedView>
+                        <ThemedText
+                            onPress={() => handleMenuPress()}
+                            type="title"
+                            style={{
+                                color: "#fff",
+                                position: "absolute",
+                                alignSelf: "center",
+                                bottom: 16,
+                            }}
+                        >
+                            {user?.login || ""}
+                        </ThemedText>
+                        <FloatActionButton
+                            nameIcon={isWeb ? "menu" : "ellipsis"}
+                            right={16}
+                            top={isWeb ? 16 : 50}
+                            onPress={handleMenuPress}
+                        />
+                        <FloatActionButton
+                            nameIcon={
+                                isWeb ? "reload-outline" : "arrow.clockwise"
+                            }
+                            left={16}
+                            bottom={16}
+                            onPress={onReloadEvents}
+                        />
+                        <FloatActionButton
+                            right={16}
+                            bottom={16}
+                            nameIcon={isWeb ? "qr-code-outline" : "qrcode"}
+                            onPress={() =>
+                                router.push({
+                                    pathname: "/qr_code",
+                                    params: {
+                                        content: userCrypt,
+                                        title: user?.login,
+                                        description: user?.displayname,
+                                    },
+                                })
+                            }
+                        />
+                    </React.Fragment>
+                }
+            >
+                <>
+                    {user && (
+                        <EventsList
+                            isWeb={isWeb}
+                            color={color}
+                            userData={user}
+                            onRefreshReady={handleRefreshReady}
+                        />
+                    )}
+                </>
+            </ParallaxScrollView>
+        </>
     );
 }
 
