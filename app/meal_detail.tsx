@@ -50,14 +50,8 @@ export default function MealDetailScreen() {
                 style={[styles.container, isWeb ? styles.inner : {}]}
             >
                 <ScrollView showsVerticalScrollIndicator={isWeb}>
-                    <ThemedView darkColor="#222" style={styles.card}>
+                    <ThemedView darkColor="#333" style={styles.card}>
                         <ThemedText style={styles.type}>{meal.type}</ThemedText>
-                        <View
-                            style={[
-                                styles.divider,
-                                { backgroundColor: colorDivider },
-                            ]}
-                        />
                         <ThemedText style={styles.name}>{meal.name}</ThemedText>
                         <Text style={styles.desc}>{meal.description}</Text>
                         {meal.pathImage ? (
@@ -73,26 +67,20 @@ export default function MealDetailScreen() {
                                 name="restaurant"
                             />
                         )}
-                        <RatingSection
-                            color={colorCard}
-                            campusId={campusId}
-                            cursusId={cursusId}
-                            type="meals"
-                            typeId={meal.id}
-                            userId={userId}
-                        />
-                        <View
-                            style={[
-                                styles.divider,
-                                { backgroundColor: colorDivider },
-                            ]}
-                        />
                         <Text style={styles.date}>{meal.createdDate}</Text>
                         <Text style={styles.qty}>
                             Quantidade: {meal.quantity} /{" "}
                             {meal.numberSubscribed}
                         </Text>
                     </ThemedView>
+                    <RatingSection
+                        color={colorCard}
+                        campusId={campusId}
+                        cursusId={cursusId}
+                        type="meals"
+                        typeId={meal.id}
+                        userId={userId}
+                    />
                     <View style={styles.fabRow}>
                         <TouchableOpacity
                             onPress={() =>
@@ -145,8 +133,7 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         elevation: 4,
         margin: 16,
-        padding: 20,
-        width: "95%",
+        padding: 12,
         alignItems: "center",
         shadowColor: "#000",
         shadowOpacity: 0.08,
@@ -159,23 +146,17 @@ const styles = StyleSheet.create({
         textAlign: "center",
         marginBottom: 8,
     },
-    divider: {
-        width: "100%",
-        height: 1,
-        marginVertical: 8,
-    },
     name: {
-        fontSize: 20,
+        fontSize: 16,
         fontWeight: "normal",
         textAlign: "center",
         marginBottom: 4,
-        fontStyle: "italic",
     },
     desc: {
         fontSize: 15,
         textAlign: "center",
         marginBottom: 12,
-        color: "#444",
+        color: "#888",
     },
     image: {
         width: "100%",
@@ -188,7 +169,6 @@ const styles = StyleSheet.create({
         fontSize: 13,
         color: "#888",
         textAlign: "center",
-        marginTop: 12,
     },
     qty: {
         fontSize: 15,
@@ -200,7 +180,6 @@ const styles = StyleSheet.create({
     fabRow: {
         flexDirection: "row",
         justifyContent: "center",
-        marginVertical: 24,
         gap: 24,
     },
     fab: {
