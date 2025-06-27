@@ -1,5 +1,6 @@
 import axios from "axios";
 import { Alert } from "react-native";
+import { getItem, setItem } from "./AccessTokenGeneratorRN";
 
 class Notification {
     title: string;
@@ -158,3 +159,30 @@ export const sendNotificationForTopicDirect = async (
         );
     }
 };
+
+export async function subscribeToMealTopic(
+    campusName: string,
+    campusId: string,
+    cursusId: string,
+    isStaff: boolean
+) {
+    const isSubscribed = await getItem("subscribe_topic");
+    if (!isSubscribed) {
+        let topic = `meals_${campusId}_`;
+        if (isStaff) {
+            topic += campusName;
+        } else {
+            topic += cursusId;
+        }
+        try {
+            // await messaging().subscribeToTopic(topic);
+            await setItem("subscribe_topic", "true");
+        } catch (error: any) {
+            console.error("Failed to subscribe to topic:", error);
+            Alert.alert(
+                "Erro",
+                "Failed to subscribe to topic: " + error.message
+            );
+        }
+    }
+}
