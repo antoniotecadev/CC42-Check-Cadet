@@ -3,9 +3,10 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import RatingSection from "@/components/ui/RatingSection";
 import { useColorScheme } from "@/hooks/useColorScheme";
+import { encrypt } from "@/utility/AESUtil";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
-import { Stack, useLocalSearchParams } from "expo-router";
+import { router, Stack, useLocalSearchParams } from "expo-router";
 import {
     Platform,
     ScrollView,
@@ -94,6 +95,22 @@ export default function MealDetailScreen() {
                     </ThemedView>
                     <View style={styles.fabRow}>
                         <TouchableOpacity
+                            onPress={() =>
+                                router.push({
+                                    pathname: "/qr_code",
+                                    params: {
+                                        content: encrypt(
+                                            "cc42meal" + meal.id + "#" + userId
+                                        ),
+                                        title: meal?.name,
+                                        description: meal?.description,
+                                        isEvent: "false",
+                                        userId: userId,
+                                        campusId: campusId,
+                                        cursusId: cursusId,
+                                    },
+                                })
+                            }
                             style={[styles.fab, { backgroundColor: colorCard }]}
                         >
                             <MaterialCommunityIcons
