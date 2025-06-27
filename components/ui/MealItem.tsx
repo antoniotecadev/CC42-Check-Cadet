@@ -37,21 +37,21 @@ const MealItem: React.FC<MealItemProps> = ({ item, color, borderColor }) => {
                 />
             )}
             <View style={styles.infoCol}>
-                <Text style={styles.type}>{item.type}</Text>
                 <ThemedText style={styles.name}>{item.name}</ThemedText>
                 <ThemedText style={styles.desc}>{item.description}</ThemedText>
+
+                <Text style={styles.type}>
+                    {item.type} {item.createdDate} {item.quantity}/
+                    {item.numberSubscribed}{" "}
+                </Text>
                 <Text
                     style={[
                         styles.sub,
                         { color: item.isSubscribed ? "green" : "red" },
                     ]}
                 >
-                    {item.isSubscribed ? "Assinado" : "Não assinado"}
+                    {item.isSubscribed ? "Assinado" : ""}
                 </Text>
-                <Text style={styles.qty}>
-                    Quantidade: {item.quantity} / {item.numberSubscribed}
-                </Text>
-                <Text style={styles.date}>{item.createdDate}</Text>
             </View>
         </View>
     );
@@ -72,12 +72,10 @@ const styles = StyleSheet.create({
         marginRight: 16,
     },
     infoCol: { flex: 1 },
-    name: { fontWeight: "bold", fontSize: 16 },
+    name: { fontWeight: "bold", fontSize: 14 },
     type: { fontSize: 12, color: "#888" },
     desc: { fontSize: 12 },
-    qty: { fontSize: 12, color: "#007AFF" },
-    date: { fontSize: 10, color: "#888" },
-    sub: { fontSize: 12, fontWeight: "normal" },
+    sub: { fontSize: 12 },
 });
 
 export default MealItem;
