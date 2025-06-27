@@ -58,6 +58,7 @@ export default function MealsScreen() {
     const [meals, setMeals] = useState<Meal[]>([]);
     const [refreshing, setRefreshing] = useState(false);
     const [endReached, setEndReached] = useState(false);
+    const [loadingMore, setLoadingMore] = useState(false);
     const [lastKey, setLastKey] = useState<string | null>(null);
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [editMeal, setEditMeal] = useState<Meal | null>(null);
@@ -65,7 +66,6 @@ export default function MealsScreen() {
     const fetchMeals = useCallback(
         (startAtKey: string | null = null, append = false) => {
             if (!campusId || !cursusId) return;
-            setLoading(true);
             let mealsRef = ref(
                 database,
                 `campus/${campusId}/cursus/${cursusId}/meals`
@@ -108,11 +108,19 @@ export default function MealsScreen() {
                         newLastKey = dataSnapshot.key;
                     });
                     mealList.reverse();
-                    setMeals((prev) =>
-                        append ? [...prev, ...mealList] : mealList
-                    );
+                    setMeals((prev) => {
+                        let newMeals = append
+                            ? [...prev, ...mealList]
+                            : mealList;
+                        // Remover duplicatas pelo id
+                        const uniqueMeals = new Map();
+                        newMeals.forEach((m) => uniqueMeals.set(m.id, m));
+                        return Array.from(uniqueMeals.values());
+                    });
                     setLastKey(newLastKey);
                     setLoading(false);
+                    setRefreshing(false);
+                    setLoadingMore(false);
                     setEndReached(mealList.length < 15);
                 },
                 { onlyOnce: true }
@@ -128,11 +136,11 @@ export default function MealsScreen() {
     const onRefresh = () => {
         setRefreshing(true);
         fetchMeals(null, false);
-        setRefreshing(false);
     };
 
     const loadMore = () => {
         if (!endReached && lastKey) {
+            setLoadingMore(true);
             fetchMeals(lastKey, true);
         }
     };
@@ -226,7 +234,7 @@ export default function MealsScreen() {
                 lightColor="#fff"
                 style={[styles.container, isWeb ? styles.inner : {}]}
             >
-                {isWeb && loading && (
+                {((isWeb && refreshing) || loading) && (
                     <ActivityIndicator
                         size="large"
                         color={color}
@@ -275,8 +283,17 @@ export default function MealsScreen() {
                             />
                         </TouchableOpacity>
                     )}
+                    ListFooterComponent={
+                        loadingMore ? (
+                            <ActivityIndicator
+                                size="small"
+                                color={color}
+                                style={{ margin: 16 }}
+                            />
+                        ) : null
+                    }
                     estimatedItemSize={76}
-                    refreshing={refreshing || loading}
+                    refreshing={refreshing}
                     onRefresh={onRefresh}
                     onEndReached={loadMore}
                     onEndReachedThreshold={0.2}
@@ -319,5 +336,9 @@ const styles = StyleSheet.create({
         maxWidth: 600, // limite superior
         minWidth: 480, // limite inferior (opcional)
         marginHorizontal: "auto", // centraliza na web (usando style prop em web pura)
+    },
+    alignText: {
+        alignSelf: "center",
+        justifyContent: "center",
     },
 });
