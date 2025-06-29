@@ -269,7 +269,7 @@ export default function EventUsersScreen() {
                     />
                 )}
                 estimatedItemSize={80}
-                // onEndReached={() => {
+                // onEndReached={() => { // option - if use remove function React.useEffectin line 72
                 //     if (hasNextPage && !isFetchingNextPage) fetchNextPage();
                 // }}
                 // onEndReachedThreshold={0.2}
