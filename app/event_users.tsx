@@ -68,6 +68,13 @@ export default function EventUsersScreen() {
         (u) => u.isPresent === false
     ).length;
 
+    // Carrega todas as páginas automaticamente até não ter mais
+    React.useEffect(() => {
+        if (!isLoading && hasNextPage && !isFetchingNextPage) {
+            fetchNextPage();
+        }
+    }, [isLoading, hasNextPage, isFetchingNextPage, fetchNextPage]);
+
     async function handlePrintPdf() {
         const html = generateAttendanceHtml({
             title: "Lista de Presença",
@@ -262,10 +269,10 @@ export default function EventUsersScreen() {
                     />
                 )}
                 estimatedItemSize={80}
-                onEndReached={() => {
-                    if (hasNextPage && !isFetchingNextPage) fetchNextPage();
-                }}
-                onEndReachedThreshold={0.2}
+                // onEndReached={() => {
+                //     if (hasNextPage && !isFetchingNextPage) fetchNextPage();
+                // }}
+                // onEndReachedThreshold={0.2}
                 ListFooterComponent={
                     isFetchingNextPage ? (
                         <ActivityIndicator color={color} />

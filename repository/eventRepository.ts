@@ -261,7 +261,7 @@ export function useEventUsersPaginated(eventId: number, pageSize = 30) {
         getNextPageParam: (lastPage) => lastPage.nextPage, // Define a próxima página com base no tamanho da página
         enabled: !!eventId, // Garante que a query só roda se eventId estiver definido
         refetchOnWindowFocus: false, // Evita refetch automático ao voltar para a página
-        staleTime: 1000 * 60 * 5, // Dados ficam "frescos" por 5 minutos
+        staleTime: 1000 * 60 * 30, // Dados ficam "frescos" por 30 minutos
         retry: 2, // Tenta novamente 2 vezes em caso de falha
     });
 }
