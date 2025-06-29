@@ -232,6 +232,7 @@ const EventDetailScreen = () => {
                                 router.push({
                                     pathname: "/event_users",
                                     params: {
+                                        type: "events",
                                         eventId: eventId,
                                         userId: userId,
                                         campusId: campusId,

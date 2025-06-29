@@ -20,9 +20,10 @@ export default function QrCodeScanner() {
     const player = useAudioPlayer(require("../assets/beep.mp3"));
 
     const { color } = useColorCoalition();
-    const { userData, eventId, camera } = useLocalSearchParams<{
+    const { userData, eventId, mealId, camera } = useLocalSearchParams<{
         userData: string;
         eventId: string;
+        mealId: string;
         camera: CameraType;
     }>();
     const user = typeof userData === "string" ? JSON.parse(userData) : null;
@@ -58,6 +59,7 @@ export default function QrCodeScanner() {
             await handleQrCode({
                 barcodeResult: barcode,
                 eventId: eventId,
+                mealId: mealId,
                 userId: user?.id,
                 displayName: user?.displayname,
                 cursusId: user?.cursusId,

@@ -6,9 +6,11 @@ interface EventUserItemProps {
     login: string;
     displayName: string;
     imageUrl?: string;
-    isPresent?: boolean;
     onPress?: () => void;
     colorscheme: string;
+    type: string;
+    isPresent?: boolean;
+    isSusbscribed?: boolean;
 }
 
 const blurhash =
@@ -18,9 +20,11 @@ export const EventUserItem: React.FC<EventUserItemProps> = ({
     login,
     displayName,
     imageUrl,
-    isPresent,
     onPress,
     colorscheme,
+    type,
+    isPresent,
+    isSusbscribed,
 }) => {
     return (
         <TouchableOpacity
@@ -44,18 +48,18 @@ export const EventUserItem: React.FC<EventUserItemProps> = ({
                     <Text
                         style={[
                             styles.present,
-                            isPresent === true
+                            isPresent || isSusbscribed
                                 ? styles.presentYes
-                                : isPresent === false
-                                ? styles.presentNo
-                                : null,
+                                : styles.presentNo,
                         ]}
                     >
-                        {isPresent === true
-                            ? "Presente"
-                            : isPresent === false
-                            ? "Ausente"
-                            : ""}
+                        {type === "events"
+                            ? isPresent
+                                ? "Presente"
+                                : "Ausente"
+                            : isSusbscribed
+                            ? "Assinado"
+                            : "Não assinado"}
                     </Text>
                 </View>
                 <Text style={styles.displayName}>{displayName}</Text>

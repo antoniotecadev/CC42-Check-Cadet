@@ -2,8 +2,12 @@ import { useColorCoalition } from "@/components/ColorCoalitionContext";
 import { ThemedView } from "@/components/ThemedView";
 import EventUserItem from "@/components/ui/EventUserItem";
 import { useColorScheme } from "@/hooks/useColorScheme";
-import { useEventAttendanceIds } from "@/hooks/useEventAttendanceIds";
-import { useEventUsersPaginated } from "@/repository/eventRepository";
+import { useIds } from "@/hooks/useEventAttendanceIds";
+import {
+    UserPresence,
+    UserSubscription,
+    useUsersPaginated,
+} from "@/repository/eventRepository";
 import { generateAttendanceHtml } from "@/utility/HTMLUtil";
 import { useBase64Image } from "@/utility/ImageUtil";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
@@ -24,6 +28,8 @@ import {
     View,
 } from "react-native";
 
+const EVENTS: string = "events";
+
 export default function EventUsersScreen() {
     const navigation = useNavigation();
     const colorScheme = useColorScheme();
@@ -31,16 +37,32 @@ export default function EventUsersScreen() {
     const { color } = useColorCoalition();
 
     const isWeb = Platform.OS === "web";
-    const { eventId, userId, campusId, cursusId, eventName, eventDate } =
-        useLocalSearchParams<{
-            eventId: string;
-            userId: string;
-            campusId: string;
-            cursusId: string;
-            eventName: string;
-            eventDate: string;
-        }>();
-    const attendanceIds = useEventAttendanceIds(campusId, cursusId, eventId);
+    const {
+        type,
+        eventId,
+        userId,
+        campusId,
+        cursusId,
+        eventName,
+        eventDate,
+        mealId,
+        mealName,
+        mealCreatedDate,
+    } = useLocalSearchParams<{
+        type: string;
+        eventId: string;
+        userId: string;
+        campusId: string;
+        cursusId: string;
+        eventName: string;
+        eventDate: string;
+        mealId: string;
+        mealName: string;
+        mealCreatedDate: string;
+    }>();
+    const typeId = type === EVENTS ? eventId : mealId;
+    const endPoint = type === EVENTS ? "participants" : "subscriptions";
+    const ids = useIds(campusId, cursusId, type, typeId, endPoint);
     const {
         data,
         isLoading,
@@ -49,24 +71,67 @@ export default function EventUsersScreen() {
         hasNextPage,
         isFetchingNextPage,
         refetch,
-    } = useEventUsersPaginated(Number(eventId));
+    } = useUsersPaginated(type, eventId, cursusId, campusId);
 
     const [refreshing, setRefreshing] = React.useState(false);
     const colorscheme = colorScheme === "dark" ? "#333" : "#fff";
 
-    const users = data?.pages.flatMap((page) => page.users) || [];
+    const users: UserPresence[] =
+        data?.pages.flatMap((page) =>
+            type === EVENTS
+                ? (page.users as UserPresence[])
+                : (page.users as UserSubscription[]).map((s) => ({
+                      ...s.user,
+                      isSubscribed: false, // default, will be set later
+                  }))
+        ) || [];
+
     // Marcar presença de acordo com o Firebase
-    const usersWithPresence = users.map((u) => ({
-        ...u,
-        isPresent: attendanceIds.includes(String(u.id)),
-    }));
-    // Contagem de presentes e ausentes
-    const presents = usersWithPresence.filter(
-        (u) => u.isPresent === true
-    ).length;
-    const absents = usersWithPresence.filter(
-        (u) => u.isPresent === false
-    ).length;
+    let userAttendanceList: UserPresence[] = [];
+    let userSubscriptionsList: UserPresence[] = [];
+    let numberPresents: number = 0,
+        numberAbsents: number = 0,
+        numberSubscribed: number = 0,
+        numberUnSubscribed: number = 0;
+
+    if (type === EVENTS) {
+        userAttendanceList = users.map((u) => ({
+            ...u,
+            isPresent: ids.includes(String(u.id)),
+        }));
+        // Contagem de presentes e ausentes
+        numberPresents = userAttendanceList.filter(
+            (u) => u.isPresent === true
+        ).length;
+        numberAbsents = userAttendanceList.filter(
+            (u) => u.isPresent === false
+        ).length;
+    } else {
+        //alert(JSON.stringify(users, null, 2))
+        userSubscriptionsList = users.map((u) => ({
+            ...u,
+            isSubscribed: ids.includes(String(u.id)),
+        }));
+        // Contagem de presentes e ausentes
+        numberSubscribed = userSubscriptionsList.filter(
+            (u) => u.isSubscribed === true
+        ).length;
+        numberUnSubscribed = userSubscriptionsList.filter(
+            (u) => u.isSubscribed === false
+        ).length;
+    }
+
+    const date = type === EVENTS ? eventDate : mealCreatedDate;
+    const title =
+        type === EVENTS
+            ? ["Lista de Presença", eventName]
+            : ["Lista de Assinaturas", mealName];
+    const numberPresenceORSubscribed: number =
+        type === EVENTS ? numberPresents : numberSubscribed;
+    const numberAbsentsORUnSubscribed =
+        type === EVENTS ? numberAbsents : numberUnSubscribed;
+    const userPresenceSubscribed =
+        type === EVENTS ? userAttendanceList : userSubscriptionsList;
 
     // Carrega todas as páginas automaticamente até não ter mais
     React.useEffect(() => {
@@ -77,13 +142,13 @@ export default function EventUsersScreen() {
 
     async function handlePrintPdf() {
         const html = generateAttendanceHtml({
-            title: "Lista de Presença",
+            title: title[0],
             logoBase64: base64Image ?? "",
-            eventName,
-            eventDate,
-            presents,
-            absents,
-            usersWithPresence,
+            description: title[1],
+            date,
+            numberPresenceORSubscribed,
+            numberAbsentsORUnSubscribed,
+            userPresenceSubscribed,
         });
         if (isWeb) {
             await Print.printAsync({ html });
@@ -93,7 +158,7 @@ export default function EventUsersScreen() {
                 base64: false,
             });
             await Sharing.shareAsync(uri, {
-                dialogTitle: "Imprimir ou Partilhar Lista de Presença",
+                dialogTitle: `Imprimir ou Partilhar ${title}`,
                 UTI: ".pdf",
                 mimeType: "application/pdf",
             });
@@ -102,19 +167,27 @@ export default function EventUsersScreen() {
 
     async function handleExportExcel() {
         // Monta os dados CSV
-        const header = "Nº;Nome Completo;Login;Presença\n";
-        const rows = usersWithPresence
+        const header = `Nº;Nome Completo;Login; ${
+            type === EVENTS ? "Presença" : "Assinatura"
+        }\n`;
+        const rows = userPresenceSubscribed
             .map(
                 (u, i) =>
                     `${i + 1};"${u.displayname}";${u.login};${
-                        u.isPresent ? "Presente" : "Ausente"
+                        type === EVENTS
+                            ? u.isPresent
+                                ? "Presente"
+                                : "Ausente"
+                            : u.isSubscribed
+                            ? "Assinado"
+                            : "Não assinado"
                     }`
             )
             .join("\n");
         // Adiciona BOM UTF-8 para compatibilidade com Excel
         const csv = String.fromCharCode(0xfeff) + header + rows;
         const fileName = `lista_presenca_${
-            eventName ? eventName.replace(/\s+/g, "_") : "evento"
+            title[1] ? title[1].replace(/\s+/g, "_") : type
         }.csv`;
         if (isWeb) {
             // Cria um blob e faz download directo no navegador
@@ -161,6 +234,7 @@ export default function EventUsersScreen() {
     React.useLayoutEffect(() => {
         navigation.setOptions &&
             navigation.setOptions({
+                headerTitle: title[1],
                 headerRight: () =>
                     isWeb ? (
                         <>
@@ -192,7 +266,7 @@ export default function EventUsersScreen() {
                         </TouchableOpacity>
                     ),
             });
-    }, [navigation, color, usersWithPresence]);
+    }, [navigation, color, userPresenceSubscribed]);
 
     const onRefresh = useCallback(async () => {
         setRefreshing(true);
@@ -219,133 +293,139 @@ export default function EventUsersScreen() {
     }
 
     return (
-        <ThemedView
-            lightColor={"#f7f7f7"}
-            style={[{ flex: 1 }, isWeb ? styles.inner : {}]}
-        >
-            {isWeb && refreshing && (
-                <ActivityIndicator
-                    size="large"
-                    color={color}
-                    style={{ marginTop: 16 }}
+        <>
+            <ThemedView
+                lightColor={"#f7f7f7"}
+                style={[{ flex: 1 }, isWeb ? styles.inner : {}]}
+            >
+                {isWeb && refreshing && (
+                    <ActivityIndicator
+                        size="large"
+                        color={color}
+                        style={{ marginTop: 16 }}
+                    />
+                )}
+                {/* Chips de presentes e ausentes - agora absolutos no topo direito */}
+                <View style={styles.chipAbsoluteRow} pointerEvents="box-none">
+                    <View style={[styles.chip, styles.chipPresent]}>
+                        <MaterialCommunityIcons
+                            name="account-check"
+                            size={18}
+                            color={colorscheme}
+                            style={{ marginRight: 4 }}
+                        />
+                        <Text style={[styles.chipText, { color: colorscheme }]}>
+                            {numberPresenceORSubscribed}
+                        </Text>
+                    </View>
+                    <View style={[styles.chip, styles.chipAbsent]}>
+                        <MaterialCommunityIcons
+                            name="account-remove"
+                            size={18}
+                            color={colorscheme}
+                            style={{ marginRight: 4 }}
+                        />
+                        <Text style={[styles.chipText, { color: colorscheme }]}>
+                            {numberAbsentsORUnSubscribed}
+                        </Text>
+                    </View>
+                </View>
+                <FlashList
+                    data={userPresenceSubscribed}
+                    renderItem={({ item }) => (
+                        <EventUserItem
+                            login={item.login}
+                            colorscheme={colorscheme}
+                            displayName={item.displayname}
+                            imageUrl={
+                                item.image?.link?.toString().trim() || undefined
+                            }
+                            type={type}
+                            isPresent={item.isPresent}
+                            isSusbscribed={item.isSubscribed}
+                        />
+                    )}
+                    estimatedItemSize={type === EVENTS ? 100 : 300}
+                    // onEndReached={() => { // option - if use remove function React.useEffectin line 72
+                    //     if (hasNextPage && !isFetchingNextPage) fetchNextPage();
+                    // }}
+                    // onEndReachedThreshold={0.2}
+                    ListFooterComponent={
+                        isFetchingNextPage ? (
+                            <ActivityIndicator color={color} />
+                        ) : null
+                    }
+                    keyExtractor={(item) => String(item.id)}
+                    refreshing={refreshing}
+                    onRefresh={onRefresh}
                 />
-            )}
-            {/* Chips de presentes e ausentes - agora absolutos no topo direito */}
-            <View style={styles.chipAbsoluteRow} pointerEvents="box-none">
-                <View style={[styles.chip, styles.chipPresent]}>
-                    <MaterialCommunityIcons
-                        name="account-check"
-                        size={18}
-                        color={colorscheme}
-                        style={{ marginRight: 4 }}
-                    />
-                    <Text style={[styles.chipText, { color: colorscheme }]}>
-                        {presents}
-                    </Text>
-                </View>
-                <View style={[styles.chip, styles.chipAbsent]}>
-                    <MaterialCommunityIcons
-                        name="account-remove"
-                        size={18}
-                        color={colorscheme}
-                        style={{ marginRight: 4 }}
-                    />
-                    <Text style={[styles.chipText, { color: colorscheme }]}>
-                        {absents}
-                    </Text>
-                </View>
-            </View>
-            <FlashList
-                data={usersWithPresence}
-                renderItem={({ item }) => (
-                    <EventUserItem
-                        login={item.login}
-                        colorscheme={colorscheme}
-                        displayName={item.displayname}
-                        imageUrl={
-                            item.image?.link?.toString().trim() || undefined
-                        }
-                        isPresent={item.isPresent}
-                    />
-                )}
-                estimatedItemSize={80}
-                // onEndReached={() => { // option - if use remove function React.useEffectin line 72
-                //     if (hasNextPage && !isFetchingNextPage) fetchNextPage();
-                // }}
-                // onEndReachedThreshold={0.2}
-                ListFooterComponent={
-                    isFetchingNextPage ? (
-                        <ActivityIndicator color={color} />
-                    ) : null
-                }
-                keyExtractor={(item) => String(item.id)}
-                refreshing={refreshing}
-                onRefresh={onRefresh}
-            />
-            {/* Floating Action Buttons */}
-            <View style={styles.fabContainer} pointerEvents="box-none">
-                <TouchableOpacity
-                    style={[
-                        styles.fab,
-                        styles.fabLeft,
-                        { backgroundColor: color },
-                    ]}
-                    onPress={() => {
-                        router.push({
-                            pathname: "/qr_code_scanner",
-                            params: {
-                                camera: "back",
-                                eventId: eventId,
-                                userData: JSON.stringify({
-                                    id: userId,
-                                }),
-                            },
-                        });
-                    }}
-                    activeOpacity={0.8}
-                >
-                    <MaterialCommunityIcons
-                        name="camera-rear"
-                        size={32}
-                        color={colorscheme}
-                    />
-                </TouchableOpacity>
-                {isWeb && (
+                {/* Floating Action Buttons */}
+                <View style={styles.fabContainer} pointerEvents="box-none">
                     <TouchableOpacity
-                        style={[styles.fab, { backgroundColor: color }]}
-                        onPress={onRefresh}
+                        style={[
+                            styles.fab,
+                            styles.fabLeft,
+                            { backgroundColor: color },
+                        ]}
+                        onPress={() => {
+                            router.push({
+                                pathname: "/qr_code_scanner",
+                                params: {
+                                    camera: "back",
+                                    eventId: eventId,
+                                    mealId: mealId,
+                                    userData: JSON.stringify({
+                                        id: userId,
+                                    }),
+                                },
+                            });
+                        }}
+                        activeOpacity={0.8}
                     >
-                        <Ionicons name="refresh" size={28} color="#fff" />
+                        <MaterialCommunityIcons
+                            name="camera-rear"
+                            size={32}
+                            color={colorscheme}
+                        />
                     </TouchableOpacity>
-                )}
-                <TouchableOpacity
-                    style={[
-                        styles.fab,
-                        styles.fabRight,
-                        { backgroundColor: color },
-                    ]}
-                    onPress={() => {
-                        router.push({
-                            pathname: "/qr_code_scanner",
-                            params: {
-                                camera: "front",
-                                eventId: eventId,
-                                userData: JSON.stringify({
-                                    id: userId,
-                                }),
-                            },
-                        });
-                    }}
-                    activeOpacity={0.8}
-                >
-                    <MaterialCommunityIcons
-                        name="camera-front"
-                        size={32}
-                        color={colorscheme}
-                    />
-                </TouchableOpacity>
-            </View>
-        </ThemedView>
+                    {isWeb && (
+                        <TouchableOpacity
+                            style={[styles.fab, { backgroundColor: color }]}
+                            onPress={onRefresh}
+                        >
+                            <Ionicons name="refresh" size={28} color="#fff" />
+                        </TouchableOpacity>
+                    )}
+                    <TouchableOpacity
+                        style={[
+                            styles.fab,
+                            styles.fabRight,
+                            { backgroundColor: color },
+                        ]}
+                        onPress={() => {
+                            router.push({
+                                pathname: "/qr_code_scanner",
+                                params: {
+                                    camera: "front",
+                                    eventId: eventId,
+                                    mealId: mealId,
+                                    userData: JSON.stringify({
+                                        id: userId,
+                                    }),
+                                },
+                            });
+                        }}
+                        activeOpacity={0.8}
+                    >
+                        <MaterialCommunityIcons
+                            name="camera-front"
+                            size={32}
+                            color={colorscheme}
+                        />
+                    </TouchableOpacity>
+                </View>
+            </ThemedView>
+        </>
     );
 }
 

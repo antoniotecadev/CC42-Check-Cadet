@@ -2,26 +2,28 @@ import { database } from "@/firebaseConfig";
 import { onValue, ref } from "firebase/database";
 import { useEffect, useState } from "react";
 
-export function useEventAttendanceIds(
-    campusId?: string,
-    cursusId?: string,
-    eventId?: string
+export function useIds(
+    campusId: string,
+    cursusId: string,
+    type: string,
+    typeId: string,
+    endPoint: string
 ) {
-    const [attendanceIds, setAttendanceIds] = useState<string[]>([]);
+    const [ids, setIds] = useState<string[]>([]);
     useEffect(() => {
-        if (!campusId || !cursusId || !eventId) return;
-        const participantsRef = ref(
+        if (!campusId || !cursusId || !typeId) return;
+        const reference = ref(
             database,
-            `campus/${campusId}/cursus/${cursusId}/events/${eventId}/participants`
+            `campus/${campusId}/cursus/${cursusId}/${type}/${typeId}/${endPoint}`
         );
-        const unsubscribe = onValue(participantsRef, (snapshot) => {
+        const unsubscribe = onValue(reference, (snapshot) => {
             const ids: string[] = [];
             snapshot.forEach((child) => {
                 ids.push(child.key!);
             });
-            setAttendanceIds(ids);
+            setIds(ids);
         });
         return () => unsubscribe();
-    }, [campusId, cursusId, eventId]);
-    return attendanceIds;
+    }, [campusId, cursusId, typeId]);
+    return ids;
 }

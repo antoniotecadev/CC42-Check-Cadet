@@ -232,7 +232,7 @@ export async function markAttendance({
     }
 }
 
-export interface EventUser {
+export interface UserPresence {
     id: number;
     login: string;
     displayname: string;
@@ -241,16 +241,30 @@ export interface EventUser {
     isSubscribed: boolean;
 }
 
-export function useEventUsersPaginated(eventId: number, pageSize = 30) {
-    const { api } = useApiInterceptors();
+export interface UserSubscription {
+    user: UserPresence;
+}
 
+export function useUsersPaginated(
+    type: string,
+    eventId: string,
+    cursusId: string,
+    campusId: string,
+    pageSize = 30
+) {
+    let res;
+    const { api } = useApiInterceptors();
     return useInfiniteQuery({
-        queryKey: ["event-users", eventId], // Chave única para identificar a query
+        queryKey: type === "events" ? ["event-users", eventId] : ["meal-users"], // Chave única para identificar a query
         queryFn: async ({ pageParam = 1 }) => {
-            // Função que busca os usuários do evento
-            const res = await api.get<EventUser[]>(
-                `/v2/events/${eventId}/users?page[number]=${pageParam}&page[size]=${pageSize}`
-            );
+            // Função que busca os usuários
+            type === "events"
+                ? (res = await api.get<UserPresence[]>(
+                      `/v2/events/${eventId}/users?page[number]=${pageParam}&page[size]=${pageSize}`
+                  ))
+                : (res = await api.get<UserSubscription[]>(
+                      `/v2/cursus_users?filter[cursus_id]=${cursusId}&filter[campus_id]=${campusId}&filter[active]=true&page[number]=${pageParam}&page[size]=${pageSize}`
+                  ));
             return {
                 users: res.data,
                 nextPage:
@@ -259,7 +273,7 @@ export function useEventUsersPaginated(eventId: number, pageSize = 30) {
         },
         initialPageParam: 1, // Começa na primeira página
         getNextPageParam: (lastPage) => lastPage.nextPage, // Define a próxima página com base no tamanho da página
-        enabled: !!eventId, // Garante que a query só roda se eventId estiver definido
+        enabled: type === "events" ? !!eventId : !!cursusId && !!campusId, // Garante que a query só roda se eventId | cursusId && campusId estiver definido
         refetchOnWindowFocus: false, // Evita refetch automático ao voltar para a página
         staleTime: 1000 * 60 * 30, // Dados ficam "frescos" por 30 minutos
         retry: 2, // Tenta novamente 2 vezes em caso de falha

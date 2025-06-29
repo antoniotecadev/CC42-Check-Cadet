@@ -109,6 +109,20 @@ export default function MealDetailScreen() {
                             {/* <Text style={styles.fabText}>QR Code</Text> */}
                         </TouchableOpacity>
                         <TouchableOpacity
+                            onPress={() => {
+                                router.push({
+                                    pathname: "/meal_users",
+                                    params: {
+                                        type: "meals",
+                                        mealId: meal.id,
+                                        userId: userId,
+                                        campusId: campusId,
+                                        cursusId: cursusId,
+                                        mealName: meal.name,
+                                        mealCreatedDate: meal.createdDate,
+                                    },
+                                });
+                            }}
                             style={[styles.fab, { backgroundColor: colorCard }]}
                         >
                             <MaterialCommunityIcons

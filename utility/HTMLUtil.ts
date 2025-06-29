@@ -1,32 +1,28 @@
-import { EventUser } from "@/repository/eventRepository";
+import { UserPresence } from "@/repository/eventRepository";
 
 // Função utilitária para gerar o HTML do PDF
 export function generateAttendanceHtml({
     title,
     logoBase64,
-    eventName,
-    eventDate,
-    presents = 0,
-    absents = 0,
-    subscribed = 0,
-    unsubscribed = 0,
-    usersWithPresence,
+    description,
+    date,
+    numberPresenceORSubscribed = 0,
+    numberAbsentsORUnSubscribed = 0,
+    userPresenceSubscribed,
 }: {
-    title: "Lista de Presença" | "Lista de Assinaturas";
+    title: string;
     logoBase64: string;
-    eventName: string;
-    eventDate: string;
-    presents?: number;
-    absents?: number;
-    subscribed?: number;
-    unsubscribed?: number;
-    usersWithPresence: EventUser[];
+    description: string;
+    date: string;
+    numberPresenceORSubscribed?: number;
+    numberAbsentsORUnSubscribed?: number;
+    userPresenceSubscribed: UserPresence[];
 }) {
     // Divide os usuários em páginas de 28 linhas
     const pageSize = 28;
     const pages = [];
-    for (let i = 0; i < usersWithPresence.length; i += pageSize) {
-        pages.push(usersWithPresence.slice(i, i + pageSize));
+    for (let i = 0; i < userPresenceSubscribed.length; i += pageSize) {
+        pages.push(userPresenceSubscribed.slice(i, i + pageSize));
     }
     return `
         <html>
@@ -53,12 +49,10 @@ export function generateAttendanceHtml({
                 <div class="title">${title}</div>
                 <div class="subtitle">${
                     title === "Lista de Assinaturas"
-                        ? `Assinado: ${subscribed} | Não Assinado: ${unsubscribed}`
-                        : `Presente: ${presents} | Ausente: ${absents}`
+                        ? `Assinado: ${numberPresenceORSubscribed} | Não Assinado: ${numberAbsentsORUnSubscribed}`
+                        : `Presente: ${numberPresenceORSubscribed} | Ausente: ${numberAbsentsORUnSubscribed}`
                 }</div>
-                <div class="subtitle">${eventName || ""} - ${
-        eventDate || ""
-    }</div>
+                <div class="subtitle">${description || ""} - ${date || ""}</div>
             </div>
             <table>
                 <tr>
