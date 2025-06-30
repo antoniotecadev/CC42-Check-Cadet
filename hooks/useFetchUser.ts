@@ -1,6 +1,8 @@
 import { useColorCoalition } from "@/components/ColorCoalitionContext";
 import { Colors } from "@/constants/Colors";
+import { registerPushToken } from "@/services/ExpoNotificationService";
 import axios from "axios";
+import { Platform } from "react-native";
 import useItemStorage from "./storage/useItemStorage";
 import useTokenStorage from "./storage/useTokenStorage";
 import useUserStorage from "./storage/useUserStorage";
@@ -58,8 +60,21 @@ const useFetchUser = () => {
             // 4. Salvar localmente
             await saveUser(userWithCoalition);
             await setItem("user_id", `${userWithCoalition.id}`);
-            await setItem("campus_id", `${userWithCoalition?.campus?.[0]?.id ?? 0}`);
-            await setItem("campus_name", `${userWithCoalition.campus?.[0]?.name?.trim()}`);
+            await setItem(
+                "campus_id",
+                `${userWithCoalition?.campus?.[0]?.id ?? 0}`
+            );
+            await setItem(
+                "campus_name",
+                `${userWithCoalition.campus?.[0]?.name?.trim()}`
+            );
+            if (Platform.OS === "ios") {
+                registerPushToken(
+                    userWithCoalition.id,
+                    userWithCoalition?.campus?.[0]?.id,
+                    userWithCoalition?.projects_users?.[0]?.cursus_ids?.[0]
+                );
+            }
             return true;
         } catch (e) {
             showError("Erro", "Erro ao buscar dados do usuário: " + e);

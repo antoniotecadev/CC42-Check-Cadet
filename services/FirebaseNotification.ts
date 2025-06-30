@@ -1,6 +1,7 @@
 import axios from "axios";
 import { Alert } from "react-native";
 import { getItem, setItem } from "./AccessTokenGeneratorRN";
+import { sendExpoNotificationToGroup } from "./ExpoNotificationService";
 
 class Notification {
     title: string;
@@ -90,7 +91,8 @@ class FCMessage {
 export const sendNotificationForTopicDirect = async (
     accessToken: string,
     meal: any,
-    cursusId: string | number,
+    campusId: string,
+    cursusId: string,
     topic?: string,
     condition?: string
 ): Promise<void> => {
@@ -108,7 +110,7 @@ export const sendNotificationForTopicDirect = async (
             meal.createdBy,
             meal.createdDate,
             String(meal.quantity),
-            String(cursusId),
+            cursusId,
             "DetailsMealFragment",
             meal.description,
             notification
@@ -129,8 +131,14 @@ export const sendNotificationForTopicDirect = async (
         });
 
         if (response.status === 200) {
-            Alert.alert("Sucesso", "Notificação enviada com sucesso!");
+            await sendExpoNotificationToGroup(campusId, cursusId, {
+                title: meal.type,
+                body: meal.name,
+                data: {},
+                image: meal.pathImage,
+            });
             console.log("Notification sent:", response.data);
+            Alert.alert("Sucesso", "Notificação enviada com sucesso!");
         } else {
             console.error(
                 "Failed to send notification:",

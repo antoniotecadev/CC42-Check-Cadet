@@ -1,3 +1,4 @@
+import * as Notifications from "expo-notifications";
 import { Tabs } from "expo-router";
 import React from "react";
 import { Platform } from "react-native";
@@ -8,6 +9,15 @@ import { IconSymbol } from "@/components/ui/IconSymbol";
 import TabBarBackground from "@/components/ui/TabBarBackground";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { MaterialIcons } from "@expo/vector-icons";
+
+Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+        shouldPlaySound: true,
+        shouldSetBadge: true,
+        shouldShowBanner: true,
+        shouldShowList: true,
+    }),
+});
 
 export default function TabLayout() {
     const colorScheme = useColorScheme();
@@ -51,7 +61,11 @@ export default function TabLayout() {
                     title: "Refeição",
                     headerTitle: "Cursus",
                     tabBarIcon: ({ color }) => (
-                        <MaterialIcons size={28} name="restaurant" color={color} />
+                        <MaterialIcons
+                            size={28}
+                            name="restaurant"
+                            color={color}
+                        />
                     ),
                 }}
             />

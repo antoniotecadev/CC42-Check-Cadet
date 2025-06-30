@@ -161,7 +161,8 @@ export function useCreateMeal() {
                 await sendNotificationForTopicDirect(
                     accessToken,
                     mealData,
-                    parseInt(cursusId),
+                    campusId,
+                    cursusId,
                     undefined, // O campo 'topic' deve ser null quando se usa 'condition'
                     condition
                 );
