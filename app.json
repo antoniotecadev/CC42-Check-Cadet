@@ -72,12 +72,19 @@
         "experiments": {
             "typedRoutes": true
         },
+        "host": "lan",
         "extra": {
             "router": {},
             "eas": {
                 "projectId": "751b05e6-4b80-4dae-b3b0-299c676f93d5"
             }
         },
-        "owner": "antonioteca"
+        "owner": "antonioteca",
+        "runtimeVersion": {
+            "policy": "appVersion"
+        },
+        "updates": {
+            "url": "https://u.expo.dev/751b05e6-4b80-4dae-b3b0-299c676f93d5"
+        }
     }
 }
