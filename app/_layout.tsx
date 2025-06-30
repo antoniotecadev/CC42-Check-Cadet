@@ -83,16 +83,7 @@ export default function RootLayout() {
                             name="event_details"
                             options={{
                                 headerShown: true,
-                                title: "EVENT",
-                                headerBackTitle: "Voltar",
-                                headerBackVisible: true,
-                            }}
-                        />
-                        <Stack.Screen
-                            name="event_users"
-                            options={{
-                                headerShown: true,
-                                title: "Lista de Presença",
+                                title: "Detalhes",
                                 headerBackTitle: "Voltar",
                                 headerBackVisible: true,
                             }}
