@@ -264,7 +264,7 @@ export default function MealsScreen() {
                             onLongPress={() => handleItemLongPress(item)}
                             onPress={() => {
                                 router.push({
-                                    pathname: "/meal_detail",
+                                    pathname: "/meal_details",
                                     params: {
                                         userId,
                                         campusId,

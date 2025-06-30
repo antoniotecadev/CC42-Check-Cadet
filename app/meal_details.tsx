@@ -69,8 +69,10 @@ export default function MealDetailScreen() {
                         )}
                         <Text style={styles.date}>{meal.createdDate}</Text>
                         <Text style={styles.qty}>
-                            Quantidade: {meal.quantity} /{" "}
-                            {meal.numberSubscribed}
+                            Quantidade: {meal.quantity}{" "}
+                            {meal.numberSubscribed
+                                ? "/ " + meal.numberSubscribed
+                                : ""}
                         </Text>
                     </ThemedView>
                     <RatingSection

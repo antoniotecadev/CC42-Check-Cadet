@@ -4,7 +4,7 @@ import {
     ThemeProvider,
 } from "@react-navigation/native";
 import { useFonts } from "expo-font";
-import { SplashScreen, Stack } from "expo-router";
+import { router, SplashScreen, Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import "react-native-reanimated";
 
@@ -15,9 +15,11 @@ import {
 import { useColorScheme } from "@/hooks/useColorScheme";
 import React, { useEffect } from "react";
 
+import useItemStorage from "@/hooks/storage/useItemStorage";
 import { useReactQueryDevTools } from "@dev-plugins/react-query";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Buffer } from 'buffer';
+import { Buffer } from "buffer";
+import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
 
 // serve para disponibilizar o objeto Buffer globalmente em ambientes onde ele não está presente por padrão
@@ -25,7 +27,17 @@ global.Buffer = Buffer;
 
 const queryClient = new QueryClient({});
 
+Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+        shouldPlaySound: true,
+        shouldSetBadge: true,
+        shouldShowBanner: true,
+        shouldShowList: true,
+    }),
+});
+
 export default function RootLayout() {
+    const { getItem } = useItemStorage();
     useReactQueryDevTools(queryClient);
     const colorScheme = useColorScheme();
     const [loaded] = useFonts({
@@ -35,6 +47,69 @@ export default function RootLayout() {
     useEffect(() => {
         // Libera manualmente a splash (impede que ela fique visível)
         SplashScreen.hideAsync().catch(() => {});
+    }, []);
+
+    useEffect(() => {
+        let isMounted = true;
+
+        async function redirect(notification: Notifications.Notification) {
+            const userId = await getItem("user_id");
+            const campusId = await getItem("campus_id"); 
+            const { title, body, data } = notification.request.content;
+            if (data && userId && campusId) {
+                router.push({
+                    pathname: "/meal_details",
+                    params: {
+                        userId,
+                        campusId,
+                        cursusId: data.cursusId as string,
+                        mealData: JSON.stringify({
+                            id: data.id,
+                            type: title,
+                            name: body,
+                            description: data.description,
+                            createdDate: data.createdDate,
+                            quantity: data.quantity,
+                            pathImage: data.pathImage,
+                        }),
+                    },
+                });
+            }
+        }
+
+        // 🔁 1. Listener enquanto o app está rodando (foreground ou background)
+        const subscription =
+            Notifications.addNotificationResponseReceivedListener(
+                (response) => {
+                    const data = response.notification.request.content.data;
+                    console.log(
+                        "🟡 Notificação clicada (listener ativo):",
+                        data
+                    );
+                    // ex: navegue para outra tela com esses dados
+                    redirect(response.notification);
+                }
+            );
+
+        // 🔁 2. Verifica se o app foi ABERTO pela notificação (estava fechado)
+        async function checkInitialNotification() {
+            const response =
+                await Notifications.getLastNotificationResponseAsync();
+            if (!isMounted || !response?.notification) {
+                return;
+            }
+            const data = response.notification.request.content.data;
+            console.log("🔵 App reaberto pela notificação:", data);
+            // ex: navegue para outra tela aqui também
+            redirect(response?.notification);
+        }
+
+        checkInitialNotification();
+
+        return () => {
+            isMounted = false;
+            subscription.remove();
+        };
     }, []);
 
     if (!loaded) {
@@ -75,8 +150,8 @@ export default function RootLayout() {
                             options={{
                                 headerShown: Platform.OS === "web",
                                 title: "Scanear QR Code",
-                                headerBackTitle: "Voltar", 
-                                headerBackVisible: true, 
+                                headerBackTitle: "Voltar",
+                                headerBackVisible: true,
                             }}
                         />
                         <Stack.Screen

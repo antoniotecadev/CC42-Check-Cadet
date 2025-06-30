@@ -109,7 +109,7 @@ export const sendNotificationForTopicDirect = async (
             meal.id,
             meal.createdBy,
             meal.createdDate,
-            String(meal.quantity),
+            meal.quantity,
             cursusId,
             "DetailsMealFragment",
             meal.description,
@@ -134,7 +134,14 @@ export const sendNotificationForTopicDirect = async (
             await sendExpoNotificationToGroup(campusId, cursusId, {
                 title: meal.type,
                 body: meal.name,
-                data: {},
+                data: {
+                    id: meal.id,
+                    cursusId: cursusId,
+                    description: meal.description,
+                    createdDate: meal.createdDate,
+                    quantity: meal.quantity,
+                    pathImage: meal.pathImage,
+                },
                 image: meal.pathImage,
             });
             console.log("Notification sent:", response.data);
