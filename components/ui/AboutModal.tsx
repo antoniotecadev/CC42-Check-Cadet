@@ -34,7 +34,7 @@ export default function AboutModal({
                     ]}
                 >
                     <LinearGradient
-                        colors={[color, "#eee"]}
+                        colors={["#333", "#eee"]}
                         style={styles.modalContainer}
                     >
                         <ScrollView contentContainerStyle={styles.content}>
