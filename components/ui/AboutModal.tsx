@@ -34,7 +34,7 @@ export default function AboutModal({
                     ]}
                 >
                     <LinearGradient
-                        colors={["#333", "#eee"]}
+                        colors={["#333", "#444"]}
                         style={styles.modalContainer}
                     >
                         <ScrollView contentContainerStyle={styles.content}>
@@ -42,51 +42,27 @@ export default function AboutModal({
                                 style={styles.closeButton}
                                 onPress={onClose}
                             >
-                                <Ionicons name="close" size={28} color="#333" />
+                                <Ionicons name="close" size={28} color="red" />
                             </TouchableOpacity>
                             <Text style={styles.description}>
-                                Este aplicativo foi criado para facilitar a
+                                Esta aplicação foi criada para facilitar a
                                 gestão de refeições e eventos no campus.
                                 Aproveite a experiência!
                             </Text>
-                            <Image
-                                source={require("@/assets/images/ateca_about.jpg")}
-                                style={styles.avatar}
+                            <Profile
+                                name="António Teca"
+                                photo={require("@/assets/images/ateca_about.jpg")}
+                                intra="ateca"
+                                gitHub="antoniotecadev"
+                                email="antonioteca@hotmail.com"
                             />
-                            <Text style={styles.name}>António Teca</Text>
-                            <TouchableOpacity
-                                onPress={() =>
-                                    Linking.openURL(
-                                        "https://profile.intra.42.fr/users/ateca"
-                                    )
-                                }
-                            >
-                                <Text style={styles.link}>
-                                    ateca (Intra 42)
-                                </Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                onPress={() =>
-                                    Linking.openURL(
-                                        "https://github.com/antoniotecadev"
-                                    )
-                                }
-                            >
-                                <Text style={styles.link}>
-                                    github.com/antoniotecadev
-                                </Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                onPress={() =>
-                                    Linking.openURL(
-                                        "mailto:antonioteca@hotmail.com"
-                                    )
-                                }
-                            >
-                                <Text style={styles.link}>
-                                    antonioteca@hotmail.com
-                                </Text>
-                            </TouchableOpacity>
+                            <Profile
+                                name="António Pedro"
+                                photo={require("@/assets/images/pedro_about.jpeg")}
+                                intra="ansebast"
+                                gitHub="AntonioSebastiaoPedro"
+                                email="antoniosebastiaopedro19@gmail.com"
+                            />
                         </ScrollView>
                     </LinearGradient>
                 </View>
@@ -94,6 +70,48 @@ export default function AboutModal({
         </Modal>
     );
 }
+
+type ProfileProps = {
+    name: string;
+    photo: string;
+    intra: string;
+    gitHub: string;
+    email: string;
+};
+
+const Profile: React.FC<ProfileProps> = ({
+    name,
+    photo,
+    intra,
+    gitHub,
+    email,
+}) => {
+    return (
+        <>
+            <Image source={photo} style={styles.avatar} />
+            <Text style={styles.name}>{name}</Text>
+            <TouchableOpacity
+                onPress={() =>
+                    Linking.openURL(
+                        `https://profile.intra.42.fr/users/${intra}`
+                    )
+                }
+            >
+                <Text style={styles.link}>{intra} (Intra 42)</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+                onPress={() => Linking.openURL(`https://github.com/${gitHub}`)}
+            >
+                <Text style={styles.link}>github.com/{gitHub}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+                onPress={() => Linking.openURL(`mailto:{email}`)}
+            >
+                <Text style={styles.link}>{email}</Text>
+            </TouchableOpacity>
+        </>
+    );
+};
 
 const styles = StyleSheet.create({
     container: {
@@ -145,7 +163,7 @@ const styles = StyleSheet.create({
     name: {
         fontSize: 20,
         fontWeight: "bold",
-        color: "#222",
+        color: "#eee",
         marginTop: 8,
         marginBottom: 4,
     },
