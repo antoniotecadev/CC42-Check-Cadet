@@ -49,10 +49,12 @@ export default function CursusScreen() {
     const [campusId, setCampusId] = useState<string | null>(null);
     const [campusName, setCampusName] = useState<string | null>(null);
 
+    const borderColor = colorScheme === "light" ? "#f0f0f0" : "#333";
+
     useEffect(() => {
         const fetchCampusId = async () => {
             const userId = await getItem("user_id");
-            const campusId = await getItem("campus_id"); 
+            const campusId = await getItem("campus_id");
             const campusName = await getItem("campus_name");
             if (campusId && userId) {
                 setUserId(userId);
@@ -123,7 +125,7 @@ export default function CursusScreen() {
             >
                 <View style={styles.header}>
                     <TextInput
-                        style={styles.input}
+                        style={[styles.input, { borderColor }]}
                         placeholder="Buscar cursus..."
                         value={search}
                         onChangeText={setSearch}
@@ -152,15 +154,7 @@ export default function CursusScreen() {
                         keyExtractor={(item) => item.id.toString()}
                         renderItem={({ item }) => (
                             <TouchableOpacity
-                                style={[
-                                    styles.item,
-                                    {
-                                        borderColor:
-                                            colorScheme === "light"
-                                                ? "#f0f0f0"
-                                                : "#333",
-                                    },
-                                ]}
+                                style={[styles.item, { borderColor }]}
                                 onPress={() =>
                                     router.push({
                                         pathname: "/meals",
@@ -219,7 +213,6 @@ const styles = StyleSheet.create({
     input: {
         flex: 1,
         borderWidth: 1,
-        borderColor: "#eee",
         borderRadius: 8,
         padding: 8,
         marginRight: 12,
