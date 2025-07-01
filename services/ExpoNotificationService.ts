@@ -95,7 +95,7 @@ export async function registerPushToken(
     cursusId: string
 ) {
     const token = await registerForPushNotificationsAsync();
-    if (token && userId) {
+    if (token && userId && campusId && cursusId) {
         const tokenRef = ref(
             database,
             `campus/${campusId}/cursus/${cursusId}/tokenIOSNotification/${userId}`

@@ -4,6 +4,7 @@ import { ThemedView } from "@/components/ThemedView";
 import useUserStorage from "@/hooks/storage/useUserStorage";
 import useAlert from "@/hooks/useAlert";
 import { Image } from "expo-image";
+import * as Notifications from "expo-notifications";
 
 import { useColorCoalition } from "@/components/ColorCoalitionContext";
 import FloatActionButton from "@/components/ui/FloatActionButton";
@@ -15,10 +16,12 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import AboutModal from "@/components/ui/AboutModal";
 import EventItem from "@/components/ui/EventItem";
 import WebMenuModal from "@/components/ui/WebMenuModal";
+import { database } from "@/firebaseConfig";
 import useItemStorage from "@/hooks/storage/useItemStorage";
 import useTokenStorage from "@/hooks/storage/useTokenStorage";
 import { useEvents } from "@/repository/eventRepository";
 import { FlashList } from "@shopify/flash-list";
+import { ref, set } from "firebase/database";
 import {
     ActionSheetIOS,
     ActivityIndicator,
@@ -96,7 +99,29 @@ export default function HomeScreen() {
             }
         };
 
+        const subscription = Notifications.addPushTokenListener(
+            async (token) => {
+                const userId = user?.id;
+                const campusId = user?.campus?.[0]?.id;
+                const cursusId = user?.projects_users?.[0]?.cursus_ids?.[0];
+                console.log("🔁 Novo token detectado:", token.data);
+                if (userId && campusId && cursusId && Platform.OS === "ios") {
+                    const tokenRef = ref(
+                        database,
+                        `campus/${campusId}/cursus/${cursusId}/tokenIOSNotification/${userId}`
+                    );
+                    try {
+                        await set(tokenRef, token);
+                    } catch (e: any) {
+                        alert(e.message);
+                    }
+                }
+            }
+        );
+
         fetchUser();
+
+        return () => subscription.remove();
     }, []);
 
     const handleMenuPress = () => {
