@@ -238,7 +238,16 @@ export default function MealsScreen() {
                     <ActivityIndicator
                         size="large"
                         color={color}
-                        style={{ marginTop: 16 }}
+                        style={[
+                            { marginTop: 16 },
+                            loading
+                                ? {
+                                      alignItems: "center",
+                                      justifyContent: "center",
+                                      marginTop: height / 2.5,
+                                  }
+                                : null,
+                        ]}
                     />
                 )}
                 {!loading && !meals.length && (
