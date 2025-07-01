@@ -54,7 +54,7 @@ export default function RootLayout() {
 
         async function redirect(notification: Notifications.Notification) {
             const userId = await getItem("user_id");
-            const campusId = await getItem("campus_id"); 
+            const campusId = await getItem("campus_id");
             const { title, body, data } = notification.request.content;
             if (data && userId && campusId) {
                 router.push({
@@ -103,8 +103,7 @@ export default function RootLayout() {
             // ex: navegue para outra tela aqui também
             redirect(response?.notification);
         }
-
-        checkInitialNotification();
+        if (Platform.OS !== "web") checkInitialNotification();
 
         return () => {
             isMounted = false;
