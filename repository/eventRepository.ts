@@ -28,8 +28,8 @@ export function useEvents(params: GetEventsParams) {
 
             const response = await api.get<Event[]>(url);
             return response.data;
-        } catch (error) {
-            showError("ERRO", "Erro ao buscar eventos: " + error);
+        } catch (error: any) {
+            showError("ERRO", "Erro ao buscar eventos: " + error.message);
             return [];
         }
     };
