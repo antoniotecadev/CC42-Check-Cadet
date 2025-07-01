@@ -170,9 +170,9 @@ export default function HomeScreen() {
             async () => {
                 const token = (await getAccessToken()) ?? "";
                 revokeToken(token);
-                clearTokens(); // Limpa os tokens se falhar ao buscar usuário
-                removeItem("user_id"); // Remove user_id se falhar
-                removeItem("campus_id"); // Remove campus_id se falhar
+                clearTokens();
+                removeItem("user_id");
+                removeItem("campus_id");
                 removeItem("campus_name");
                 removeItem("expires_in_google");
                 removeItem("access_token_google");

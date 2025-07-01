@@ -1,5 +1,4 @@
 import { useLogin42 } from "@/hooks/useLogin42";
-import { AuthRequest } from "expo-auth-session";
 import { router } from "expo-router";
 import { useVideoPlayer, VideoView } from "expo-video";
 import React, { useEffect } from "react";
@@ -17,12 +16,12 @@ import {
 
 export default function LoginScreen() {
     const { width, height } = useWindowDimensions();
-    const { loading, request, sucess, promptAsync } = useLogin42();
+    const { loading, success, promptAsync } = useLogin42();
     const videoSource = require("@/assets/images/qr_code_phone_gif.mp4");
 
     useEffect(() => {
-        if (sucess) router.replace("/(tabs)"); // Redireciona para a tela home
-    }, [sucess]);
+        if (success) router.replace("/(tabs)"); // Redireciona para a tela home
+    }, [success]);
 
     const player = useVideoPlayer(videoSource, (player) => {
         player.loop = true;
@@ -61,7 +60,7 @@ export default function LoginScreen() {
                         <ActivityIndicator size="large" color="#419259" />
                     ) : (
                         <SignInButton
-                            request={request}
+                            loading={loading}
                             onPress={() => promptAsync()}
                         />
                     )}
@@ -77,14 +76,14 @@ export default function LoginScreen() {
 }
 
 interface SignInButtonProps {
-    request: AuthRequest | null;
+    loading: boolean;
     onPress: (event: GestureResponderEvent) => void;
 }
 
-const SignInButton: React.FC<SignInButtonProps> = ({ request, onPress }) => {
+const SignInButton: React.FC<SignInButtonProps> = ({ loading, onPress }) => {
     return (
         <TouchableOpacity
-            disabled={!request}
+            disabled={loading}
             onPress={onPress}
             style={styles.button}
         >
