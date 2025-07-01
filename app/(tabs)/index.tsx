@@ -19,6 +19,7 @@ import WebMenuModal from "@/components/ui/WebMenuModal";
 import { database } from "@/firebaseConfig";
 import useItemStorage from "@/hooks/storage/useItemStorage";
 import useTokenStorage from "@/hooks/storage/useTokenStorage";
+import { revokeToken } from "@/hooks/useLogin42";
 import { useEvents } from "@/repository/eventRepository";
 import { FlashList } from "@shopify/flash-list";
 import { ref, set } from "firebase/database";
@@ -39,8 +40,8 @@ export default function HomeScreen() {
     const { showConfirm } = useAlert();
     const { getUser } = useUserStorage();
     const { removeItem } = useItemStorage();
-    const { clearTokens } = useTokenStorage();
     const { color, setColor } = useColorCoalition();
+    const { clearTokens, getAccessToken } = useTokenStorage();
 
     const isWeb = Platform.OS === "web";
 
@@ -166,7 +167,9 @@ export default function HomeScreen() {
         showConfirm(
             "Sair",
             "Tem certeza que deseja terminar a sessão?",
-            () => {
+            async () => {
+                const token = (await getAccessToken()) ?? "";
+                revokeToken(token);
                 clearTokens(); // Limpa os tokens se falhar ao buscar usuário
                 removeItem("user_id"); // Remove user_id se falhar
                 removeItem("campus_id"); // Remove campus_id se falhar
@@ -177,7 +180,7 @@ export default function HomeScreen() {
             },
             () => {
                 // Código a executar se o usuário cancelar (opcional)
-                console.log("Cancelado!");
+                console.log("Logout Cancelado!");
             }
         );
     };

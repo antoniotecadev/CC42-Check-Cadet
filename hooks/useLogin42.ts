@@ -3,6 +3,7 @@ import {
     exchangeCodeAsync,
     makeRedirectUri,
     ResponseType,
+    revokeAsync,
     useAuthRequest,
 } from "expo-auth-session";
 import * as WebBrowser from "expo-web-browser";
@@ -15,12 +16,11 @@ import useFetchUser from "./useFetchUser";
 
 WebBrowser.maybeCompleteAuthSession();
 
-const CLIENT_ID =
-    "u-s4t2ud-4ce9a69013fc7817425995ce488c2f0e9d4c968de61e0f7e51f4d5facc50cc27";
+const CLIENT_ID = process.env.EXPO_PUBLIC_API_KEY ?? "";
 
 const discovery = {
-    authorizationEndpoint: "https://api.intra.42.fr/oauth/authorize",
-    tokenEndpoint: "https://api.intra.42.fr/oauth/token",
+    authorizationEndpoint: process.env.EXPO_PUBLIC_API_URL + "/oauth/authorize",
+    tokenEndpoint: process.env.EXPO_PUBLIC_API_URL + "/oauth/token",
 };
 
 export function useLogin42() {
@@ -77,7 +77,7 @@ export function useLogin42() {
                     if (!sucess) {
                         clearTokens(); // Limpa os tokens se falhar ao buscar usuário
                         removeItem("user_id"); // Remove user_id se falhar
-                        removeItem("campus_id"); // Remove campus_id se falhar 
+                        removeItem("campus_id"); // Remove campus_id se falhar
                         removeItem("campus_name");
                     }
                     setSucess(sucess);
@@ -111,4 +111,28 @@ export function useLogin42() {
         sucess,
         promptAsync, // chama isto no botão ou evento
     };
+}
+
+export async function revokeToken(token: string) {
+    const clientId = process.env.EXPO_PUBLIC_API_KEY ?? "";
+    const clientSecret = "SEU_CLIENT_SECRET"; // se necessário
+
+    // URL de revogação da 42 API
+    const revocationEndpoint =
+        process.env.EXPO_PUBLIC_API_URL + "/oauth/revoke";
+    try {
+        const result = await revokeAsync(
+            {
+                token,
+                clientId,
+            },
+            {
+                revocationEndpoint,
+            }
+        );
+
+        console.log("Token revogado com sucesso:", result);
+    } catch (error) {
+        console.error("Erro ao revogar o token:", error);
+    }
 }
