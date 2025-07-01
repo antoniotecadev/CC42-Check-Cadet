@@ -2,7 +2,7 @@ import { fetchApiKeyFromDatabase } from "@/services/firebaseApiKey";
 import {
     exchangeCodeAsync,
     makeRedirectUri,
-    revokeAsync
+    revokeAsync,
 } from "expo-auth-session";
 import * as Linking from "expo-linking";
 import * as WebBrowser from "expo-web-browser";
@@ -118,11 +118,10 @@ WebBrowser.maybeCompleteAuthSession();
 const CLIENT_ID = process.env.EXPO_PUBLIC_API_KEY ?? "";
 const AUTH_BASE_URL = process.env.EXPO_PUBLIC_API_URL + "/oauth/authorize";
 const TOKEN_URL = process.env.EXPO_PUBLIC_API_URL + "/oauth/token";
-
-const redirectUri =
-    Platform.OS === "web"
-        ? makeRedirectUri({ path: "checkcadet42" })
-        : "cc42://checkcadet42";
+const isWeb = Platform.OS === "web";
+const redirectUri = isWeb
+    ? makeRedirectUri({ path: "checkcadet42" })
+    : "cc42://checkcadet42";
 
 export function useLogin42() {
     const { showError } = useAlert();
@@ -136,16 +135,18 @@ export function useLogin42() {
     const promptAsync = async () => {
         try {
             setLoading(true);
-            const authUrl = `${AUTH_BASE_URL}?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(
-                redirectUri
-            )}&response_type=code&scope=public`;
+            const authUrl =
+                `${AUTH_BASE_URL}?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(
+                    redirectUri
+                )}&response_type=code&scope=public` +
+                (isWeb ? `&prompt=login` : ``);
 
             const result = await WebBrowser.openAuthSessionAsync(
                 authUrl,
                 redirectUri,
                 {
                     // ✅ Força sessão privada no iOS
-                    preferEphemeralSession: true,
+                    preferEphemeralSession: Platform.OS === "ios",
                 }
             );
 
