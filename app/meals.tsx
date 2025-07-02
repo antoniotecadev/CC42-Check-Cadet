@@ -4,7 +4,9 @@ import { ThemedView } from "@/components/ThemedView";
 import CreateMealModal from "@/components/ui/CreateMealModal";
 import MealItem from "@/components/ui/MealItem";
 import { database } from "@/firebaseConfig";
+import useAlert from "@/hooks/useAlert";
 import { useColorScheme } from "@/hooks/useColorScheme";
+import { useCreateMeal } from "@/hooks/useCreateMeal";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
@@ -40,10 +42,12 @@ interface Meal {
 }
 
 export default function MealsScreen() {
+    const { showConfirm } = useAlert();
     const navigation = useNavigation();
     const colorScheme = useColorScheme();
     const { color } = useColorCoalition();
     const { height } = useWindowDimensions();
+    const { deleteMealFromFirebase } = useCreateMeal();
 
     const isWeb = Platform.OS === "web";
     const { userId, campusId, campusName, cursusId, cursusName } =
@@ -133,8 +137,8 @@ export default function MealsScreen() {
         fetchMeals(null, false);
     }, [fetchMeals]);
 
-    const onRefresh = () => {
-        setRefreshing(true);
+    const onRefresh = (doRefresh = true) => {
+        if (doRefresh) setRefreshing(true);
         fetchMeals(null, false);
     };
 
@@ -163,12 +167,28 @@ export default function MealsScreen() {
         else
             ActionSheetIOS.showActionSheetWithOptions(
                 {
-                    options: ["Editar", "Cancelar"],
-                    cancelButtonIndex: 1,
+                    options: ["Editar", "Eliminar", "Cancelar"],
+                    destructiveButtonIndex: 1,
+                    cancelButtonIndex: 2,
                     userInterfaceStyle: "dark",
                 },
                 (selectedIndex) => {
                     if (selectedIndex === 0) setEditMeal(item);
+                    if (selectedIndex === 1) {
+                        showConfirm(
+                            "Eliminar",
+                            item.name,
+                            async () => {
+                                await deleteMealFromFirebase(
+                                    campusId,
+                                    cursusId,
+                                    { id: item.id, pathImage: item.pathImage },
+                                    onRefresh
+                                );
+                            },
+                            () => null
+                        );
+                    }
                 }
             );
     };
@@ -310,7 +330,7 @@ export default function MealsScreen() {
                 {isWeb && (
                     <TouchableOpacity
                         style={[styles.fab, { backgroundColor: color }]}
-                        onPress={onRefresh}
+                        onPress={() => onRefresh()}
                     >
                         <Ionicons name="refresh" size={28} color="#fff" />
                     </TouchableOpacity>

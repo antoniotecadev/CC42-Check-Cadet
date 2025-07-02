@@ -4,7 +4,7 @@ import { fetchApiKeyFromDatabase } from "@/services/firebaseApiKey";
 import { sendNotificationForTopicDirect } from "@/services/FirebaseNotification";
 import axios from "axios";
 import * as Crypto from "expo-crypto";
-import { push, ref, set, update } from "firebase/database";
+import { push, ref, remove, set, update } from "firebase/database";
 import { useState } from "react";
 import { Alert, Platform } from "react-native";
 
@@ -124,6 +124,7 @@ export function useCreateMeal() {
 
     const CLOUDINARY_API_KEY = "926854887914134";
     const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/cc42/image/upload";
+    const CLOUDINARY_DESTROY_URL = `https://api.cloudinary.com/v1_1/cc42/image/destroy`;
 
     async function uploadImageToCloudinary(
         imageUri: string,
@@ -360,5 +361,110 @@ export function useCreateMeal() {
         }
     }
 
-    return { createMeal, updateMealImage, updateMealData, loading, error };
+    async function deleteMealFromFirebase(
+        campusId: string,
+        cursusId: string,
+        meal: { id: string; pathImage?: string },
+        onRefresh: (doRefresh: boolean) => void
+    ) {
+        const mealRef = ref(
+            database,
+            `campus/${campusId}/cursus/${cursusId}/meals/${meal.id}`
+        );
+
+        try {
+            await remove(mealRef);
+            // Sucesso: notifique, delete imagem do Cloudinary, mostre alerta
+            if (meal.pathImage) {
+                const success = await deleteImageFromCloudinary(meal.pathImage);
+                if (!success) {
+                    Alert.alert("Erro", "Imagem não eliminada", [
+                        { text: "OK" },
+                    ]);
+                }
+            }
+            Alert.alert("Sucesso", "Refeição eliminada com sucesso!", [
+                { text: "OK" },
+            ]);
+            onRefresh(false);
+        } catch (e: any) {
+            Alert.alert("Erro", "Erro ao eliminar refeição: " + e.message, [
+                { text: "OK" },
+            ]);
+        }
+    }
+
+    async function deleteImageFromCloudinary(
+        imageUrl: string
+    ): Promise<boolean> {
+        const publicId = getPublicIdFromUrl(imageUrl);
+
+        if (!publicId) {
+            console.error(
+                "Não foi possível extrair o public_id da URL:",
+                imageUrl
+            );
+            return false;
+        }
+
+        const timestamp = Math.round(new Date().getTime() / 1000); // Carimbo de data/hora em segundos
+
+        // Parâmetros que serão assinados para a deleção
+        const paramsToSign: Record<string, any> = {
+            public_id: publicId,
+            timestamp: timestamp,
+        };
+        const CLOUDINARY_API_SECRET = await fetchApiKeyFromDatabase(
+            "cloudinary"
+        );
+        const signature = await generateCloudinarySignature(
+            paramsToSign,
+            CLOUDINARY_API_SECRET
+        );
+
+        const formData = new FormData();
+        formData.append("public_id", publicId);
+        formData.append("api_key", CLOUDINARY_API_KEY);
+        formData.append("timestamp", timestamp.toString());
+        formData.append("signature", signature);
+
+        try {
+            console.log(`Tentando excluir public_id: ${publicId}`);
+            const response = await axios.post(
+                CLOUDINARY_DESTROY_URL,
+                formData,
+                {
+                    headers: { "Content-Type": "multipart/form-data" },
+                }
+            );
+
+            if (response.data.result === "ok") {
+                console.log(
+                    `Imagem com public_id ${publicId} excluída com sucesso.`
+                );
+                return true;
+            } else {
+                console.error(
+                    `Falha ao excluir imagem ${publicId}:`,
+                    response.data
+                );
+                return false;
+            }
+        } catch (e: any) {
+            console.error(
+                "Erro na deleção do Cloudinary:",
+                e.response ? e.response.data : e.message
+            );
+            throw e;
+        }
+    }
+
+    return {
+        createMeal,
+        updateMealImage,
+        updateMealData,
+        deleteMealFromFirebase,
+        loading,
+        error,
+    };
 }
