@@ -4,11 +4,6 @@
       "DISABLE_FRONTEND_BUILD": "true"
     }
   },
-  "functions": {
-    "api/**/*.js": {
-      "runtime": "vercel-node@canary"
-    }
-  },
   "rewrites": [
     {
       "source": "/api/(.*)",
