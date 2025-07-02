@@ -6,7 +6,7 @@
   },
   "functions": {
     "api/**/*.js": {
-      "runtime": "node18.x"
+      "runtime": "@vercel/node@18.x"
     }
   },
   "rewrites": [
