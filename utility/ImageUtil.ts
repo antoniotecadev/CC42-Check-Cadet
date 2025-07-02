@@ -1,5 +1,9 @@
 import { Asset } from "expo-asset";
-import { ImageManipulator, useImageManipulator } from "expo-image-manipulator";
+import {
+    ImageManipulator,
+    SaveFormat,
+    useImageManipulator,
+} from "expo-image-manipulator";
 import { useEffect, useState } from "react";
 
 const IMAGE = Asset.fromModule(require("@/assets/images/logo_42_luanda.webp"));
@@ -29,11 +33,17 @@ export function useBase64Image() {
     return base64Uri;
 }
 
-export async function optimizeImage(uri: any) {
-    const manipulated = await ImageManipulator.manipulateAsync(
-        uri,
-        [{ resize: { width: 1080 } }], // Reduz a largura, proporcionalmente
-        { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG }
-    );
-    return manipulated.uri;
+export async function optimizeImage(imageUri: string) {
+    alert()
+    const context = ImageManipulator.manipulate(imageUri);
+    context.resize({
+        width: 400,
+        height: 300,
+    });
+    const image = await context.renderAsync();
+    const result = await image.saveAsync({
+        format: SaveFormat.WEBP,
+        compress: 0.5,
+    });
+    return result.uri;
 }

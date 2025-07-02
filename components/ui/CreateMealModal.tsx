@@ -15,6 +15,7 @@ import {
 } from "@/constants/mealOptions";
 import useAlert from "@/hooks/useAlert";
 import { useCreateMeal } from "@/hooks/useCreateMeal";
+import { optimizeImage } from "@/utility/ImageUtil";
 import { Picker } from "@react-native-picker/picker";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
@@ -28,7 +29,7 @@ import {
     Text,
     TextInput,
     TouchableOpacity,
-    View
+    View,
 } from "react-native";
 import { useColorCoalition } from "../ColorCoalitionContext";
 import { ThemedText } from "../ThemedText";
@@ -97,10 +98,12 @@ export default function CreateMealModal({
             mediaTypes: ["images"],
             allowsEditing: true,
             aspect: [4, 3],
-            quality: 0.7,
+            quality: 1,
         });
         if (!result.canceled && result.assets && result.assets.length > 0) {
-            setImage(result.assets[0].uri);
+            const imageUri = result.assets[0].uri;
+            const resultUri = await optimizeImage(imageUri);
+            setImage(resultUri);
         }
     }
 
@@ -111,10 +114,12 @@ export default function CreateMealModal({
             const result = await ImagePicker.launchCameraAsync({
                 allowsEditing: true,
                 aspect: [4, 3],
-                quality: 0.7,
+                quality: 0.5,
             });
             if (!result.canceled && result.assets && result.assets.length > 0) {
-                setImage(result.assets[0].uri);
+                const imageUri = result.assets[0].uri;
+                const resultUri = await optimizeImage(imageUri);
+                setImage(resultUri);
             }
         }
     }
