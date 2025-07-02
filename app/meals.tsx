@@ -233,7 +233,7 @@ export default function MealsScreen() {
                 cursusId={cursusId}
                 campusName={campusName}
                 userId={userId}
-                onCreated={onRefresh}
+                onCreated={() => onRefresh(false)}
             />
             <CreateMealModal
                 key={1}
@@ -247,7 +247,7 @@ export default function MealsScreen() {
                 editMode={true}
                 onCreated={() => {
                     setEditMeal(null);
-                    onRefresh();
+                    onRefresh(false);
                 }}
             />
             <ThemedView
