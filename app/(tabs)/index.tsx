@@ -69,10 +69,6 @@ export default function HomeScreen() {
             const userData = await getUser();
             setUser(userData);
             if (userData) {
-                // showInfo(
-                //     `Welcome back, ${userData.email}!`,
-                //     JSON.stringify(userData.coalition, null, 2)
-                // );
                 setColor(
                     userData?.coalition?.color?.trim() ||
                         Colors.light_blue_900.default
@@ -349,7 +345,7 @@ function EventsList({
     } = useEvents({
         campusId: userData?.campus?.[0]?.id || 0,
         cursusId: userData?.projects_users?.[0]?.cursus_ids?.[0] || 0,
-        isStaff: false,
+        isStaff: userData["staff?"],
     });
 
     const handleRefresh = useCallback(() => {
