@@ -82,7 +82,6 @@ async function generateCloudinarySignature(
 // Extrai o public_id de uma URL do Cloudinary
 function getPublicIdFromUrl(url: string) {
     const match = url.match(/\/([^\/]+)\.[a-z]+$/i);
-    // const match = url.match(/\/upload\/(?:v\d+\/)?(.+?)\.[a-z]+$/i);
     const publicId = match ? match[1] : undefined;
 
     console.log("Original URL:", url);
