@@ -1,6 +1,7 @@
 import * as SecureStore from "expo-secure-store";
 import { KJUR } from "jsrsasign"; // Continua sendo necessário para Signature
 import { Platform } from "react-native";
+import { fetchApiKeyFromDatabase } from "./firebaseApiKey";
 
 // --- Função auxiliar para configurar o Buffer no Expo ---
 // Adicione isso no início do seu App.js ou index.js se estiver tendo problemas com Buffer
@@ -11,22 +12,19 @@ import { Platform } from "react-native";
 const SERVICE_ACCOUNT_JSON = {
     type: "service_account",
     project_id: "cadet-check-cc42",
-    private_key_id: "SEU_PRIVATE_KEY_ID",
-    private_key:
-        "-----BEGIN PRIVATE KEY-----\nSEU_PRIVATE_KEY_AQUI_COM_QUEBRAS_DE_LINHA\n-----END PRIVATE KEY-----\n",
-    client_email: "SEU_CLIENT_EMAIL@cadet-check-cc42.iam.gserviceaccount.com",
-    client_id: "SEU_CLIENT_ID",
+    private_key_id: "e9bf5bc43c0b4f78c519e7abb276e94503e36327",
+    client_email: "firebase-messaging@cadet-check-cc42.iam.gserviceaccount.com",
+    client_id: "108330644593536930546",
     auth_uri: "https://accounts.google.com/o/oauth2/auth",
     token_uri: "https://oauth2.googleapis.com/token",
     auth_provider_x509_cert_url: "https://www.googleapis.com/oauth2/v1/certs",
     client_x509_cert_url:
-        "https://www.googleapis.com/robot/v1/metadata/x509/SEU_CLIENT_EMAIL.iam.gserviceaccount.com",
+        "https://www.googleapis.com/robot/v1/metadata/x509/firebase-messaging%40cadet-check-cc42.iam.gserviceaccount.com",
     universe_domain: "googleapis.com",
 };
 
 const TOKEN_URI = SERVICE_ACCOUNT_JSON.token_uri;
 const CLIENT_EMAIL = SERVICE_ACCOUNT_JSON.client_email;
-const PRIVATE_KEY = SERVICE_ACCOUNT_JSON.private_key;
 const SCOPE = "https://www.googleapis.com/auth/firebase.messaging"; // O mesmo escopo que você usou no Java
 
 // Define uma função assíncrona para obter o access token do Google
@@ -66,6 +64,13 @@ export const getGoogleAccessToken = async () => {
         // Serializa o cabeçalho e o payload para string JSON
         const sHeader = JSON.stringify(header);
         const sPayload = JSON.stringify(payload);
+        const PRIVATE_KEY = await fetchApiKeyFromDatabase(
+            "google-cloud-message"
+        );
+
+        if (!PRIVATE_KEY) {
+            throw new Error("PRIVATE_KEY is null. Cannot sign JWT.");
+        }
 
         // Cria e assina o JWT usando a biblioteca jsrsasign e a chave privada
         const finalJwt = KJUR.jws.JWS.sign(
