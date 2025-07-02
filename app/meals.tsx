@@ -10,7 +10,7 @@ import { useCreateMeal } from "@/hooks/useCreateMeal";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
-import { router, Stack, useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import {
     endBefore,
     limitToLast,
@@ -196,6 +196,7 @@ export default function MealsScreen() {
     useLayoutEffect(() => {
         navigation.setOptions &&
             navigation.setOptions({
+                title: cursusName || "Refeições",
                 headerRight: () =>
                     isWeb ? (
                         <TouchableOpacity
@@ -220,11 +221,6 @@ export default function MealsScreen() {
 
     return (
         <>
-            <Stack.Screen
-                options={{
-                    title: cursusName || "Refeições",
-                }}
-            />
             <CreateMealModal
                 key={0}
                 visible={showCreateModal}
