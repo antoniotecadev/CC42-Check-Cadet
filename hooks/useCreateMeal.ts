@@ -1,7 +1,9 @@
 import { database } from "@/firebaseConfig";
 import { getGoogleAccessToken } from "@/services/AccessTokenGeneratorRN";
+import { fetchApiKeyFromDatabase } from "@/services/firebaseApiKey";
 import { sendNotificationForTopicDirect } from "@/services/FirebaseNotification";
 import axios from "axios";
+import * as Crypto from "expo-crypto";
 import { push, ref, set, update } from "firebase/database";
 import { useState } from "react";
 import { Alert, Platform } from "react-native";
@@ -40,21 +42,55 @@ interface UpdateMealImageParams {
     oldImageUrl: string;
 }
 
-export function useCreateMeal() {
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+/**
+ * Gera a assinatura do Cloudinary no cliente.
+ * ATENÇÃO: NUNCA FAÇA ISSO EM PRODUÇÃO!
+ * @param params Os parâmetros do upload a serem assinados.
+ * @returns A assinatura gerada.
+ */
+async function generateCloudinarySignature(
+    params: Record<string, any>,
+    api_secret: string | null
+): Promise<string> {
+    // 1. Ordene os parâmetros alfabeticamente por chave
+    const sortedKeys = Object.keys(params).sort();
+    let stringToSign = "";
 
-    const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/cc42/image/upload";
-    const CLOUDINARY_UPLOAD_PRESET = "ml_default";
+    // 2. Concatene os pares chave=valor
+    sortedKeys.forEach((key) => {
+        const value = params[key];
+        // Cloudinary espera valores booleanos como "true" ou "false" strings
+        const formattedValue =
+            typeof value === "boolean" ? String(value) : value;
+        stringToSign += `${key}=${formattedValue}&`;
+    });
 
-    // Extrai o public_id de uma URL do Cloudinary
-    function getPublicIdFromUrl(url: string) {
-        const match = url.match(/\/upload\/(?:v\d+\/)?(.+?)\.[a-z]+$/i);
-        // const match = url.match(/\/([^\/]+)\.[a-z]+$/i);
-        return match ? match[1] : undefined;
-    }
+    // Remova o último '&' e adicione o API Secret
+    stringToSign = stringToSign.slice(0, -1) + api_secret;
 
-    /*
+    console.log("String a ser assinada:", stringToSign);
+
+    const digest = await Crypto.digestStringAsync(
+        Crypto.CryptoDigestAlgorithm.SHA1,
+        stringToSign
+    );
+
+    // 3. Aplique o hash SHA-1
+    return digest;
+}
+
+// Extrai o public_id de uma URL do Cloudinary
+function getPublicIdFromUrl(url: string) {
+    const match = url.match(/\/([^\/]+)\.[a-z]+$/i);
+    // const match = url.match(/\/upload\/(?:v\d+\/)?(.+?)\.[a-z]+$/i);
+    const publicId = match ? match[1] : undefined;
+
+    console.log("Original URL:", url);
+    console.log("Extracted publicId:", publicId);
+    return publicId;
+}
+
+/*
         URL: blob:http://localhost:19006/a1b2c3d4...
 
         É apenas um ponteiro para um objeto Blob na memória do navegador.
@@ -70,18 +106,25 @@ export function useCreateMeal() {
             new File([blob], ...) → criar um objeto File, que o FormData entende.
      */
 
-    async function prepareFileForUpload(uri: string) {
-        if (Platform.OS === "web") {
-            const blob = await fetch(uri).then((res) => res.blob());
-            return new File([blob], "meal.jpg", { type: "image/jpeg" });
-        } else {
-            return {
-                uri,
-                type: "image/jpeg",
-                name: "meal.jpg",
-            };
-        }
+async function prepareFileForUpload(uri: string) {
+    if (Platform.OS === "web") {
+        const blob = await fetch(uri).then((res) => res.blob());
+        return new File([blob], "meal.jpg", { type: "image/jpeg" });
+    } else {
+        return {
+            uri,
+            type: "image/jpeg",
+            name: "meal.jpg",
+        };
     }
+}
+
+export function useCreateMeal() {
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    const CLOUDINARY_API_KEY = "926854887914134";
+    const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/cc42/image/upload";
 
     async function uploadImageToCloudinary(
         imageUri: string,
@@ -90,20 +133,80 @@ export function useCreateMeal() {
     ): Promise<string> {
         const file = await prepareFileForUpload(imageUri);
         const formData = new FormData();
-        formData.append("file", file as any);
-        formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
-        formData.append("asset_folder", `campus/${campusId}/meals`);
+
+        const timestamp = Math.round(new Date().getTime() / 1000); // Carimbo de data/hora em segundos
+
+        let publicIdToUse: string | undefined;
+        let shouldOverwrite = false;
+
         if (oldImageUrl) {
-            const publicId = getPublicIdFromUrl(oldImageUrl);
-            if (publicId) {
-                formData.append("public_id", publicId);
-                formData.append("overwrite", "true");
+            const extractedPublicId = getPublicIdFromUrl(oldImageUrl);
+            if (extractedPublicId) {
+                publicIdToUse = extractedPublicId;
+                shouldOverwrite = true;
+                console.log(
+                    `Tentando sobrescrever com public_id: ${publicIdToUse}`
+                );
+            } else {
+                console.warn(
+                    `Não foi possível extrair o public_id da URL: ${oldImageUrl}.`
+                );
+                throw new Error(
+                    `Não foi possível extrair o public_id da URL: ${oldImageUrl}.`
+                );
             }
+        } else {
+            console.log(
+                "Nenhuma URL de imagem antiga fornecida. Realizando um novo upload."
+            );
         }
-        const response = await axios.post(CLOUDINARY_URL, formData, {
-            headers: { "Content-Type": "multipart/form-data" },
-        });
-        return response.data.secure_url;
+
+        // Parâmetros que serão assinados
+        const paramsToSign: Record<string, any> = {
+            timestamp: timestamp,
+            folder: `campus/${campusId}/meals`, // Use 'folder' para uploads assinados
+        };
+
+        if (publicIdToUse) {
+            paramsToSign.public_id = publicIdToUse;
+        }
+        if (shouldOverwrite) {
+            paramsToSign.overwrite = true; // Use o booleano 'true' para a assinatura
+        }
+        const CLOUDINARY_API_SECRET = await fetchApiKeyFromDatabase(
+            "cloudinary"
+        );
+        const signature = await generateCloudinarySignature(
+            paramsToSign,
+            CLOUDINARY_API_SECRET
+        );
+
+        // Adicione todos os parâmetros ao FormData
+        formData.append("file", file as any);
+        formData.append("api_key", CLOUDINARY_API_KEY);
+        formData.append("timestamp", timestamp.toString()); // Envie como string
+        formData.append("signature", signature);
+
+        if (publicIdToUse) {
+            formData.append("public_id", publicIdToUse);
+        }
+        if (shouldOverwrite) {
+            formData.append("overwrite", "true"); // Envie como string "true" para o Cloudinary
+        }
+        formData.append("folder", `campus/${campusId}/meals`); // Envie a pasta
+
+        try {
+            const response = await axios.post(CLOUDINARY_URL, formData, {
+                headers: { "Content-Type": "multipart/form-data" },
+            });
+            return response.data.secure_url;
+        } catch (e: any) {
+            console.error(
+                "Cloudinary upload/update failed:",
+                e.response ? e.response.data : e.message
+            );
+            throw e;
+        }
     }
 
     async function createMeal({
