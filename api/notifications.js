@@ -1,4 +1,5 @@
 // api/notifications.js
+
 import { KJUR } from "jsrsasign";
 
 const SERVICE_ACCOUNT_JSON = {
@@ -19,10 +20,22 @@ const TOKEN_URI = SERVICE_ACCOUNT_JSON.token_uri;
 const CLIENT_EMAIL = SERVICE_ACCOUNT_JSON.client_email;
 const SCOPE = "https://www.googleapis.com/auth/firebase.messaging";
 
+let cachedAccessToken = null;
+let tokenExpirationTime = 0; // Timestamp em milissegundos
+
 // Função para obter o access token do Google
 const getGoogleAccessToken = async () => {
     try {
         const now = Math.floor(Date.now() / 1000);
+
+        if (
+            cachedAccessToken &&
+            tokenExpirationTime &&
+            now < tokenExpirationTime - 60
+        ) {
+            // 60 segundos de margem de segurança
+            return cachedAccessToken;
+        }
 
         const PRIVATE_KEY = process.env.GOOGLE_PRIVATE_KEY.replace(
             /\\n/g,
@@ -36,11 +49,11 @@ const getGoogleAccessToken = async () => {
         // Cabeçalho e payload para JWT
         const header = { alg: "RS256", typ: "JWT" };
         const payload = {
-            iss: CLIENT_EMAIL,
-            scope: SCOPE,
-            aud: TOKEN_URI,
+            iss: CLIENT_EMAIL, // E-mail do serviço (issuer)
+            scope: SCOPE, // Escopos de acesso requisitados
+            aud: TOKEN_URI, // Destinatário (endpoint do token)
             exp: now + 3600, // Expira em 1 hora
-            iat: now,
+            iat: now, // Timestamp de emissão
         };
 
         const sHeader = JSON.stringify(header);
@@ -75,6 +88,8 @@ const getGoogleAccessToken = async () => {
         }
 
         const data = await response.json();
+        cachedAccessToken = data.access_token;
+        tokenExpirationTime = now + (data.expires_in || 3600); // Expira 1 minuto antes
         return data.access_token;
     } catch (error) {
         console.error("Error in getGoogleAccessToken:", error);
