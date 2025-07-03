@@ -70,7 +70,7 @@
 //         const sHeader = JSON.stringify(header);
 //         const sPayload = JSON.stringify(payload);
 //         const PRIVATE_KEY = await fetchApiKeyFromDatabase(
-//             "google-cloud-message"
+//             "index"
 //         );
 
 //         if (!PRIVATE_KEY) {
