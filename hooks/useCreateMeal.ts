@@ -1,7 +1,6 @@
 import { database } from "@/firebaseConfig";
-import { getGoogleAccessToken } from "@/services/AccessTokenGeneratorRN";
 import { fetchApiKeyFromDatabase } from "@/services/firebaseApiKey";
-import { sendNotificationForTopicDirect } from "@/services/FirebaseNotification";
+import { sendNotificationForBackEnd } from "@/services/FirebaseNotification";
 import axios from "axios";
 import * as Crypto from "expo-crypto";
 import { push, ref, remove, set, update } from "firebase/database";
@@ -257,24 +256,33 @@ export function useCreateMeal() {
                 .map((topic) => `'${topic}' in topics`)
                 .join(" || ");
 
-            try {
-                const accessToken = await getGoogleAccessToken();
-                console.log("Obtained Access Token:", accessToken);
+            await sendNotificationForBackEnd(
+                mealData,
+                campusId,
+                cursusId,
+                undefined, // O campo 'topic' deve ser null quando se usa 'condition'
+                condition
+            );
 
-                await sendNotificationForTopicDirect(
-                    accessToken,
-                    mealData,
-                    campusId,
-                    cursusId,
-                    undefined, // O campo 'topic' deve ser null quando se usa 'condition'
-                    condition
-                );
-            } catch (error) {
-                Alert.alert(
-                    "Erro Geral",
-                    "Não foi possível completar o envio da notificação."
-                );
-            }
+            // try {
+            // ENVIA NOTIFICAÇÃO SOLICITANDO TOKEN DE ACESSO AO GOOGLE NO CLIENT
+            // const accessToken = await getGoogleAccessToken();
+            // console.log("Obtained Access Token:", accessToken);
+
+            // await sendNotificationForTopicDirect(
+            //     accessToken,
+            //     mealData,
+            //     campusId,
+            //     cursusId,
+            //     undefined, // O campo 'topic' deve ser null quando se usa 'condition'
+            //     condition
+            // );
+            // } catch (error) {
+            //     Alert.alert(
+            //         "Erro Geral",
+            //         "Não foi possível completar o envio da notificação."
+            //     );
+            // }
             setLoading(false);
             return mealData;
         } catch (e: any) {

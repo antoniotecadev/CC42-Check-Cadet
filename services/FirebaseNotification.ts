@@ -1,6 +1,5 @@
 import axios from "axios";
 import { Alert } from "react-native";
-import { getItem, setItem } from "./AccessTokenGeneratorRN";
 import { sendExpoNotificationToGroup } from "./ExpoNotificationService";
 
 class Notification {
@@ -87,63 +86,146 @@ class FCMessage {
         this.message = message;
     }
 }
+// ENVIAR NOTIFICAÇÃO FCM APARTIR DO CLIENT - APENAS PARA TEST
+// export const sendNotificationForTopicDirect = async (
+//     accessToken: string,
+//     meal: any,
+//     campusId: string,
+//     cursusId: string,
+//     topic?: string,
+//     condition?: string
+// ): Promise<void> => {
+//     const PROJECT_ID = "cadet-check-cc42";
+//     const FCM_URL = `https://fcm.googleapis.com/v1/projects/${PROJECT_ID}/messages:send`;
 
-export const sendNotificationForTopicDirect = async (
-    accessToken: string,
+//     try {
+//         const notification = new Notification(
+//             meal.type,
+//             meal.name,
+//             meal.pathImage
+//         );
+//         const data = new Data(
+//             meal.id,
+//             meal.createdBy,
+//             meal.createdDate,
+//             meal.quantity,
+//             cursusId,
+//             "DetailsMealFragment",
+//             meal.description,
+//             notification
+//         );
+//         const message = new Message(topic, condition, notification, data);
+//         const fcmMessage = new FCMessage(message);
+
+//         console.log(
+//             "Sending FCM Message:",
+//             JSON.stringify(fcmMessage, null, 2)
+//         );
+
+//         const response = await axios.post(FCM_URL, fcmMessage, {
+//             headers: {
+//                 "Content-Type": "application/json",
+//                 Authorization: `Bearer ${accessToken}`,
+//             },
+//         });
+
+//         if (response.status === 200) {
+//             await sendExpoNotificationToGroup(campusId, cursusId, {
+//                 title: meal.type,
+//                 body: meal.name,
+//                 data: {
+//                     id: meal.id,
+//                     cursusId: cursusId,
+//                     description: meal.description,
+//                     createdDate: meal.createdDate,
+//                     quantity: meal.quantity,
+//                     pathImage: meal.pathImage,
+//                 },
+//                 image: meal.pathImage,
+//             });
+//             console.log("Notification sent:", response.data);
+//             Alert.alert("Sucesso", "Notificação enviada com sucesso!");
+//         } else {
+//             console.error(
+//                 "Failed to send notification:",
+//                 response.status,
+//                 data
+//             );
+//             Alert.alert(
+//                 "Erro",
+//                 `Erro ao enviar notificação: ${
+//                     response.status
+//                 } - ${JSON.stringify(data)}`
+//             );
+//         }
+//     } catch (error: any) {
+//         console.error(
+//             "Error sending notification:",
+//             error.response ? error.response.data : error.message
+//         );
+//         Alert.alert(
+//             "Erro na Requisição",
+//             `Erro: ${
+//                 error.response
+//                     ? JSON.stringify(error.response.data)
+//                     : error.message
+//             }`
+//         );
+//     }
+// };
+
+export const sendNotificationForBackEnd = async (
     meal: any,
     campusId: string,
     cursusId: string,
     topic?: string,
     condition?: string
 ): Promise<void> => {
-    const PROJECT_ID = "cadet-check-cc42";
-    const FCM_URL = `https://fcm.googleapis.com/v1/projects/${PROJECT_ID}/messages:send`;
+    const notification = new Notification(meal.type, meal.name, meal.pathImage);
+    const data = new Data(
+        meal.id,
+        meal.createdBy,
+        meal.createdDate,
+        meal.quantity,
+        cursusId,
+        "DetailsMealFragment",
+        meal.description,
+        notification
+    );
+    const message = new Message(topic, condition, notification, data);
+    const fcmMessage = new FCMessage(message);
 
+    console.log("Sending FCM Message:", JSON.stringify(fcmMessage, null, 2));
+
+    await sendFCMNotification(fcmMessage);
+    await sendExpoNotificationToGroup(campusId, cursusId, {
+        title: meal.type,
+        body: meal.name,
+        data: {
+            id: meal.id,
+            cursusId: cursusId,
+            description: meal.description,
+            createdDate: meal.createdDate,
+            quantity: meal.quantity,
+            pathImage: meal.pathImage,
+        },
+        image: meal.pathImage,
+    });
+};
+
+const sendFCMNotification = async (fcmMessage: FCMessage) => {
     try {
-        const notification = new Notification(
-            meal.type,
-            meal.name,
-            meal.pathImage
+        const response = await axios.post(
+            "https://check-cadet.vercel.app/api/notifications",
+            fcmMessage,
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            }
         );
-        const data = new Data(
-            meal.id,
-            meal.createdBy,
-            meal.createdDate,
-            meal.quantity,
-            cursusId,
-            "DetailsMealFragment",
-            meal.description,
-            notification
-        );
-        const message = new Message(topic, condition, notification, data);
-        const fcmMessage = new FCMessage(message);
-
-        console.log(
-            "Sending FCM Message:",
-            JSON.stringify(fcmMessage, null, 2)
-        );
-
-        const response = await axios.post(FCM_URL, fcmMessage, {
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${accessToken}`,
-            },
-        });
 
         if (response.status === 200) {
-            await sendExpoNotificationToGroup(campusId, cursusId, {
-                title: meal.type,
-                body: meal.name,
-                data: {
-                    id: meal.id,
-                    cursusId: cursusId,
-                    description: meal.description,
-                    createdDate: meal.createdDate,
-                    quantity: meal.quantity,
-                    pathImage: meal.pathImage,
-                },
-                image: meal.pathImage,
-            });
             console.log("Notification sent:", response.data);
             Alert.alert("Sucesso", "Notificação enviada com sucesso!");
         } else {
@@ -166,7 +248,7 @@ export const sendNotificationForTopicDirect = async (
         );
         Alert.alert(
             "Erro na Requisição",
-            `Erro: ${
+            `${
                 error.response
                     ? JSON.stringify(error.response.data)
                     : error.message
@@ -174,30 +256,3 @@ export const sendNotificationForTopicDirect = async (
         );
     }
 };
-
-export async function subscribeToMealTopic(
-    campusName: string,
-    campusId: string,
-    cursusId: string,
-    isStaff: boolean
-) {
-    const isSubscribed = await getItem("subscribe_topic");
-    if (!isSubscribed) {
-        let topic = `meals_${campusId}_`;
-        if (isStaff) {
-            topic += campusName;
-        } else {
-            topic += cursusId;
-        }
-        try {
-            // await messaging().subscribeToTopic(topic);
-            await setItem("subscribe_topic", "true");
-        } catch (error: any) {
-            console.error("Failed to subscribe to topic:", error);
-            Alert.alert(
-                "Erro",
-                "Failed to subscribe to topic: " + error.message
-            );
-        }
-    }
-}
