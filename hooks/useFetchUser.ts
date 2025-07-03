@@ -71,6 +71,7 @@ const useFetchUser = () => {
             if (Platform.OS === "ios") {
                 registerPushToken(
                     userWithCoalition.id,
+                    userWithCoalition["staff?"] as boolean,
                     userWithCoalition?.campus?.[0]?.id,
                     userWithCoalition?.projects_users?.[0]?.cursus_ids?.[0]
                 );

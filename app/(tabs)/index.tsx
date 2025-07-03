@@ -98,16 +98,24 @@ export default function HomeScreen() {
         const subscription = Notifications.addPushTokenListener(
             async (token) => {
                 const userId = user?.id;
+                const isStaff: boolean = user["staff?"];
                 const campusId = user?.campus?.[0]?.id;
                 const cursusId = user?.projects_users?.[0]?.cursus_ids?.[0];
                 console.log("🔁 Novo token detectado:", token.data);
-                if (userId && campusId && cursusId && Platform.OS === "ios") {
+                if (
+                    userId &&
+                    campusId &&
+                    (cursusId || isStaff) &&
+                    Platform.OS === "ios"
+                ) {
                     const tokenRef = ref(
                         database,
-                        `campus/${campusId}/cursus/${cursusId}/tokenIOSNotification/${userId}`
+                        isStaff
+                            ? `campus/${campusId}/tokenIOSNotification/staff/${userId}`
+                            : `campus/${campusId}/tokenIOSNotification/student/cursus/${cursusId}/${userId}`
                     );
                     try {
-                        await set(tokenRef, token);
+                        await set(tokenRef, token.data);
                     } catch (e: any) {
                         alert(e.message);
                     }

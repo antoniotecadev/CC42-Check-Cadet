@@ -20,19 +20,7 @@ export async function sendExpoNotificationToGroup(
     payload: ExpoNotificationPayload
 ): Promise<void> {
     // Busca os tokens do Firebase Realtime Database
-    const tokensRef = ref(
-        database,
-        `campus/${campusId}/cursus/${cursusId}/tokenIOSNotification`
-    );
-    const snapshot = await get(tokensRef);
-    if (!snapshot.exists()) {
-        throw new Error("No tokens found at the specified path.");
-    }
-    const tokensObj = snapshot.val();
-    // tokensObj pode ser um array ou objeto de tokens
-    const tokens: string[] = Array.isArray(tokensObj)
-        ? tokensObj
-        : Object.values(tokensObj);
+    const tokens: string[] = await getAllNotificationTokens(campusId, cursusId);
 
     // Monta as mensagens
     const messages = tokens.map((token) => ({
@@ -56,6 +44,34 @@ export async function sendExpoNotificationToGroup(
             },
         });
     }
+}
+
+async function getAllNotificationTokens(
+    campusId: string,
+    cursusId: string
+): Promise<string[]> {
+    // Staff tokens
+    const staffRef = ref(
+        database,
+        `campus/${campusId}/tokenIOSNotification/staff`
+    );
+    const staffSnap = await get(staffRef);
+    const staffTokens = staffSnap.exists()
+        ? (Object.values(staffSnap.val()) as string[])
+        : [];
+
+    // Student tokens
+    const studentRef = ref(
+        database,
+        `campus/${campusId}/tokenIOSNotification/student/cursus/${cursusId}`
+    );
+    const studentSnap = await get(studentRef);
+    const studentTokens = studentSnap.exists()
+        ? (Object.values(studentSnap.val()) as string[])
+        : [];
+
+    // Junta todos os tokens
+    return [...staffTokens, ...studentTokens];
 }
 
 export async function registerForPushNotificationsAsync(): Promise<
@@ -91,14 +107,17 @@ export async function registerForPushNotificationsAsync(): Promise<
 
 export async function registerPushToken(
     userId: string,
+    isStaff: boolean,
     campusId: string,
     cursusId: string
 ) {
     const token = await registerForPushNotificationsAsync();
-    if (token && userId && campusId && cursusId) {
+    if (token && userId && campusId && (cursusId || isStaff)) {
         const tokenRef = ref(
             database,
-            `campus/${campusId}/cursus/${cursusId}/tokenIOSNotification/${userId}`
+            isStaff
+                ? `campus/${campusId}/tokenIOSNotification/staff/${userId}`
+                : `campus/${campusId}/tokenIOSNotification/student/cursus/${cursusId}/${userId}`
         );
         try {
             await set(tokenRef, token);
