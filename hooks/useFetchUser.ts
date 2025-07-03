@@ -1,5 +1,6 @@
 import { useColorCoalition } from "@/components/ColorCoalitionContext";
 import { Colors } from "@/constants/Colors";
+import { authenticateWithFirebase } from "@/services/authenticateWithFirebase";
 import { registerPushToken } from "@/services/ExpoNotificationService";
 import axios from "axios";
 import { Platform } from "react-native";
@@ -56,6 +57,8 @@ const useFetchUser = () => {
                 coalition,
             };
 
+            if (!authenticateWithFirebase(userData)) return false;
+
             setColor(coalition?.color?.trim() || Colors.light_blue_900.default);
             // 4. Salvar localmente
             await saveUser(userWithCoalition);
@@ -77,8 +80,8 @@ const useFetchUser = () => {
                 );
             }
             return true;
-        } catch (e) {
-            showError("Erro", "Erro ao buscar dados do usuário: " + e);
+        } catch (e: any) {
+            showError("Erro", "Erro ao buscar dados do usuário: " + e.message);
             return false;
         }
     };
