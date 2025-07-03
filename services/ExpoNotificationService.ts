@@ -3,7 +3,7 @@ import axios from "axios";
 import Constants from "expo-constants";
 import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
-import { get, ref, set } from "firebase/database";
+import { get, ref, remove, set } from "firebase/database";
 
 const EXPO_PUSH_URL = "https://exp.host/--/api/v2/push/send";
 
@@ -125,4 +125,16 @@ export async function registerPushToken(
             alert(e.message);
         }
     }
+}
+
+export async function removePushToken(
+  userId: string,
+  isStaff: boolean,
+  campusId: string,
+  cursusId?: string
+) {
+  const path = isStaff
+    ? `campus/${campusId}/tokenIOSNotification/staff/${userId}`
+    : `campus/${campusId}/tokenIOSNotification/student/cursus/${cursusId}/${userId}`;
+  await remove(ref(database, path));
 }

@@ -21,6 +21,7 @@ import useItemStorage from "@/hooks/storage/useItemStorage";
 import useTokenStorage from "@/hooks/storage/useTokenStorage";
 import { revokeToken } from "@/hooks/useLogin42";
 import { useEvents } from "@/repository/eventRepository";
+import { removePushToken } from "@/services/ExpoNotificationService";
 import { FlashList } from "@shopify/flash-list";
 import { ref, set } from "firebase/database";
 import {
@@ -179,6 +180,12 @@ export default function HomeScreen() {
                 removeItem("campus_name");
                 removeItem("expires_in_google");
                 removeItem("access_token_google");
+                await removePushToken(
+                    user?.id,
+                    user["staff?"],
+                    user?.campus?.[0]?.id,
+                    user?.projects_users?.[0]?.cursus_ids?.[0]
+                );
                 router.replace("/login");
             },
             () => {
