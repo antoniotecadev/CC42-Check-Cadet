@@ -1,5 +1,5 @@
+import { showAlert } from "@/hooks/useAlert";
 import axios from "axios";
-import { Alert } from "react-native";
 import { sendExpoNotificationToGroup } from "./ExpoNotificationService";
 
 class Notification {
@@ -144,14 +144,14 @@ class FCMessage {
 //                 image: meal.pathImage,
 //             });
 //             console.log("Notification sent:", response.data);
-//             Alert.alert("Sucesso", "Notificação enviada com sucesso!");
+//             showAlert("Sucesso", "Notificação enviada com sucesso!");
 //         } else {
 //             console.error(
 //                 "Failed to send notification:",
 //                 response.status,
 //                 data
 //             );
-//             Alert.alert(
+//             showAlert(
 //                 "Erro",
 //                 `Erro ao enviar notificação: ${
 //                     response.status
@@ -163,7 +163,7 @@ class FCMessage {
 //             "Error sending notification:",
 //             error.response ? error.response.data : error.message
 //         );
-//         Alert.alert(
+//         showAlert(
 //             "Erro na Requisição",
 //             `Erro: ${
 //                 error.response
@@ -227,14 +227,14 @@ const sendFCMNotification = async (fcmMessage: FCMessage) => {
 
         if (response.status === 200) {
             console.log("Notification sent:", response.data);
-            Alert.alert("Sucesso", "Notificação enviada com sucesso!");
+            showAlert("Sucesso", "Notificação enviada com sucesso!");
         } else {
             console.error(
                 "Failed to send notification:",
                 response.status,
                 response.data
             );
-            Alert.alert(
+            showAlert(
                 "Erro",
                 `Erro ao enviar notificação: ${
                     response.status
@@ -246,7 +246,7 @@ const sendFCMNotification = async (fcmMessage: FCMessage) => {
             "Error sending notification:",
             error.response ? error.response.data : error.message
         );
-        Alert.alert(
+        showAlert(
             "Erro na Requisição",
             `${
                 error.response

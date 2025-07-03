@@ -2,7 +2,7 @@ import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import useUserStorage from "@/hooks/storage/useUserStorage";
-import useAlert from "@/hooks/useAlert";
+import useAlert, { showAlert } from "@/hooks/useAlert";
 import { Image } from "expo-image";
 import * as Notifications from "expo-notifications";
 
@@ -118,7 +118,7 @@ export default function HomeScreen() {
                     try {
                         await set(tokenRef, token.data);
                     } catch (e: any) {
-                        alert(e.message);
+                        showAlert("Erro", e.message);
                     }
                 }
             }

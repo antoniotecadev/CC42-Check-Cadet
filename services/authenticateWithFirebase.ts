@@ -1,5 +1,6 @@
 // após ter obtido os dados do usuário da Intra 42:
 import { auth } from "@/firebaseConfig"; // Seu arquivo de configuração do Firebase
+import { showAlert } from "@/hooks/useAlert";
 import { signInWithCustomToken } from "firebase/auth";
 
 // A URL da sua nova Vercel Function
@@ -34,14 +35,15 @@ export async function authenticateWithFirebase(
             // 2. Use o token customizado para autenticar no Firebase
             await signInWithCustomToken(auth, firebaseToken);
             console.log("Autenticado no Firebase com sucesso!");
-            // alert("Autenticado com sucesso no Firebase!");
+            // showAlert("Erro", "Autenticado com sucesso no Firebase!");
             return true;
         } else {
             console.error(
                 "Erro da Vercel Function ao gerar token Firebase:",
                 data.error
             );
-            alert(
+            showAlert(
+                "Erro",
                 `Falha ao autenticar no Firebase: ${
                     data.error || "Erro desconhecido"
                 }`
@@ -53,7 +55,7 @@ export async function authenticateWithFirebase(
             "Erro ao chamar a Vercel Function ou autenticar no Firebase:",
             error
         );
-        alert("Ocorreu um erro inesperado durante a autenticação no Firebase.");
+        showAlert("Erro", "Ocorreu um erro inesperado durante a autenticação no Firebase.");
         return false;
     }
 }

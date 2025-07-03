@@ -34,7 +34,6 @@ export function useBase64Image() {
 }
 
 export async function optimizeImage(imageUri: string) {
-    alert()
     const context = ImageManipulator.manipulate(imageUri);
     context.resize({
         width: 400,

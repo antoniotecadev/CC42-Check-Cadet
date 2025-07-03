@@ -5,7 +5,8 @@ import axios from "axios";
 import * as Crypto from "expo-crypto";
 import { push, ref, remove, set, update } from "firebase/database";
 import { useState } from "react";
-import { Alert, Platform } from "react-native";
+import { Platform } from "react-native";
+import { showAlert } from "./useAlert";
 
 interface MealData {
     name: string;
@@ -278,7 +279,7 @@ export function useCreateMeal() {
             //     condition
             // );
             // } catch (error) {
-            //     Alert.alert(
+            //     showAlert(
             //         "Erro Geral",
             //         "Não foi possível completar o envio da notificação."
             //     );
@@ -386,19 +387,13 @@ export function useCreateMeal() {
             if (meal.pathImage) {
                 const success = await deleteImageFromCloudinary(meal.pathImage);
                 if (!success) {
-                    Alert.alert("Erro", "Imagem não eliminada", [
-                        { text: "OK" },
-                    ]);
+                    showAlert("Erro", "Imagem não eliminada");
                 }
             }
-            Alert.alert("Sucesso", "Refeição eliminada com sucesso!", [
-                { text: "OK" },
-            ]);
+            showAlert("Sucesso", "Refeição eliminada com sucesso!");
             onRefresh(false);
         } catch (e: any) {
-            Alert.alert("Erro", "Erro ao eliminar refeição: " + e.message, [
-                { text: "OK" },
-            ]);
+            showAlert("Erro", "Erro ao eliminar refeição: " + e.message);
         }
     }
 

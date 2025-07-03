@@ -107,7 +107,6 @@ export default function EventUsersScreen() {
             (u) => u.isPresent === false
         ).length;
     } else {
-        //alert(JSON.stringify(users, null, 2))
         userSubscriptionsList = users.map((u) => ({
             ...u,
             isSubscribed: ids.includes(String(u.id)),

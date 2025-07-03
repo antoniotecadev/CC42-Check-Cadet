@@ -1,4 +1,5 @@
 import { database } from "@/firebaseConfig";
+import { showAlert } from "@/hooks/useAlert";
 import axios from "axios";
 import Constants from "expo-constants";
 import * as Device from "expo-device";
@@ -87,20 +88,23 @@ export async function registerForPushNotificationsAsync(): Promise<
             finalStatus = status;
         }
         if (finalStatus !== "granted") {
-            alert("Failed to get push token for push notification!");
+            showAlert(
+                "Failed",
+                "Failed to get push token for push notification!"
+            );
             return null;
         }
         const projectId =
             Constants?.expoConfig?.extra?.eas?.projectId ??
             Constants?.easConfig?.projectId;
         if (!projectId) {
-            alert("Project ID not found");
+            showAlert("Error", "Project ID not found");
             token = null;
         }
         const expoPushToken = await Notifications.getExpoPushTokenAsync();
         token = expoPushToken.data;
     } else {
-        alert("Must use physical device for Push Notifications");
+        showAlert("Erro", "Must use physical device for Push Notifications");
     }
     return token;
 }
@@ -122,19 +126,19 @@ export async function registerPushToken(
         try {
             await set(tokenRef, token);
         } catch (e: any) {
-            alert(e.message);
+            showAlert("Erro", e.message);
         }
     }
 }
 
 export async function removePushToken(
-  userId: string,
-  isStaff: boolean,
-  campusId: string,
-  cursusId?: string
+    userId: string,
+    isStaff: boolean,
+    campusId: string,
+    cursusId?: string
 ) {
-  const path = isStaff
-    ? `campus/${campusId}/tokenIOSNotification/staff/${userId}`
-    : `campus/${campusId}/tokenIOSNotification/student/cursus/${cursusId}/${userId}`;
-  await remove(ref(database, path));
+    const path = isStaff
+        ? `campus/${campusId}/tokenIOSNotification/staff/${userId}`
+        : `campus/${campusId}/tokenIOSNotification/student/cursus/${cursusId}/${userId}`;
+    await remove(ref(database, path));
 }
