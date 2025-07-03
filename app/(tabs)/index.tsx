@@ -180,12 +180,13 @@ export default function HomeScreen() {
                 removeItem("campus_name");
                 removeItem("expires_in_google");
                 removeItem("access_token_google");
-                await removePushToken(
-                    user?.id,
-                    user["staff?"],
-                    user?.campus?.[0]?.id,
-                    user?.projects_users?.[0]?.cursus_ids?.[0]
-                );
+                if (Platform.OS === "ios")
+                    await removePushToken(
+                        user?.id,
+                        user["staff?"],
+                        user?.campus?.[0]?.id,
+                        user?.projects_users?.[0]?.cursus_ids?.[0]
+                    );
                 router.replace("/login");
             },
             () => {
