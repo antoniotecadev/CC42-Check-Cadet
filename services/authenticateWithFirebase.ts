@@ -55,7 +55,19 @@ export async function authenticateWithFirebase(
             "Erro ao chamar a Vercel Function ou autenticar no Firebase:",
             error
         );
-        showAlert("Erro", "Ocorreu um erro inesperado durante a autenticação no Firebase.");
+        showAlert(
+            "Erro",
+            "Ocorreu um erro inesperado durante a autenticação no Firebase."
+        );
         return false;
     }
 }
+
+export const handleLogoutFirebase = async () => {
+    try {
+        await auth.signOut();
+    } catch (error) {
+        console.error("Erro ao sair:", error);
+        showAlert("Sign Out", "Erro ao sair.");
+    }
+};

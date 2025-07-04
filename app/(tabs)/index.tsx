@@ -21,6 +21,7 @@ import useItemStorage from "@/hooks/storage/useItemStorage";
 import useTokenStorage from "@/hooks/storage/useTokenStorage";
 import { revokeToken } from "@/hooks/useLogin42";
 import { useEvents } from "@/repository/eventRepository";
+import { handleLogoutFirebase } from "@/services/authenticateWithFirebase";
 import { removePushToken } from "@/services/ExpoNotificationService";
 import { FlashList } from "@shopify/flash-list";
 import { ref, set } from "firebase/database";
@@ -187,6 +188,7 @@ export default function HomeScreen() {
                         user?.campus?.[0]?.id,
                         user?.projects_users?.[0]?.cursus_ids?.[0]
                     );
+                await handleLogoutFirebase();
                 router.replace("/login");
             },
             () => {

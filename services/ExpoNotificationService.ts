@@ -137,8 +137,12 @@ export async function removePushToken(
     campusId: string,
     cursusId?: string
 ) {
-    const path = isStaff
-        ? `campus/${campusId}/tokenIOSNotification/staff/${userId}`
-        : `campus/${campusId}/tokenIOSNotification/student/cursus/${cursusId}/${userId}`;
-    await remove(ref(database, path));
+    try {
+        const path = isStaff
+            ? `campus/${campusId}/tokenIOSNotification/staff/${userId}`
+            : `campus/${campusId}/tokenIOSNotification/student/cursus/${cursusId}/${userId}`;
+        await remove(ref(database, path));
+    } catch (e: any) {
+        showAlert("Remove Push Token", e.message);
+    }
 }
