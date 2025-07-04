@@ -1,4 +1,5 @@
 import { useColorCoalition } from "@/components/ColorCoalitionContext";
+import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import EventUserItem from "@/components/ui/EventUserItem";
 import useItemStorage from "@/hooks/storage/useItemStorage";
@@ -300,10 +301,10 @@ export default function EventUsersScreen() {
     if (isError) {
         return (
             <View style={styles.centered}>
-                <Text>Erro ao carregar estudantes.</Text>
-                <Text onPress={() => refetch()} style={styles.retry}>
-                    Tentar novamente
-                </Text>
+                <ThemedText>Erro ao carregar estudantes.</ThemedText>
+                <TouchableOpacity onPress={onRefresh}>
+                    <Text style={styles.retry}>Tentar novamente</Text>
+                </TouchableOpacity>
             </View>
         );
     }
