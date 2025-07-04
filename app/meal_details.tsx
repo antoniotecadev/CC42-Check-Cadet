@@ -80,7 +80,7 @@ export default function MealDetailScreen() {
                                 name="restaurant"
                             />
                         )}
-                        <Text style={styles.date}>{meal.createdDate}</Text>
+                        <Text style={styles.date}>{new Date(meal.createdDate).toLocaleDateString()}</Text>
                         <Text style={styles.qty}>
                             Quantidade: {meal.quantity}{" "}
                             {meal.numberSubscribed
