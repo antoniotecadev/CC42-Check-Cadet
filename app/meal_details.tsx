@@ -38,7 +38,7 @@ export default function MealDetailScreen() {
     useEffect(() => {
         const status = async () => {
             const result = (await getItem("staff")) as any;
-            setStaff(result);
+            setStaff(result === "true");
         };
         status();
     }, [getItem]);

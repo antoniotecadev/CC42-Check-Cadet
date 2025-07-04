@@ -237,7 +237,7 @@ export default function EventUsersScreen() {
     React.useLayoutEffect(() => {
         const status = async () => {
             const result = (await getItem("staff")) as any;
-            setStaff(result);
+            setStaff(result === "true");
         };
         status();
         navigation.setOptions &&
