@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SecureStore from "expo-secure-store";
 import { Platform } from "react-native";
 
@@ -10,7 +11,7 @@ const useUserStorage = () => {
         if (Platform.OS === "web") {
             localStorage.setItem(prefix + "data", data);
         } else {
-            await SecureStore.setItemAsync(prefix + "data", data);
+            await AsyncStorage.setItem(prefix + "data", data);
         }
     }
 
@@ -19,7 +20,7 @@ const useUserStorage = () => {
             const data = localStorage.getItem(prefix + "data");
             return data ? JSON.parse(data) : null;
         } else {
-            const data = await SecureStore.getItemAsync(prefix + "data");
+            const data = await AsyncStorage.getItem(prefix + "data");
             return data ? JSON.parse(data) : null;
         }
     }
