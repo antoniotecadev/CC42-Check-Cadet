@@ -51,27 +51,6 @@ export type RatingResult = {
     userPresent?: boolean;
 };
 
-export async function userIsPresentOrSubscribed({
-    campusId,
-    cursusId,
-    type,
-    typeId,
-    userId,
-}: {
-    campusId: string;
-    cursusId: string;
-    type: "events" | "meals";
-    typeId: string;
-    userId: string;
-}): Promise<boolean> {
-    const participantsRef = ref(
-        database,
-        `campus/${campusId}/cursus/${cursusId}/${type}/${typeId}/participants/${userId}`
-    );
-    const snapshot = await get(participantsRef);
-    return snapshot.exists();
-}
-
 export function fetchRatings(
     campusId: string,
     cursusId: string,
@@ -124,30 +103,6 @@ export function fetchRatings(
     });
 
     return unsubscribe; // Chame para parar de ouvir
-}
-
-export function rate(
-    campusId: string,
-    cursusId: string,
-    type: string,
-    typeId: string,
-    userId: string,
-    rating: number,
-    onSuccess?: () => void,
-    onError?: (error: any) => void
-) {
-    const ratingRef = ref(
-        database,
-        `campus/${campusId}/cursus/${cursusId}/${type}/${typeId}/ratings/${userId}`
-    );
-
-    set(ratingRef, rating)
-        .then(() => {
-            if (onSuccess) onSuccess();
-        })
-        .catch((error) => {
-            if (onError) onError(error);
-        });
 }
 
 export async function markAttendance({

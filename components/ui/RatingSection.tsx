@@ -1,10 +1,6 @@
 import useAlert from "@/hooks/useAlert";
-import {
-    fetchRatings,
-    rate,
-    RatingResult,
-    userIsPresentOrSubscribed,
-} from "@/repository/eventRepository";
+import { fetchRatings, RatingResult } from "@/repository/eventRepository";
+import { rate, userIsPresentOrSubscribed } from "@/repository/userRepository";
 import { styles } from "@/styles/ratingSection";
 import { FontAwesome } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
