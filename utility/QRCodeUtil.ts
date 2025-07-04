@@ -157,6 +157,34 @@ export async function handleQrCode({
                 onClose: onResumeCamera,
             });
         }
+    } else if (
+        userId &&
+        !eventId &&
+        !mealId &&
+        result &&
+        result.startsWith("cc42user")
+    ) {
+        const resultQrCode = result.replace("cc42user", "");
+        const partsQrCode = resultQrCode.split("#", 6);
+        if (partsQrCode.length === 6) {
+            const userLogin = partsQrCode[1];
+            const userDisplayName = partsQrCode[2];
+            const userImageUrl = partsQrCode[5];
+            showModal({
+                title: userLogin,
+                message: userDisplayName,
+                color: "#4CAF50",
+                imageSource: { uri: userImageUrl },
+                onClose: onResumeCamera,
+            });
+        } else {
+            showModal({
+                title: "Aviso!",
+                message: "QR code inválido",
+                color: "#FDD835",
+                onClose: onResumeCamera,
+            });
+        }
     } else {
         showModal({
             title: "Aviso!",
