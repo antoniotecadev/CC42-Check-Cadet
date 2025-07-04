@@ -1,6 +1,7 @@
 import { useColorCoalition } from "@/components/ColorCoalitionContext";
 import { ThemedView } from "@/components/ThemedView";
 import EventUserItem from "@/components/ui/EventUserItem";
+import useItemStorage from "@/hooks/storage/useItemStorage";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { useIds } from "@/hooks/useEventAttendanceIds";
 import {
@@ -17,7 +18,7 @@ import * as FileSystem from "expo-file-system";
 import * as Print from "expo-print";
 import { router, useLocalSearchParams } from "expo-router";
 import * as Sharing from "expo-sharing";
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import {
     ActionSheetIOS,
     ActivityIndicator,
@@ -73,6 +74,9 @@ export default function EventUsersScreen() {
         refetch,
     } = useUsersPaginated(type, eventId, cursusId, campusId);
 
+    const { getItem } = useItemStorage();
+
+    const [staff, setStaff] = useState<boolean>(false);
     const [refreshing, setRefreshing] = React.useState(false);
     const colorscheme = colorScheme === "dark" ? "#333" : "#fff";
 
@@ -231,7 +235,13 @@ export default function EventUsersScreen() {
     };
 
     React.useLayoutEffect(() => {
+        const status = async () => {
+            const result = (await getItem("staff")) as any;
+            setStaff(result);
+        };
+        status();
         navigation.setOptions &&
+            staff &&
             navigation.setOptions({
                 headerTitle: title[1],
                 headerRight: () =>
@@ -359,70 +369,76 @@ export default function EventUsersScreen() {
                     onRefresh={onRefresh}
                 />
                 {/* Floating Action Buttons */}
-                <View style={styles.fabContainer} pointerEvents="box-none">
-                    <TouchableOpacity
-                        style={[
-                            styles.fab,
-                            styles.fabLeft,
-                            { backgroundColor: color },
-                        ]}
-                        onPress={() => {
-                            router.push({
-                                pathname: "/qr_code_scanner",
-                                params: {
-                                    camera: "back",
-                                    eventId: eventId,
-                                    mealId: mealId,
-                                    userData: JSON.stringify({
-                                        id: userId,
-                                    }),
-                                },
-                            });
-                        }}
-                        activeOpacity={0.8}
-                    >
-                        <MaterialCommunityIcons
-                            name="camera-rear"
-                            size={32}
-                            color={colorscheme}
-                        />
-                    </TouchableOpacity>
-                    {isWeb && (
+                {staff && (
+                    <View style={styles.fabContainer} pointerEvents="box-none">
                         <TouchableOpacity
-                            style={[styles.fab, { backgroundColor: color }]}
-                            onPress={onRefresh}
+                            style={[
+                                styles.fab,
+                                styles.fabLeft,
+                                { backgroundColor: color },
+                            ]}
+                            onPress={() => {
+                                router.push({
+                                    pathname: "/qr_code_scanner",
+                                    params: {
+                                        camera: "back",
+                                        eventId: eventId,
+                                        mealId: mealId,
+                                        userData: JSON.stringify({
+                                            id: userId,
+                                        }),
+                                    },
+                                });
+                            }}
+                            activeOpacity={0.8}
                         >
-                            <Ionicons name="refresh" size={28} color="#fff" />
+                            <MaterialCommunityIcons
+                                name="camera-rear"
+                                size={32}
+                                color={colorscheme}
+                            />
                         </TouchableOpacity>
-                    )}
-                    <TouchableOpacity
-                        style={[
-                            styles.fab,
-                            styles.fabRight,
-                            { backgroundColor: color },
-                        ]}
-                        onPress={() => {
-                            router.push({
-                                pathname: "/qr_code_scanner",
-                                params: {
-                                    camera: "front",
-                                    eventId: eventId,
-                                    mealId: mealId,
-                                    userData: JSON.stringify({
-                                        id: userId,
-                                    }),
-                                },
-                            });
-                        }}
-                        activeOpacity={0.8}
-                    >
-                        <MaterialCommunityIcons
-                            name="camera-front"
-                            size={32}
-                            color={colorscheme}
-                        />
-                    </TouchableOpacity>
-                </View>
+                        {isWeb && (
+                            <TouchableOpacity
+                                style={[styles.fab, { backgroundColor: color }]}
+                                onPress={onRefresh}
+                            >
+                                <Ionicons
+                                    name="refresh"
+                                    size={28}
+                                    color="#fff"
+                                />
+                            </TouchableOpacity>
+                        )}
+                        <TouchableOpacity
+                            style={[
+                                styles.fab,
+                                styles.fabRight,
+                                { backgroundColor: color },
+                            ]}
+                            onPress={() => {
+                                router.push({
+                                    pathname: "/qr_code_scanner",
+                                    params: {
+                                        camera: "front",
+                                        eventId: eventId,
+                                        mealId: mealId,
+                                        userData: JSON.stringify({
+                                            id: userId,
+                                        }),
+                                    },
+                                });
+                            }}
+                            activeOpacity={0.8}
+                        >
+                            <MaterialCommunityIcons
+                                name="camera-front"
+                                size={32}
+                                color={colorscheme}
+                            />
+                        </TouchableOpacity>
+                    </View>
+                )}
             </ThemedView>
         </>
     );

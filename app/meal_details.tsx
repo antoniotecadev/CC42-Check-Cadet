@@ -2,11 +2,13 @@ import { useColorCoalition } from "@/components/ColorCoalitionContext";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import RatingSection from "@/components/ui/RatingSection";
+import useItemStorage from "@/hooks/storage/useItemStorage";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { encrypt } from "@/utility/AESUtil";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { router, Stack, useLocalSearchParams } from "expo-router";
+import { useEffect, useState } from "react";
 import {
     Platform,
     ScrollView,
@@ -17,8 +19,11 @@ import {
 } from "react-native";
 
 export default function MealDetailScreen() {
+    const [staff, setStaff] = useState<boolean>(false);
+
     const isWeb = Platform.OS === "web";
     const colorScheme = useColorScheme();
+    const { getItem } = useItemStorage();
     const { color } = useColorCoalition();
     const { userId, campusId, cursusId, mealData } = useLocalSearchParams<{
         userId: string;
@@ -29,6 +34,14 @@ export default function MealDetailScreen() {
     const meal = JSON.parse(mealData);
     const colorCard = colorScheme === "dark" ? "#333" : "#fff";
     const colorDivider = colorScheme === "dark" ? "#333" : "#eee";
+
+    useEffect(() => {
+        const status = async () => {
+            const result = (await getItem("staff")) as any;
+            setStaff(result);
+        };
+        status();
+    }, [getItem]);
 
     if (!meal) {
         return (
@@ -83,58 +96,69 @@ export default function MealDetailScreen() {
                         typeId={meal.id}
                         userId={userId}
                     />
-                    <View style={styles.fabRow}>
-                        <TouchableOpacity
-                            onPress={() =>
-                                router.push({
-                                    pathname: "/qr_code",
-                                    params: {
-                                        content: encrypt(
-                                            "cc42meal" + meal.id + "#" + userId
-                                        ),
-                                        title: meal?.name,
-                                        description: meal?.description,
-                                        isEvent: "false",
-                                        userId: userId,
-                                        campusId: campusId,
-                                        cursusId: cursusId,
-                                    },
-                                })
-                            }
-                            style={[styles.fab, { backgroundColor: colorCard }]}
-                        >
-                            <MaterialCommunityIcons
-                                name="qrcode"
-                                size={44}
-                                color="#3A86FF"
-                            />
-                            {/* <Text style={styles.fabText}>QR Code</Text> */}
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            onPress={() => {
-                                router.push({
-                                    pathname: "/meal_users",
-                                    params: {
-                                        type: "meals",
-                                        mealId: meal.id,
-                                        userId: userId,
-                                        campusId: campusId,
-                                        cursusId: cursusId,
-                                        mealName: meal.name,
-                                        mealCreatedDate: meal.createdDate,
-                                    },
-                                });
-                            }}
-                            style={[styles.fab, { backgroundColor: colorCard }]}
-                        >
-                            <MaterialCommunityIcons
-                                name="clipboard-list-outline"
-                                size={44}
-                                color="#3A86FF"
-                            />
-                            {/* <Text style={styles.fabText}>Inscrições</Text> */}
-                        </TouchableOpacity>
-                    </View>
+                    {staff && (
+                        <View style={styles.fabRow}>
+                            <TouchableOpacity
+                                onPress={() =>
+                                    router.push({
+                                        pathname: "/qr_code",
+                                        params: {
+                                            content: encrypt(
+                                                "cc42meal" +
+                                                    meal.id +
+                                                    "#" +
+                                                    userId
+                                            ),
+                                            title: meal?.name,
+                                            description: meal?.description,
+                                            isEvent: "false",
+                                            userId: userId,
+                                            campusId: campusId,
+                                            cursusId: cursusId,
+                                        },
+                                    })
+                                }
+                                style={[
+                                    styles.fab,
+                                    { backgroundColor: colorCard },
+                                ]}
+                            >
+                                <MaterialCommunityIcons
+                                    name="qrcode"
+                                    size={44}
+                                    color="#3A86FF"
+                                />
+                                {/* <Text style={styles.fabText}>QR Code</Text> */}
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                onPress={() => {
+                                    router.push({
+                                        pathname: "/meal_users",
+                                        params: {
+                                            type: "meals",
+                                            mealId: meal.id,
+                                            userId: userId,
+                                            campusId: campusId,
+                                            cursusId: cursusId,
+                                            mealName: meal.name,
+                                            mealCreatedDate: meal.createdDate,
+                                        },
+                                    });
+                                }}
+                                style={[
+                                    styles.fab,
+                                    { backgroundColor: colorCard },
+                                ]}
+                            >
+                                <MaterialCommunityIcons
+                                    name="clipboard-list-outline"
+                                    size={44}
+                                    color="#3A86FF"
+                                />
+                                {/* <Text style={styles.fabText}>Inscrições</Text> */}
+                            </TouchableOpacity>
+                        </View>
+                    )}
                 </ScrollView>
             </ThemedView>
         </>

@@ -4,6 +4,7 @@ import { ThemedView } from "@/components/ThemedView";
 import CreateMealModal from "@/components/ui/CreateMealModal";
 import MealItem from "@/components/ui/MealItem";
 import { database } from "@/firebaseConfig";
+import useItemStorage from "@/hooks/storage/useItemStorage";
 import useAlert from "@/hooks/useAlert";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { useCreateMeal } from "@/hooks/useCreateMeal";
@@ -43,6 +44,7 @@ interface Meal {
 
 export default function MealsScreen() {
     const { showConfirm } = useAlert();
+    const { getItem } = useItemStorage();
     const navigation = useNavigation();
     const colorScheme = useColorScheme();
     const { color } = useColorCoalition();
@@ -60,6 +62,7 @@ export default function MealsScreen() {
         }>();
     const [loading, setLoading] = useState(true);
     const [meals, setMeals] = useState<Meal[]>([]);
+    const [staff, setStaff] = useState<boolean>(false);
     const [refreshing, setRefreshing] = useState(false);
     const [endReached, setEndReached] = useState(false);
     const [loadingMore, setLoadingMore] = useState(false);
@@ -194,7 +197,13 @@ export default function MealsScreen() {
     };
 
     useLayoutEffect(() => {
+        const status = async () => {
+            const result = (await getItem("staff")) as any;
+            setStaff(result);
+        };
+        status();
         navigation.setOptions &&
+            staff &&
             navigation.setOptions({
                 title: cursusName || "Refeições",
                 headerRight: () =>
@@ -286,7 +295,9 @@ export default function MealsScreen() {
                     keyExtractor={(item) => item.id}
                     renderItem={({ item }) => (
                         <TouchableOpacity
-                            onLongPress={() => handleItemLongPress(item)}
+                            onLongPress={() =>
+                                staff ? handleItemLongPress(item) : null
+                            }
                             onPress={() => {
                                 router.push({
                                     pathname: "/meal_details",
