@@ -63,7 +63,7 @@ const useFetchUser = () => {
             setColor(coalition?.color?.trim() || Colors.light_blue_900.default);
             // 4. Salvar localmente
             await saveUser(userWithCoalition);
-            if (staff as boolean) await setItem("staff", staff);
+            if (staff as boolean) await setItem("staff", `${staff}`);
             await setItem("user_id", `${userWithCoalition.id}`);
             await setItem(
                 "campus_id",
@@ -84,6 +84,7 @@ const useFetchUser = () => {
             return true;
         } catch (e: any) {
             showError("Erro", "Erro ao buscar dados do usuário: " + e.message);
+            console.error(e);
             return false;
         }
     };

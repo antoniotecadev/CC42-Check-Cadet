@@ -1,5 +1,4 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as SecureStore from "expo-secure-store";
 import { Platform } from "react-native";
 
 const useUserStorage = () => {
@@ -29,7 +28,7 @@ const useUserStorage = () => {
         if (Platform.OS === "web") {
             localStorage.removeItem(prefix + "data");
         } else {
-            await SecureStore.deleteItemAsync(prefix + "data");
+            await AsyncStorage.removeItem(prefix + "data");
         }
     }
     return { saveUser, getUser, clearUser };
