@@ -136,6 +136,7 @@ export default function HomeScreen() {
             ActionSheetIOS.showActionSheetWithOptions(
                 {
                     options,
+                    destructiveButtonIndex: 2,
                     cancelButtonIndex: 3,
                     userInterfaceStyle: "dark",
                 },
