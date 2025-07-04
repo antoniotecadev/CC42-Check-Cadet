@@ -53,6 +53,8 @@ export default function HomeScreen() {
     const [webMenuVisible, setWebMenuVisible] = useState(false);
     const [userCrypt, setUserCrypt] = useState<string | null>(null);
 
+    const isStaff: boolean = user["staff?"];
+
     const blurhash =
         "|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuayj[";
 
@@ -100,7 +102,6 @@ export default function HomeScreen() {
         const subscription = Notifications.addPushTokenListener(
             async (token) => {
                 const userId = user?.id;
-                const isStaff: boolean = user["staff?"];
                 const campusId = user?.campus?.[0]?.id;
                 const cursusId = user?.projects_users?.[0]?.cursus_ids?.[0];
                 console.log("🔁 Novo token detectado:", token.data);
@@ -298,7 +299,8 @@ export default function HomeScreen() {
                         <FloatActionButton
                             nameIcon={isWeb ? "menu" : "ellipsis"}
                             right={16}
-                            top={isWeb ? 16 : 50}
+                            top={isStaff ? undefined : isWeb ? 16 : 50}
+                            bottom={isStaff ? 16 : undefined}
                             onPress={handleMenuPress}
                         />
                         <FloatActionButton
@@ -309,21 +311,23 @@ export default function HomeScreen() {
                             bottom={16}
                             onPress={onReloadEvents}
                         />
-                        <FloatActionButton
-                            right={16}
-                            bottom={16}
-                            nameIcon={isWeb ? "qr-code-outline" : "qrcode"}
-                            onPress={() =>
-                                router.push({
-                                    pathname: "/qr_code",
-                                    params: {
-                                        content: userCrypt,
-                                        title: user?.login,
-                                        description: user?.displayname,
-                                    },
-                                })
-                            }
-                        />
+                        {!isStaff && (
+                            <FloatActionButton
+                                right={16}
+                                bottom={16}
+                                nameIcon={isWeb ? "qr-code-outline" : "qrcode"}
+                                onPress={() =>
+                                    router.push({
+                                        pathname: "/qr_code",
+                                        params: {
+                                            content: userCrypt,
+                                            title: user?.login,
+                                            description: user?.displayname,
+                                        },
+                                    })
+                                }
+                            />
+                        )}
                     </React.Fragment>
                 }
             >
