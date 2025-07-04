@@ -185,7 +185,7 @@ export default function CursusScreen() {
                                     >
                                         {item.name}
                                     </ThemedText>
-                                    <Text style={styles.id}>ID: {item.id}</Text>
+                                    {/* <Text style={styles.id}>ID: {item.id}</Text> */}
                                 </View>
                             </TouchableOpacity>
                         )}
