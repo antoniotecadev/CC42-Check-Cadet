@@ -52,6 +52,7 @@ const useFetchUser = () => {
                 coalitions && coalitions.length > 0 ? coalitions[0] : null;
 
             // 3. Juntar os dados
+            const staff = userData["staff?"];
             const userWithCoalition = {
                 ...userData,
                 coalition,
@@ -62,6 +63,7 @@ const useFetchUser = () => {
             setColor(coalition?.color?.trim() || Colors.light_blue_900.default);
             // 4. Salvar localmente
             await saveUser(userWithCoalition);
+            if (staff as boolean) await setItem("staff", staff);
             await setItem("user_id", `${userWithCoalition.id}`);
             await setItem(
                 "campus_id",
