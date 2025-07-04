@@ -176,11 +176,10 @@ export default function HomeScreen() {
                 const token = (await getAccessToken()) ?? "";
                 revokeToken(token);
                 clearTokens();
+                removeItem("staff");
                 removeItem("user_id");
                 removeItem("campus_id");
                 removeItem("campus_name");
-                removeItem("expires_in_google");
-                removeItem("access_token_google");
                 if (Platform.OS === "ios")
                     await removePushToken(
                         user?.id,
