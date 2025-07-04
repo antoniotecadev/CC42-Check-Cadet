@@ -126,7 +126,7 @@ export async function registerPushToken(
         try {
             await set(tokenRef, token);
         } catch (e: any) {
-            showAlert("Erro", e.message);
+            showAlert("Notification Token", JSON.stringify(e, null, 2));
         }
     }
 }
@@ -143,6 +143,6 @@ export async function removePushToken(
             : `campus/${campusId}/tokenIOSNotification/student/cursus/${cursusId}/${userId}`;
         await remove(ref(database, path));
     } catch (e: any) {
-        showAlert("Remove Push Token", e.message);
+        showAlert("Notification Token", e.message);
     }
 }
