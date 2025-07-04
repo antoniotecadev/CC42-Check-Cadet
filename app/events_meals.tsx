@@ -243,6 +243,7 @@ export default function EventUsersScreen() {
     };
 
     React.useLayoutEffect(() => {
+        const colorIcon = colorScheme === "light" ? "#333" : "#fdfdfd";
         navigation.setOptions &&
             staff &&
             navigation.setOptions({
@@ -255,6 +256,7 @@ export default function EventUsersScreen() {
                                 style={{ marginRight: 16 }}
                             >
                                 <MaterialCommunityIcons
+                                    color={colorIcon}
                                     name="printer"
                                     size={28}
                                 />
@@ -264,6 +266,7 @@ export default function EventUsersScreen() {
                                 style={{ marginRight: 16 }}
                             >
                                 <MaterialCommunityIcons
+                                    color={colorIcon}
                                     name="file-excel"
                                     size={28}
                                 />
@@ -272,13 +275,14 @@ export default function EventUsersScreen() {
                     ) : (
                         <TouchableOpacity onPress={handleMenuPress}>
                             <MaterialCommunityIcons
+                                color={colorIcon}
                                 name="dots-vertical"
                                 size={28}
                             />
                         </TouchableOpacity>
                     ),
             });
-    }, [navigation, color, userPresenceSubscribed, staff]);
+    }, [navigation, staff, colorScheme, title]);
 
     const onRefresh = useCallback(async () => {
         setRefreshing(true);

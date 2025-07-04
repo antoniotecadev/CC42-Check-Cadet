@@ -205,6 +205,7 @@ export default function MealsScreen() {
     };
 
     useLayoutEffect(() => {
+        const colorIcon = colorScheme === "light" ? "#333" : "#fdfdfd";
         navigation.setOptions &&
             staff &&
             navigation.setOptions({
@@ -216,6 +217,7 @@ export default function MealsScreen() {
                             style={{ marginRight: 16 }}
                         >
                             <MaterialCommunityIcons
+                                color={colorIcon}
                                 name="card-plus"
                                 size={28}
                             />
@@ -223,13 +225,14 @@ export default function MealsScreen() {
                     ) : (
                         <TouchableOpacity onPress={handleMenuPress}>
                             <MaterialCommunityIcons
+                                color={colorIcon}
                                 name="dots-vertical"
                                 size={28}
                             />
                         </TouchableOpacity>
                     ),
             });
-    }, [navigation, color, staff]);
+    }, [navigation, staff, colorScheme, cursusName]);
 
     return (
         <>
