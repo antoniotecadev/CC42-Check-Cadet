@@ -18,7 +18,7 @@ import * as FileSystem from "expo-file-system";
 import * as Print from "expo-print";
 import { router, useLocalSearchParams } from "expo-router";
 import * as Sharing from "expo-sharing";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
     ActionSheetIOS,
     ActivityIndicator,
@@ -79,6 +79,14 @@ export default function EventUsersScreen() {
     const [staff, setStaff] = useState<boolean>(false);
     const [refreshing, setRefreshing] = React.useState(false);
     const colorscheme = colorScheme === "dark" ? "#333" : "#fff";
+
+    useEffect(() => {
+        const status = async () => {
+            const result = (await getItem("staff")) as any;
+            setStaff(result === "true");
+        };
+        status();
+    }, [getItem]);
 
     const users: UserPresence[] =
         data?.pages.flatMap((page) =>
@@ -235,11 +243,6 @@ export default function EventUsersScreen() {
     };
 
     React.useLayoutEffect(() => {
-        const status = async () => {
-            const result = (await getItem("staff")) as any;
-            setStaff(result === "true");
-        };
-        status();
         navigation.setOptions &&
             staff &&
             navigation.setOptions({
@@ -275,7 +278,7 @@ export default function EventUsersScreen() {
                         </TouchableOpacity>
                     ),
             });
-    }, [navigation, color, userPresenceSubscribed]);
+    }, [navigation, color, userPresenceSubscribed, staff]);
 
     const onRefresh = useCallback(async () => {
         setRefreshing(true);

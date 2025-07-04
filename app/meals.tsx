@@ -70,6 +70,14 @@ export default function MealsScreen() {
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [editMeal, setEditMeal] = useState<Meal | null>(null);
 
+    useEffect(() => {
+        const status = async () => {
+            const result = (await getItem("staff")) as any;
+            setStaff(result === "true");
+        };
+        status();
+    }, [getItem]);
+
     const fetchMeals = useCallback(
         (startAtKey: string | null = null, append = false) => {
             if (!campusId || !cursusId) return;
@@ -197,11 +205,6 @@ export default function MealsScreen() {
     };
 
     useLayoutEffect(() => {
-        const status = async () => {
-            const result = (await getItem("staff")) as any;
-            setStaff(result === "true");
-        };
-        status();
         navigation.setOptions &&
             staff &&
             navigation.setOptions({
@@ -226,7 +229,7 @@ export default function MealsScreen() {
                         </TouchableOpacity>
                     ),
             });
-    }, [navigation, color]);
+    }, [navigation, color, staff]);
 
     return (
         <>
