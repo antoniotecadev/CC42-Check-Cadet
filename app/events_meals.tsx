@@ -8,7 +8,7 @@ import {
     UserPresence,
     UserSubscription,
     useUsersPaginated,
-} from "@/repository/eventRepository";
+} from "@/repository/userRepository";
 import { generateAttendanceHtml } from "@/utility/HTMLUtil";
 import { useBase64Image } from "@/utility/ImageUtil";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
