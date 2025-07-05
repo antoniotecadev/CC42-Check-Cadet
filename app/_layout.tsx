@@ -41,7 +41,7 @@ export default function RootLayout() {
     useReactQueryDevTools(queryClient);
     const colorScheme = useColorScheme();
     const [loaded] = useFonts({
-        SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
+        SpaceMono: require("@/assets/fonts/SpaceMono-Regular.ttf"),
     });
 
     useEffect(() => {
