@@ -84,7 +84,8 @@
             "policy": "appVersion"
         },
         "updates": {
-            "url": "https://u.expo.dev/751b05e6-4b80-4dae-b3b0-299c676f93d5"
+            "url": "https://u.expo.dev/751b05e6-4b80-4dae-b3b0-299c676f93d5",
+            "assetBundlePatterns": ["assets/images/**/*", "assets/fonts/*"]
         }
     }
 }
