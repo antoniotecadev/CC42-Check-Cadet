@@ -1,9 +1,5 @@
-import { fetchApiKeyFromDatabase } from "@/services/firebaseApiKey";
-import {
-    exchangeCodeAsync,
-    makeRedirectUri,
-    revokeAsync,
-} from "expo-auth-session";
+import { Colors } from "@/constants/Colors";
+import { makeRedirectUri, revokeAsync } from "expo-auth-session";
 import * as Linking from "expo-linking";
 import * as WebBrowser from "expo-web-browser";
 import { useState } from "react";
@@ -11,7 +7,13 @@ import { Platform } from "react-native";
 import useItemStorage from "./storage/useItemStorage";
 import useTokenStorage from "./storage/useTokenStorage";
 import useAlert from "./useAlert";
-import useFetchUser from "./useFetchUser";
+
+import { useColorCoalition } from "@/components/ColorCoalitionContext";
+import { auth } from "@/firebaseConfig";
+import { registerPushToken } from "@/services/ExpoNotificationService";
+import axios from "axios";
+import { signInWithCustomToken } from "firebase/auth";
+import useUserStorage from "./storage/useUserStorage";
 
 /* OPTIONAL - CASO NÃO PRECISE ABRIR A JANELA POP UP NO MODO ANONIMO
 WebBrowser.maybeCompleteAuthSession();
@@ -125,9 +127,10 @@ const redirectUri = isWeb
 
 export function useLogin42() {
     const { showError } = useAlert();
-    const { fetchUser } = useFetchUser();
-    const { removeItem } = useItemStorage();
-    const { saveToken, clearTokens } = useTokenStorage();
+    const { saveToken } = useTokenStorage();
+    const { setItem } = useItemStorage();
+    const { setColor } = useColorCoalition();
+    const { saveUser } = useUserStorage();
 
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
@@ -157,11 +160,9 @@ export function useLogin42() {
                     code = code[0];
                 }
                 if (typeof code === "string" && code) {
-                    const secret = await fetchApiKeyFromDatabase("intra");
-                    if (secret) {
-                        await handleTokenExchange(secret, code);
-                        return;
-                    }
+                    const ok = await loginWithIntra42Code(code, redirectUri);
+                    setSuccess(ok);
+                    return;
                 }
                 showError("Erro", "Código de autorização não encontrado.");
             }
@@ -172,47 +173,111 @@ export function useLogin42() {
         }
     };
 
-    const handleTokenExchange = async (secret: string, code: string) => {
+    async function loginWithIntra42Code(
+        code: string,
+        redirectUri: string
+    ): Promise<boolean> {
         try {
-            const tokenResponse = await exchangeCodeAsync(
+            const response = await axios.post(
+                "https://check-cadet.vercel.app/api/loginWithIntra42Code",
                 {
-                    clientId: CLIENT_ID,
-                    clientSecret: secret,
-                    redirectUri,
                     code,
-                    extraParams: { grant_type: "authorization_code" },
-                },
-                {
-                    tokenEndpoint: TOKEN_URL,
+                    redirectUri,
                 }
             );
 
-            if (!tokenResponse.accessToken) {
-                throw new Error("Access token não recebido");
+            const { firebaseToken, userWithCoalition, tokenResponse } =
+                response.data;
+
+            if (!firebaseToken || !userWithCoalition) {
+                throw new Error("Resposta incompleta do servidor");
             }
 
-            let ok = await saveToken({
-                accessToken: tokenResponse.accessToken,
-                refreshToken: tokenResponse.refreshToken || "",
-                expiresIn: tokenResponse.expiresIn || 0,
+            // 1. Login no Firebase
+            await signInWithCustomToken(auth, firebaseToken);
+
+            // 2. Salvar dados localmente
+            await saveUser(userWithCoalition);
+            await saveToken({
+                accessToken: tokenResponse.access_token,
+                refreshToken: tokenResponse.refresh_token || "",
+                expiresIn: tokenResponse.expires_in || 0,
             });
 
-            if (ok) {
-                ok = await fetchUser();
-                if (!ok) {
-                    clearTokens();
-                    removeItem("user_id");
-                    removeItem("campus_id");
-                    removeItem("campus_name");
-                }
-                setSuccess(ok);
-            } else {
-                showError("Erro", "Erro ao salvar o token");
+            // 3. Outros dados (ex: campus, cor)
+            const coalition = userWithCoalition.coalition;
+            setColor(coalition?.color?.trim() || Colors.light_blue_900.default);
+
+            const staff = userWithCoalition["staff?"];
+            if (staff as boolean) await setItem("staff", `${staff}`);
+
+            await setItem("user_id", `${userWithCoalition.id}`);
+            await setItem(
+                "campus_id",
+                `${userWithCoalition.campus?.[0]?.id ?? 0}`
+            );
+            await setItem(
+                "campus_name",
+                `${userWithCoalition.campus?.[0]?.name?.trim()}`
+            );
+            if (Platform.OS === "ios") {
+                registerPushToken(
+                    userWithCoalition.id,
+                    userWithCoalition["staff?"] as boolean,
+                    userWithCoalition?.campus?.[0]?.id,
+                    userWithCoalition?.projects_users?.[0]?.cursus_ids?.[0]
+                );
             }
-        } catch (err) {
-            showError("Erro", "Erro ao trocar código por token");
+            return true;
+        } catch (err: any) {
+            console.error("Erro no login com Intra 42:", err.message);
+            showError("Erro", "Falha ao autenticar com Intra 42.");
+            return false;
         }
-    };
+    }
+
+    //  TROCA DO code COM access_token no CLIENTE - NÃO É SEGURO, SERVE PAENAS PARA TESTE
+    // const handleTokenExchange = async (secret: string, code: string) => {
+    //     try {
+    //         const tokenResponse = await exchangeCodeAsync(
+    //             {
+    //                 clientId: CLIENT_ID,
+    //                 clientSecret: secret,
+    //                 redirectUri,
+    //                 code,
+    //                 extraParams: { grant_type: "authorization_code" },
+    //             },
+    //             {
+    //                 tokenEndpoint: TOKEN_URL,
+    //             }
+    //         );
+
+    //         if (!tokenResponse.accessToken) {
+    //             throw new Error("Access token não recebido");
+    //         }
+
+    //         let ok = await saveToken({
+    //             accessToken: tokenResponse.accessToken,
+    //             refreshToken: tokenResponse.refreshToken || "",
+    //             expiresIn: tokenResponse.expiresIn || 0,
+    //         });
+
+    //         if (ok) {
+    //             ok = await fetchUser();
+    //             if (!ok) {
+    //                 clearTokens();
+    //                 removeItem("user_id");
+    //                 removeItem("campus_id");
+    //                 removeItem("campus_name");
+    //             }
+    //             setSuccess(ok);
+    //         } else {
+    //             showError("Erro", "Erro ao salvar o token");
+    //         }
+    //     } catch (err) {
+    //         showError("Erro", "Erro ao trocar código por token");
+    //     }
+    // };
 
     return {
         loading,
