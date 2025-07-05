@@ -111,14 +111,7 @@ export default function MealsScreen() {
                             (meal.quantity || 0) - meal.numberSubscribed,
                             0
                         );
-                        if (subscription.exists()) {
-                            subscription.forEach((sub) => {
-                                if (sub.key === userId) {
-                                    meal.isSubscribed = true;
-                                    return;
-                                }
-                            });
-                        }
+                        meal.isSubscribed = subscription.child(userId).exists();
                         mealList.push(meal);
                         newLastKey = dataSnapshot.key;
                     });
