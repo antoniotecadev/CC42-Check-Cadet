@@ -95,7 +95,13 @@ export default function HomeScreen() {
                     )
                 );
             } else {
-                showInfo("Welcome!", "You can start exploring the app.");
+                showConfirm(
+                    "Ocorreu um erro ao carregar os dados ⚠",
+                    "Sair e tentar logar novamente ?",
+                    () => {
+                        router.replace("/login");
+                    }
+                );
             }
         };
 
@@ -175,14 +181,14 @@ export default function HomeScreen() {
             "Sair",
             "Tem certeza que deseja terminar a sessão?",
             async () => {
-                const token = (await getAccessToken()) ?? "";
-                revokeToken(token);
-                clearTokens();
-                clearUser();
-                removeItem("staff");
-                removeItem("user_id");
-                removeItem("campus_id");
-                removeItem("campus_name");
+                const token = await getAccessToken();
+                if (token) await revokeToken(token);
+                await clearTokens();
+                await clearUser();
+                await removeItem("staff");
+                await removeItem("user_id");
+                await removeItem("campus_id");
+                await removeItem("campus_name");
                 if (Platform.OS === "ios")
                     await removePushToken(
                         user?.id,
