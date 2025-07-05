@@ -6,6 +6,7 @@ import useItemStorage from "@/hooks/storage/useItemStorage";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { useIds } from "@/hooks/useEventAttendanceIds";
 import {
+    optimizeUsers,
     UserPresence,
     UserSubscription,
     useUsersPaginated,
@@ -108,29 +109,31 @@ export default function EventUsersScreen() {
         numberUnSubscribed: number = 0;
 
     if (type === EVENTS) {
-        userAttendanceList = users.map((u) => ({
-            ...u,
-            isPresent: ids.includes(String(u.id)),
-        }));
+        userAttendanceList = optimizeUsers(users, ids);
         // Contagem de presentes e ausentes
-        numberPresents = userAttendanceList.filter(
-            (u) => u.isPresent === true
-        ).length;
-        numberAbsents = userAttendanceList.filter(
-            (u) => u.isPresent === false
-        ).length;
+        const counts = userAttendanceList.reduce(
+            (acc, u) => {
+                if (u.isPresent) acc.isPresent++;
+                else acc.isAbsents++;
+                return acc;
+            },
+            { isPresent: 0, isAbsents: 0 }
+        );
+        numberPresents = counts.isPresent;
+        numberAbsents = counts.isAbsents;
     } else {
-        userSubscriptionsList = users.map((u) => ({
-            ...u,
-            isSubscribed: ids.includes(String(u.id)),
-        }));
-        // Contagem de presentes e ausentes
-        numberSubscribed = userSubscriptionsList.filter(
-            (u) => u.isSubscribed === true
-        ).length;
-        numberUnSubscribed = userSubscriptionsList.filter(
-            (u) => u.isSubscribed === false
-        ).length;
+        userSubscriptionsList = optimizeUsers(users, ids);
+        // Contagem de asinados e não assinados
+        const counts = userSubscriptionsList.reduce(
+            (acc, u) => {
+                if (u.isSubscribed) acc.subscribed++;
+                else acc.unsubscribed++;
+                return acc;
+            },
+            { subscribed: 0, unsubscribed: 0 }
+        );
+        numberSubscribed = counts.subscribed;
+        numberUnSubscribed = counts.unsubscribed;
     }
 
     const date = type === EVENTS ? eventDate : mealCreatedDate;

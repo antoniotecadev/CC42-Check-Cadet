@@ -52,6 +52,7 @@ export function rate(
 
 export interface UserPresence {
     id: number;
+    kind: string;
     login: string;
     displayname: string;
     image?: string;
@@ -96,4 +97,27 @@ export function useUsersPaginated(
         staleTime: 1000 * 60 * 30, // Dados ficam "frescos" por 30 minutos
         retry: 2, // Tenta novamente 2 vezes em caso de falha
     });
+}
+
+export function optimizeUsers(
+    users: UserPresence[],
+    ids: (string | number)[]
+): UserPresence[] {
+    // Transforma lista de IDs em Set para buscas rápidas
+    const idSet = new Set(ids.map(String));
+
+    // Usa reduce para filtrar e mapear ao mesmo tempo
+    return users.reduce<UserPresence[]>((acc, user) => {
+        if (user.kind !== "student") {
+            return acc; // pula se for 'student'
+        }
+
+        const updatedUser = {
+            ...user,
+            isSubscribed: idSet.has(String(user.id)),
+        };
+
+        acc.push(updatedUser); // adiciona ao resultado
+        return acc;
+    }, []);
 }
