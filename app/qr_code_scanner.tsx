@@ -136,10 +136,10 @@ export default function QrCodeScanner() {
                     barcodeTypes: ["qr"],
                 }}
                 onBarcodeScanned={handleBarCodeScanned}
-            >
-                <View style={styles.overlay}>
-                    <Text style={styles.text}>Aponte para o QR Code</Text>
-                </View>
+            />
+            {/* Overlay acima da camera */}
+            <View style={[StyleSheet.absoluteFillObject, styles.overlay]}>
+                <Text style={styles.text}>Aponte para o QR Code</Text>
                 <TouchableOpacity
                     style={styles.closeBtn}
                     onPress={() => router.back()}
@@ -149,7 +149,7 @@ export default function QrCodeScanner() {
                     )}
                     <Text style={styles.closeText}>Fechar</Text>
                 </TouchableOpacity>
-            </CameraView>
+            </View>
         </View>
     );
 }
