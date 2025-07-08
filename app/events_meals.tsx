@@ -109,7 +109,7 @@ export default function EventUsersScreen() {
         numberUnSubscribed: number = 0;
 
     if (type === EVENTS) {
-        userAttendanceList = optimizeUsers(users, ids);
+        userAttendanceList = optimizeUsers(users, ids, "events");
         // Contagem de presentes e ausentes
         const counts = userAttendanceList.reduce(
             (acc, u) => {
@@ -122,7 +122,7 @@ export default function EventUsersScreen() {
         numberPresents = counts.isPresent;
         numberAbsents = counts.isAbsents;
     } else {
-        userSubscriptionsList = optimizeUsers(users, ids);
+        userSubscriptionsList = optimizeUsers(users, ids, "meals");
         // Contagem de asinados e não assinados
         const counts = userSubscriptionsList.reduce(
             (acc, u) => {

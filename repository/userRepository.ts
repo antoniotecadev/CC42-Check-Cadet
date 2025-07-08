@@ -101,10 +101,12 @@ export function useUsersPaginated(
 
 export function optimizeUsers(
     users: UserPresence[],
-    ids: (string | number)[]
+    ids: (string | number)[],
+    type: "events" | "meals"
 ): UserPresence[] {
     // Transforma lista de IDs em Set para buscas rápidas
     const idSet = new Set(ids.map(String));
+    const key = type === "meals" ? 'isSubscribed' : 'isPresent';
 
     // Usa reduce para filtrar e mapear ao mesmo tempo
     return users.reduce<UserPresence[]>((acc, user) => {
@@ -114,7 +116,7 @@ export function optimizeUsers(
 
         const updatedUser = {
             ...user,
-            isSubscribed: idSet.has(String(user.id)),
+            [key]: idSet.has(String(user.id)),
         };
 
         acc.push(updatedUser); // adiciona ao resultado
