@@ -122,7 +122,7 @@ const AUTH_BASE_URL = process.env.EXPO_PUBLIC_API_URL + "/oauth/authorize";
 const TOKEN_URL = process.env.EXPO_PUBLIC_API_URL + "/oauth/token";
 const isWeb = Platform.OS === "web";
 const redirectUri = isWeb
-    ? makeRedirectUri({ path: "checkcadet42" })
+    ? makeRedirectUri({})
     : "cc42://checkcadet42";
 
 export function useLogin42() {
