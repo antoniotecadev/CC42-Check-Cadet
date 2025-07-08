@@ -121,9 +121,7 @@ const CLIENT_ID = process.env.EXPO_PUBLIC_API_KEY ?? "";
 const AUTH_BASE_URL = process.env.EXPO_PUBLIC_API_URL + "/oauth/authorize";
 const TOKEN_URL = process.env.EXPO_PUBLIC_API_URL + "/oauth/token";
 const isWeb = Platform.OS === "web";
-const redirectUri = isWeb
-    ? makeRedirectUri({})
-    : "cc42://checkcadet42";
+const redirectUri = isWeb ? makeRedirectUri({}) : "cc42://checkcadet42";
 
 export function useLogin42() {
     const { showError } = useAlert();
@@ -166,8 +164,9 @@ export function useLogin42() {
                 }
                 showError("Erro", "Código de autorização não encontrado.");
             }
-        } catch (err) {
-            showError("Erro", "Erro na autenticação.");
+        } catch (err: any) {
+            console.error("Erro na autenticação:", err);
+            showError("Erro na autenticação", err.message);
         } finally {
             setLoading(false);
         }
