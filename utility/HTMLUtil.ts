@@ -1,4 +1,4 @@
-import { UserPresence } from "@/repository/eventRepository";
+import { UserPresence } from "@/repository/userRepository";
 
 // Função utilitária para gerar o HTML do PDF
 export function generateAttendanceHtml({
