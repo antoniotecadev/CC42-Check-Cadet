@@ -61,9 +61,10 @@ export default function useTokenStorage() {
     }, []);
 
     async function refreshTokenUser(
-        refresh_token: string | null
+        refresh_token: string | null,
+        isSPlash: boolean = false
     ): Promise<boolean> {
-        const secret = await fetchApiKeyFromDatabase("intra");
+        const secret = await fetchApiKeyFromDatabase("intra", isSPlash);
         if (!secret) return false;
         try {
             if (!refresh_token) {
@@ -109,10 +110,7 @@ export default function useTokenStorage() {
             });
             return sucess;
         } catch (error: any) {
-            showError(
-                "Erro",
-                "Erro ao fazer refresh do token"
-            );
+            showError("Erro", "Erro ao fazer refresh do token");
             return false;
         }
     }

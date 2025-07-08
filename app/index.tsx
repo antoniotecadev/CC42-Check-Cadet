@@ -26,7 +26,7 @@ export default function SplashScreen() {
             if (accessToken == null || refreshToken == null) {
                 router.replace("/login");
             } else if (await isTokenExpired()) {
-                const sucess = await refreshTokenUser(refreshToken);
+                const sucess = await refreshTokenUser(refreshToken, true);
                 if (!sucess) router.replace("/login");
                 else router.replace("/(tabs)");
             } else router.replace("/(tabs)");

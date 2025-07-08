@@ -3,7 +3,8 @@ import useAlert from "@/hooks/useAlert";
 import { get, ref } from "firebase/database";
 
 export async function fetchApiKeyFromDatabase(
-    source: string
+    source: string,
+    isSPlash: boolean = false
 ): Promise<string | null> {
     const { showError } = useAlert();
     try {
@@ -16,7 +17,8 @@ export async function fetchApiKeyFromDatabase(
             throw new Error("Chave da API não encontrada");
         }
     } catch (error: any) {
-        showError("Firebase", "Erro ao buscar chave da API: " + error);
+        if (isSPlash) return null;
+        showError("Chave de API", error.message);
         return null;
     }
 }
