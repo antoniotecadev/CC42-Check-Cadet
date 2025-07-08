@@ -230,8 +230,8 @@ export function useLogin42() {
             }
             return true;
         } catch (err: any) {
-            console.error("Erro no login com Intra 42:", err.message);
-            showError("Erro", "Falha ao autenticar com Intra 42.");
+            console.error("Intra 42:", err);
+            showError("Intra 42", err.message);
             return false;
         }
     }
