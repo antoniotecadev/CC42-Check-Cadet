@@ -1,20 +1,13 @@
 // Import the functions you need from the SDKs you need
 import { getApps, initializeApp } from "firebase/app";
 import { getDatabase } from "firebase/database";
-import { Platform } from 'react-native';
 
-// Importa o auth do Firebase JS SDK para a web
-import { getAuth as getWebAuth } from 'firebase/auth';
-
-// Importa o auth do @react-native-firebase para mobile
-import getNativeAuth from '@react-native-firebase/auth';
-
-// Com @react-native-firebase/auth, você simplesmente importa e usa a instância padrão.
-// A persistência é gerenciada automaticamente para plataformas nativas.
-// Se você precisar de autenticação web no mesmo código, precisaria de uma lógica condicional
-// para importar o SDK JS para web.
-
-// ---
+// Importa o auth do Firebase JS SDK da web
+import {
+  browserLocalPersistence,
+  getAuth,
+  setPersistence,
+} from "firebase/auth";
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -34,20 +27,12 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+const auth = getAuth(app);
 const database = getDatabase(app);
 
-// Declaração da variável 'auth' com um tipo flexível para acomodar ambos
-let auth: any; // Usamos 'any' aqui para flexibilidade entre os tipos de auth
-
-if (Platform.OS === "web") {
-  // Para a web, usamos o Firebase JS SDK
-  auth = getWebAuth(app);
-} else {
-  // Para React Native (iOS/Android), usamos @react-native-firebase/auth
-  auth = getNativeAuth();
-  // Não precisamos configurar persistência com getReactNativePersistence aqui,
-  // pois @react-native-firebase já lida com isso nativamente.
-}
+// browserLocalPersistence usa AsyncStorage no React Native (quando disponível), e o firebase web já entende isto automaticamente
+// Não precisa instalar @react-native-firebase/app
+setPersistence(auth, browserLocalPersistence).catch(console.error);
 
 export { app, auth, database };
 
