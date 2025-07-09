@@ -16,7 +16,7 @@ const EventItem: React.FC<{ item: EventItemProps; color: string }> = ({
 }) => {
     return (
         <LinearGradient
-            colors={[color, "#000"]}
+            colors={[color, "#444"]}
             start={{ x: 1, y: 1 }}
             end={{ x: 0, y: 0 }}
             style={styles.card}
