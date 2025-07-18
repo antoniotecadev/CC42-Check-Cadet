@@ -6,9 +6,9 @@ import {
 } from "expo-image-manipulator";
 import { useEffect, useState } from "react";
 
-const IMAGE = Asset.fromModule(require("@/assets/images/logo_42_luanda.webp"));
 
 export function useBase64Image() {
+    const IMAGE = Asset.fromModule(require("@/assets/images/logo_42_luanda.png"));
     const context = useImageManipulator(IMAGE.uri);
     const [base64Uri, setBase64Uri] = useState<string | null>(null);
 
@@ -20,7 +20,7 @@ export function useBase64Image() {
                 const result = await manipulatedImage.saveAsync({
                     base64: true,
                 });
-                setBase64Uri(`data:image/webp;base64,${result.base64}`);
+                setBase64Uri(`data:image/png;base64,${result.base64}`);
             } catch (error) {
                 console.error("Error:", error);
                 setBase64Uri(null);
