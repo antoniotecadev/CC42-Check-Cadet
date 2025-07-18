@@ -20,7 +20,7 @@ import * as FileSystem from "expo-file-system";
 import * as Print from "expo-print";
 import { router, useLocalSearchParams } from "expo-router";
 import * as Sharing from "expo-sharing";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
     ActionSheetIOS,
     ActivityIndicator,
@@ -155,31 +155,6 @@ export default function EventUsersScreen() {
         }
     }, [isLoading, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-    async function handlePrintPdf() {
-        const html = generateAttendanceHtml({
-            title: title[0],
-            logoBase64: base64Image ?? "",
-            description: title[1],
-            date,
-            numberPresenceORSubscribed,
-            numberAbsentsORUnSubscribed,
-            userPresenceSubscribed,
-        });
-        if (isWeb) {
-            await Print.printAsync({ html });
-        } else {
-            const { uri } = await Print.printToFileAsync({
-                html,
-                base64: false,
-            });
-            await Sharing.shareAsync(uri, {
-                dialogTitle: `Imprimir ou Partilhar ${title}`,
-                UTI: ".pdf",
-                mimeType: "application/pdf",
-            });
-        }
-    }
-
     async function handleExportExcel() {
         // Monta os dados CSV
         const header = `Nº;Nome Completo;Login; ${
@@ -228,20 +203,99 @@ export default function EventUsersScreen() {
         }
     }
 
+    type Filter =
+        | "Filtrar todos"
+        | "Filtrar presentes"
+        | "Filtrar ausentes"
+        | "Filtrar assinados"
+        | "Filtrar não assinados";
+
+    const [filter, setFilter] = useState<Filter>("Filtrar todos");
+
+    const userFilter = useMemo(() => {
+        switch (filter) {
+            case "Filtrar todos":
+                return userPresenceSubscribed;
+            case "Filtrar presentes":
+                return userPresenceSubscribed.filter((u) => u.isPresent);
+            case "Filtrar ausentes":
+                return userPresenceSubscribed.filter((u) => !u.isPresent);
+            case "Filtrar assinados":
+                return userPresenceSubscribed.filter((u) => u.isSubscribed);
+            case "Filtrar não assinados":
+                return userPresenceSubscribed.filter((u) => !u.isSubscribed);
+        }
+    }, [filter, userPresenceSubscribed]);
+
+    async function handlePrintPdf() {
+        const html = generateAttendanceHtml({
+            title: title[0],
+            logoBase64: base64Image ?? "",
+            description: title[1],
+            date,
+            numberPresenceORSubscribed,
+            numberAbsentsORUnSubscribed,
+            userFilter,
+        });
+        if (isWeb) {
+            await Print.printAsync({ html });
+        } else {
+            const { uri } = await Print.printToFileAsync({
+                html,
+                base64: false,
+            });
+            await Sharing.shareAsync(uri, {
+                dialogTitle: `Imprimir ou Partilhar ${title}`,
+                UTI: ".pdf",
+                mimeType: "application/pdf",
+            });
+        }
+    }
+
     const handleMenuPress = () => {
         ActionSheetIOS.showActionSheetWithOptions(
             {
                 options: [
+                    "Filtrar",
                     "Imprimir ou Partilhar",
                     "Exportar para Excel",
                     "Cancelar",
                 ],
-                cancelButtonIndex: 2,
+                cancelButtonIndex: 3,
                 userInterfaceStyle: "dark",
             },
             (selectedIndex) => {
-                if (selectedIndex === 0) handlePrintPdf();
-                if (selectedIndex === 1) handleExportExcel();
+                if (selectedIndex === 0) handleMenuFilter();
+                if (selectedIndex === 1) handlePrintPdf();
+                if (selectedIndex === 2) handleExportExcel();
+            }
+        );
+    };
+
+    const handleMenuFilter = () => {
+        ActionSheetIOS.showActionSheetWithOptions(
+            {
+                options: [
+                    type === EVENTS ? "Filtrar presentes" : "Filtrar assinados",
+                    type === EVENTS
+                        ? "Filtrar ausentes"
+                        : "Filtrar não assinados",
+                    "Filtrar todos",
+                    "Cancelar",
+                ],
+                cancelButtonIndex: 3,
+                userInterfaceStyle: "dark",
+            },
+            (selectedIndex) => {
+                if (selectedIndex === 0)
+                    type === EVENTS
+                        ? setFilter("Filtrar presentes")
+                        : setFilter("Filtrar assinados");
+                if (selectedIndex === 1)
+                    type === EVENTS
+                        ? setFilter("Filtrar ausentes")
+                        : setFilter("Filtrar não assinados");
+                if (selectedIndex === 2) setFilter("Filtrar todos");
             }
         );
     };
@@ -277,13 +331,15 @@ export default function EventUsersScreen() {
                             </TouchableOpacity>
                         </>
                     ) : (
-                        <TouchableOpacity onPress={handleMenuPress}>
-                            <MaterialCommunityIcons
-                                color={colorIcon}
-                                name="dots-vertical"
-                                size={28}
-                            />
-                        </TouchableOpacity>
+                        <>
+                            <TouchableOpacity onPress={handleMenuPress}>
+                                <MaterialCommunityIcons
+                                    color={colorIcon}
+                                    name="dots-vertical"
+                                    size={28}
+                                />
+                            </TouchableOpacity>
+                        </>
                     ),
             });
     }, [navigation, staff, colorScheme, title]);
@@ -351,7 +407,7 @@ export default function EventUsersScreen() {
                     </View>
                 </View>
                 <FlashList
-                    data={userPresenceSubscribed}
+                    data={userFilter}
                     renderItem={({ item }) => (
                         <EventUserItem
                             login={item.login}

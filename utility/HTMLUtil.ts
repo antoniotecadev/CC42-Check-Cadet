@@ -8,7 +8,7 @@ export function generateAttendanceHtml({
     date,
     numberPresenceORSubscribed = 0,
     numberAbsentsORUnSubscribed = 0,
-    userPresenceSubscribed,
+    userFilter,
 }: {
     title: string;
     logoBase64: string;
@@ -16,13 +16,13 @@ export function generateAttendanceHtml({
     date: string;
     numberPresenceORSubscribed?: number;
     numberAbsentsORUnSubscribed?: number;
-    userPresenceSubscribed: UserPresence[];
+    userFilter: UserPresence[];
 }) {
     // Divide os usuários em páginas de 28 linhas
     const pageSize = 28;
     const pages = [];
-    for (let i = 0; i < userPresenceSubscribed.length; i += pageSize) {
-        pages.push(userPresenceSubscribed.slice(i, i + pageSize));
+    for (let i = 0; i < userFilter.length; i += pageSize) {
+        pages.push(userFilter.slice(i, i + pageSize));
     }
     return `
         <html>
