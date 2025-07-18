@@ -11,7 +11,13 @@ import FloatActionButton from "@/components/ui/FloatActionButton";
 import { Colors } from "@/constants/Colors";
 import { encrypt } from "@/utility/AESUtil";
 import { router, useRouter } from "expo-router";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, {
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
 
 import AboutModal from "@/components/ui/AboutModal";
 import EventItem from "@/components/ui/EventItem";
@@ -377,6 +383,37 @@ function EventsList({
         isStaff: userData["staff?"],
     });
 
+    const [showEventsPast, setShowEventsPast] = useState(false);
+
+    const now = new Date();
+
+    const eventsFuture = useMemo(() => {
+        return events?.filter((event) => new Date(event.end_at) > now);
+    }, [events]);
+
+    const eventsPast = useMemo(() => {
+        return events?.filter((event) => new Date(event.end_at) <= now);
+    }, [events]);
+
+    const eventsFinal = showEventsPast ? events : eventsFuture;
+
+    const renderFooter = () => {
+        if (eventsPast?.length === 0) return null;
+
+        return (
+            <TouchableOpacity
+                onPress={() => setShowEventsPast(!showEventsPast)}
+                style={{ padding: 16, alignItems: "center" }}
+            >
+                <Text style={{ color: color, fontWeight: "bold" }}>
+                    {showEventsPast
+                        ? "Ocultar eventos realizados"
+                        : "Ver eventos realizados "}
+                </Text>
+            </TouchableOpacity>
+        );
+    };
+
     const handleRefresh = useCallback(() => {
         refetch();
     }, [refetch]);
@@ -409,7 +446,7 @@ function EventsList({
 
     return (
         <FlashList
-            data={events}
+            data={eventsFinal}
             estimatedItemSize={30}
             keyExtractor={(item) => item.id.toString()}
             refreshControl={
@@ -445,6 +482,7 @@ function EventsList({
                     <EventItem item={item} color={color} />
                 </TouchableOpacity>
             )}
+            ListFooterComponent={renderFooter}
         />
     );
 }
