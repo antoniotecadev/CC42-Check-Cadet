@@ -40,7 +40,10 @@ const EventDetailScreen = () => {
     const { getItem } = useItemStorage();
     const { userData, eventData } = useLocalSearchParams();
     const user = typeof userData === "string" ? JSON.parse(userData) : null;
-    const event = typeof eventData === "string" ? JSON.parse(eventData) : null;
+    const event =
+        typeof eventData === "string"
+            ? JSON.parse(eventData.replace(/[\u0000-\u001F]+/g, ""))
+            : null;
 
     const userId = user?.id?.toString();
     const campusId = user?.campusId?.toString();
@@ -48,7 +51,7 @@ const EventDetailScreen = () => {
     const eventId = event?.id?.toString();
 
     const color = colorScheme === "dark" ? "#333" : "#fff";
-    
+
     // Animation for floating buttons
     const scaleAnim = React.useRef(new Animated.Value(1)).current;
 
