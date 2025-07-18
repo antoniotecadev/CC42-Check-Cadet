@@ -52,7 +52,7 @@ export function generateAttendanceHtml({
                         ? `Assinado: ${numberPresenceORSubscribed} | Não Assinado: ${numberAbsentsORUnSubscribed}`
                         : `Presente: ${numberPresenceORSubscribed} | Ausente: ${numberAbsentsORUnSubscribed}`
                 }</div>
-                <div class="subtitle">${description || ""} - ${date || ""}</div>
+                <div class="subtitle">${description || ""} - ${new Date(date).toLocaleString() || ""}</div>
             </div>
             <table>
                 <tr>
