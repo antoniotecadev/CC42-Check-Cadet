@@ -45,7 +45,7 @@ import {
 export default function HomeScreen() {
     const router = useRouter();
     const { removeItem } = useItemStorage();
-    const { showConfirm, showInfo } = useAlert();
+    const { showConfirm } = useAlert();
     const { getUser, clearUser } = useUserStorage();
     const { color, setColor } = useColorCoalition();
     const { clearTokens, getAccessToken } = useTokenStorage();
