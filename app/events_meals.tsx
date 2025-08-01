@@ -453,6 +453,7 @@ export default function EventUsersScreen() {
                                         mealId: mealId,
                                         userData: JSON.stringify({
                                             id: userId,
+                                            cursusId: cursusId,
                                         }),
                                     },
                                 });
@@ -492,6 +493,7 @@ export default function EventUsersScreen() {
                                         mealId: mealId,
                                         userData: JSON.stringify({
                                             id: userId,
+                                            cursusId: cursusId,
                                         }),
                                     },
                                 });
