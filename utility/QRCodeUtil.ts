@@ -74,7 +74,7 @@ export async function handleQrCode({
             const userStudentId = partsQrCode[0];
             const userLogin = partsQrCode[1];
             const userDisplayName = partsQrCode[2];
-            const userCursusId = cursusId || partsQrCode[3];
+            const userCursusId = partsQrCode[3];
             const userCampusId = partsQrCode[4];
             const userImageUrl = partsQrCode[5];
             markAttendance({
@@ -133,7 +133,7 @@ export async function handleQrCode({
             const userStudentId = partsQrCode[0];
             const userLogin = partsQrCode[1];
             const userDisplayName = partsQrCode[2];
-            const userCursusId = cursusId || partsQrCode[3];
+            const userCursusId = partsQrCode[3];
             const userCampusId = partsQrCode[4];
             const userImageUrl = partsQrCode[5];
             subscription({
