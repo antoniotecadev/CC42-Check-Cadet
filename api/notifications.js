@@ -5,9 +5,9 @@ import { KJUR } from "jsrsasign";
 const SERVICE_ACCOUNT_JSON = {
     type: "service_account",
     project_id: "cadet-check-cc42",
-    private_key_id: "e9bf5bc43c0b4f78c519e7abb276e94503e36327",
-    client_email: "firebase-messaging@cadet-check-cc42.iam.gserviceaccount.com",
-    client_id: "108330644593536930546",
+    private_key_id: "88f2e30ff88f4f6af2cc96ff2fb46956657b5d1c",
+    client_email: "firebase-adminsdk-azard@cadet-check-cc42.iam.gserviceaccount.com",
+    client_id: "108495949353518772510",
     auth_uri: "https://accounts.google.com/o/oauth2/auth",
     token_uri: "https://oauth2.googleapis.com/token",
     auth_provider_x509_cert_url: "https://www.googleapis.com/oauth2/v1/certs",
