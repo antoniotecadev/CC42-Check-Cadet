@@ -1,6 +1,5 @@
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
-import CommentBox from "@/components/ui/CommentBox";
 import RatingSection from "@/components/ui/RatingSection";
 import useItemStorage from "@/hooks/storage/useItemStorage";
 import { useColorScheme } from "@/hooks/useColorScheme";
@@ -194,14 +193,6 @@ const EventDetailScreen = () => {
                     type="events"
                     typeId={eventId}
                     userId={userId}
-                />
-                <CommentBox
-                    campusId={campusId}
-                    cursusId={cursusId}
-                    userId={userId}
-                    type="events"
-                    typeId={eventId}
-                    containerStyle={{ marginHorizontal: 6 }}
                 />
                 {/* Floating Action Buttons */}
                 {staff && (
