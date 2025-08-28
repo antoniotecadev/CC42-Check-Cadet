@@ -207,8 +207,9 @@ export function useLogin42() {
             const coalition = userWithCoalition.coalition;
             setColor(coalition?.color?.trim() || Colors.light_blue_900.default);
 
-            const staff = userWithCoalition["staff?"];
-            if (staff as boolean) await setItem("staff", `${staff}`);
+            const staff: boolean = !!userWithCoalition?.["staff?"];
+
+            if (staff) await setItem("staff", `${staff}`);
 
             await setItem("user_id", `${userWithCoalition.id}`);
             await setItem(
