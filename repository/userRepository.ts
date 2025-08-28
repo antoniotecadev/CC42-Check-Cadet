@@ -3,6 +3,50 @@ import useApiInterceptors from "@/services/api";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { get, ref, set } from "firebase/database";
 
+/**
+ * Send a comment for a specific item (meal or event).
+ * Stores the comment under: campus/{campusId}/cursus/{cursusId}/{type}/{typeId}/comments/{userId}
+ */
+export function sendComment(
+    campusId: string,
+    cursusId: string,
+    type: string,
+    typeId: string,
+    userId: string,
+    comment: string
+): Promise<void> {
+    const commentRef = ref(
+        database,
+        `campus/${campusId}/cursus/${cursusId}/${type}/${typeId}/comments/${userId}`
+    );
+
+    // Return the promise so callers can await and handle errors
+    return set(commentRef, comment);
+}
+
+/**
+ * Get a comment for a specific item (meal or event) by a user.
+ * Returns the comment string or null if not present.
+ */
+export async function getComment(
+    campusId: string,
+    cursusId: string,
+    type: string,
+    typeId: string,
+    userId: string
+): Promise<string | null> {
+    const commentRef = ref(
+        database,
+        `campus/${campusId}/cursus/${cursusId}/${type}/${typeId}/comments/${userId}`
+    );
+
+    const snapshot = await get(commentRef);
+    if (snapshot.exists()) {
+        return snapshot.val() as string;
+    }
+    return null;
+}
+
 export async function userIsPresentOrSubscribed({
     campusId,
     cursusId,

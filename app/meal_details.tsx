@@ -1,6 +1,7 @@
 import { useColorCoalition } from "@/components/ColorCoalitionContext";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
+import CommentBox from "@/components/ui/CommentBox";
 import RatingSection from "@/components/ui/RatingSection";
 import useItemStorage from "@/hooks/storage/useItemStorage";
 import { useColorScheme } from "@/hooks/useColorScheme";
@@ -95,6 +96,15 @@ export default function MealDetailScreen() {
                         type="meals"
                         typeId={meal.id}
                         userId={userId}
+                    />
+
+                    <CommentBox
+                        campusId={campusId}
+                        cursusId={cursusId}
+                        userId={userId}
+                        type="meals"
+                        typeId={meal.id}
+                        containerStyle={{ marginHorizontal: 6 }}
                     />
                     {staff && (
                         <View style={styles.fabRow}>
