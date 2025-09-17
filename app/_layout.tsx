@@ -6,7 +6,9 @@ import {
 import { useFonts } from "expo-font";
 import { router, SplashScreen, Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+// Initialize Reanimated logger config early to avoid undefined config during module load
 import "react-native-reanimated";
+import "../reanimated-logger-init";
 
 import {
     ColorCoalitionProvider,
@@ -38,8 +40,8 @@ Notifications.setNotificationHandler({
 
 export default function RootLayout() {
     const { getItem } = useItemStorage();
-    // Show React Query DevTools in development only
-    const showDevtools = __DEV__;
+    // Show React Query DevTools in development only on web
+    const showDevtools = __DEV__ && Platform.OS === 'web';
     const colorScheme = useColorScheme();
     const [loaded] = useFonts({
         SpaceMono: require("@/assets/fonts/SpaceMono-Regular.ttf"),
