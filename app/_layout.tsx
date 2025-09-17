@@ -8,7 +8,7 @@ import { router, SplashScreen, Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 // Initialize Reanimated logger config early to avoid undefined config during module load
 import "react-native-reanimated";
-import "../reanimated-logger-init";
+import "../reanimated-logger-init.js";
 
 import {
     ColorCoalitionProvider,
