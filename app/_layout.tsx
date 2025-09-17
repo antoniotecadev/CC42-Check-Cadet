@@ -95,9 +95,8 @@ export default function RootLayout() {
             );
 
         // 🔁 2. Verifica se o app foi ABERTO pela notificação (estava fechado)
-        async function checkInitialNotification() {
-            const response =
-                await Notifications.getLastNotificationResponseAsync();
+        function checkInitialNotification() {
+            const response = Notifications.getLastNotificationResponse();
             if (!isMounted || !response?.notification) {
                 return;
             }
