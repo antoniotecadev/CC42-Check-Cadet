@@ -16,8 +16,8 @@ import { useColorScheme } from "@/hooks/useColorScheme";
 import React, { useEffect } from "react";
 
 import useItemStorage from "@/hooks/storage/useItemStorage";
-import { useReactQueryDevTools } from "@dev-plugins/react-query";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Buffer } from "buffer";
 import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
@@ -38,7 +38,8 @@ Notifications.setNotificationHandler({
 
 export default function RootLayout() {
     const { getItem } = useItemStorage();
-    useReactQueryDevTools(queryClient);
+    // Show React Query DevTools in development only
+    const showDevtools = __DEV__;
     const colorScheme = useColorScheme();
     const [loaded] = useFonts({
         SpaceMono: require("@/assets/fonts/SpaceMono-Regular.ttf"),
@@ -176,6 +177,7 @@ export default function RootLayout() {
                     <StatusBar style="auto" />
                 </ColorCoalitionProvider>
             </ThemeProvider>
+            {showDevtools ? <ReactQueryDevtools initialIsOpen={false} /> : null}
         </QueryClientProvider>
     );
 }

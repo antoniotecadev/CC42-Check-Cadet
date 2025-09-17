@@ -189,7 +189,6 @@ export default function CursusScreen() {
                                 </View>
                             </TouchableOpacity>
                         )}
-                        estimatedItemSize={75}
                         refreshing={refreshing}
                         onRefresh={onRefresh}
                     />

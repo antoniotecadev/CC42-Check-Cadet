@@ -446,8 +446,7 @@ function EventsList({
 
     return (
         <FlashList
-            data={eventsFinal}
-            estimatedItemSize={30}
+            data={eventsFinal}            
             keyExtractor={(item) => item.id.toString()}
             refreshControl={
                 <RefreshControl

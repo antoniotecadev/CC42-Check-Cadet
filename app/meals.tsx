@@ -326,8 +326,7 @@ export default function MealsScreen() {
                                 style={{ margin: 16 }}
                             />
                         ) : null
-                    }
-                    estimatedItemSize={76}
+                    }                    
                     refreshing={refreshing}
                     onRefresh={onRefresh}
                     onEndReached={loadMore}

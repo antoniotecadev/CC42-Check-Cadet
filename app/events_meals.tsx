@@ -16,7 +16,7 @@ import { useBase64Image } from "@/utility/ImageUtil";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
-import * as FileSystem from "expo-file-system";
+import * as FileSystem from "expo-file-system/legacy";
 import * as Print from "expo-print";
 import { router, useLocalSearchParams } from "expo-router";
 import * as Sharing from "expo-sharing";
@@ -421,7 +421,6 @@ export default function EventUsersScreen() {
                             isSusbscribed={item.isSubscribed}
                         />
                     )}
-                    estimatedItemSize={type === EVENTS ? 100 : 300}
                     // onEndReached={() => { // option - if use remove function React.useEffectin line 72
                     //     if (hasNextPage && !isFetchingNextPage) fetchNextPage();
                     // }}
