@@ -1,9 +1,15 @@
 import { useColorCoalition } from "@/components/ColorCoalitionContext";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
+import MessageModal from "@/components/ui/MessageModal";
 import RatingSection from "@/components/ui/RatingSection";
 import useItemStorage from "@/hooks/storage/useItemStorage";
+import { showAlert } from "@/hooks/useAlert";
 import { useColorScheme } from "@/hooks/useColorScheme";
+import {
+    observeSecondPortion,
+    subscribeSecondPortion,
+} from "@/repository/mealSecondPortion";
 import { encrypt } from "@/utility/AESUtil";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
@@ -33,7 +39,19 @@ export default function MealDetailScreen() {
     }>();
     const meal = JSON.parse(mealData);
     const colorCard = colorScheme === "dark" ? "#333" : "#fff";
-    const colorDivider = colorScheme === "dark" ? "#333" : "#eee";
+
+    const [modalData, setModalData] = useState<{
+        modalVisible: boolean;
+        title: string;
+        message: string;
+        color: string;
+        imageSource?: { uri: string } | undefined;
+    }>({
+        modalVisible: false,
+        title: "",
+        message: "",
+        color: "#3A86FF",
+    });
 
     useEffect(() => {
         const status = async () => {
@@ -42,6 +60,29 @@ export default function MealDetailScreen() {
         };
         status();
     }, [getItem]);
+
+    // second portion state
+    const [secondInfo, setSecondInfo] = useState<{
+        enabled: boolean;
+        subscribed: boolean;
+        received: boolean;
+        quantity?: number | null;
+    } | null>(null);
+    const [loadingSecond, setLoadingSecond] = useState(false);
+
+    useEffect(() => {
+        if (!campusId || !cursusId || !meal?.id || !userId) return;
+        const off = observeSecondPortion(
+            String(campusId),
+            String(cursusId),
+            String(meal.id),
+            String(userId),
+            (data) => {
+                setSecondInfo(data);
+            }
+        );
+        return () => off && off();
+    }, [campusId, cursusId, meal?.id, userId]);
 
     if (!meal) {
         return (
@@ -53,6 +94,19 @@ export default function MealDetailScreen() {
 
     return (
         <>
+            <MessageModal
+                visible={modalData.modalVisible}
+                title={modalData.title}
+                message={modalData.message}
+                color={modalData.color}
+                imageSource={
+                    modalData.imageSource ?? require("@/assets/images/icon.png")
+                }
+                buttonText="OK"
+                onClose={() =>
+                    setModalData({ ...modalData, modalVisible: false })
+                }
+            />
             <Stack.Screen
                 options={{
                     title: "Detalhes",
@@ -96,6 +150,72 @@ export default function MealDetailScreen() {
                         typeId={meal.id}
                         userId={userId}
                     />
+                    {/* Second portion subscribe button */}
+                    <View style={{ marginHorizontal: 16, marginTop: 12 }}>
+                        <TouchableOpacity
+                            disabled={
+                                !(
+                                    secondInfo?.enabled &&
+                                    !secondInfo.subscribed
+                                ) || loadingSecond
+                            }
+                            onPress={async () => {
+                                setLoadingSecond(true);
+                                const res = await subscribeSecondPortion(
+                                    String(campusId),
+                                    String(cursusId),
+                                    String(meal.id),
+                                    String(userId)
+                                );
+                                if (res.success) {
+                                    setLoadingSecond(false);
+                                    setModalData({
+                                        modalVisible: true,
+                                        title: "Sucesso",
+                                        message:
+                                            meal.name + "\nInscrição feita",
+                                        color: "#4caf50ff",
+                                    });
+                                } else {
+                                    setLoadingSecond(false);
+                                    showAlert(
+                                        "Aviso",
+                                        res.message ||
+                                            "Não foi possível inscrever-se na segunda via"
+                                    );
+                                }
+                            }}
+                            style={[
+                                styles.button,
+                                {
+                                    backgroundColor:
+                                        secondInfo == null
+                                            ? "#BDBDBD"
+                                            : secondInfo?.subscribed
+                                            ? secondInfo.received
+                                                ? "#4caf50ff"
+                                                : "#007AFF"
+                                            : secondInfo.enabled
+                                            ? "#4caf50ff"
+                                            : "#e53935ff",
+                                },
+                            ]}
+                        >
+                            <Text style={{ color: "#fff", fontWeight: "bold" }}>
+                                {loadingSecond
+                                    ? "Processando..."
+                                    : secondInfo
+                                    ? secondInfo.subscribed
+                                        ? secondInfo.received
+                                            ? "RECEBEU SEGUNDA VIA"
+                                            : "INSCRIÇÃO FEITA"
+                                        : secondInfo.enabled
+                                        ? "INSCREVER - SE"
+                                        : "SEGUNDA VIA TERMINOU"
+                                    : "SEGUNDA VIA INDISPONÍVEL"}
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
                     {staff && (
                         <View style={styles.fabRow}>
                             <TouchableOpacity
@@ -179,6 +299,14 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.08,
         shadowRadius: 8,
         shadowOffset: { width: 0, height: 4 },
+    },
+    button: {
+        borderRadius: 8,
+        paddingVertical: 10,
+        paddingHorizontal: 12,
+        alignItems: "center",
+        justifyContent: "center",
+        alignSelf: "stretch",
     },
     type: {
         fontSize: 18,
