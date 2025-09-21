@@ -74,6 +74,7 @@ export default function SendMessage() {
                 <TextInput
                     style={styles.input}
                     placeholder="Título"
+                    placeholderTextColor="#666"
                     value={title}
                     onChangeText={(t) => setTitle(t)}
                     editable={!loading}
@@ -83,6 +84,7 @@ export default function SendMessage() {
                 <TextInput
                     style={[styles.input, styles.textarea]}
                     placeholder="Mensagem"
+                    placeholderTextColor="#666"
                     value={message}
                     onChangeText={(t) => setMessage(t)}
                     editable={!loading}
