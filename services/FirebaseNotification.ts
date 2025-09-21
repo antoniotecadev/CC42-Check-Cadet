@@ -213,6 +213,29 @@ export const sendNotificationForBackEnd = async (
     });
 };
 
+export const sendNotificationForMessage = async (
+    payload: { title: string; message: string },
+    campusId: string,
+    cursusId: string,
+    topic?: string,
+    condition?: string
+): Promise<void> => {
+    const notification = new Notification(payload.title, payload.message, "");
+
+    const message = new Message(topic, condition, notification);
+    const fcmMessage = new FCMessage(message);
+
+    console.log("Sending FCM Message:", JSON.stringify(fcmMessage, null, 2));
+
+    await sendFCMNotification(fcmMessage);
+    await sendExpoNotificationToGroup(campusId, cursusId, {
+        title: payload.title,
+        body: payload.message,
+        data: {},
+        image: "",
+    });
+};
+
 const sendFCMNotification = async (fcmMessage: FCMessage) => {
     try {
         const response = await axios.post(

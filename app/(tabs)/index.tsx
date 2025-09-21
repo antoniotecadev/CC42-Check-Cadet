@@ -34,7 +34,6 @@ import { ref, set } from "firebase/database";
 import {
     ActionSheetIOS,
     ActivityIndicator,
-    Alert,
     Platform,
     RefreshControl,
     StyleSheet,
@@ -145,6 +144,7 @@ export default function HomeScreen() {
 
     const handleMenuPress = () => {
         const options = [
+            "Enviar Mensagem",
             "Ver Mensagens",
             "QR Code Scanner",
             "Sobre e Suporte",
@@ -155,34 +155,28 @@ export default function HomeScreen() {
             ActionSheetIOS.showActionSheetWithOptions(
                 {
                     options,
-                    destructiveButtonIndex: 3,
-                    cancelButtonIndex: 4,
+                    destructiveButtonIndex: 4,
+                    cancelButtonIndex: 5,
                     userInterfaceStyle: "dark",
                 },
                 (selectedIndex) => {
-                    if (selectedIndex === 0) handleMenuCursus();
-                    if (selectedIndex === 1) handleQrCodeScanner();
-                    if (selectedIndex === 2) setAboutVisible(true);
-                    if (selectedIndex === 3) handleSignOut();
+                    if (selectedIndex === 0)
+                        router.push({
+                            pathname: "/send_message",
+                            params: {
+                                userId: user?.id,
+                                campusId: user?.campus?.[0]?.id || 0,
+                                campusName: user?.campus?.[0]?.name || "",
+                            },
+                        });
+                    if (selectedIndex === 1) handleMenuCursus();
+                    if (selectedIndex === 2) handleQrCodeScanner();
+                    if (selectedIndex === 3) setAboutVisible(true);
+                    if (selectedIndex === 4) handleSignOut();
                 }
             );
         } else if (Platform.OS === "web") {
             setWebMenuVisible(true);
-        } else {
-            Alert.alert("Menu", "Escolha uma opção", [
-                {
-                    text: "QR Code Scanner",
-                    onPress: () => {
-                        handleQrCodeScanner;
-                    },
-                },
-                {
-                    text: "Sobre e Suporte",
-                    onPress: () => setAboutVisible(true),
-                },
-                { text: "Sair", onPress: handleSignOut, style: "destructive" },
-                { text: "Cancelar", style: "cancel" },
-            ]);
         }
     };
 
