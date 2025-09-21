@@ -19,6 +19,7 @@ import React, {
     useState,
 } from "react";
 
+import LatestMessageDialog from "@/components/LatestMessageDialog";
 import AboutModal from "@/components/ui/AboutModal";
 import EventItem from "@/components/ui/EventItem";
 import WebMenuModal from "@/components/ui/WebMenuModal";
@@ -265,8 +266,16 @@ export default function HomeScreen() {
         });
     };
 
+    const cursusId = user?.projects_users?.[0]?.cursus_ids?.[0];
+
     return (
         <>
+            {cursusId && (
+                <LatestMessageDialog
+                    campusId={user?.campus?.[0]?.id || 0}
+                    cursusId={cursusId}
+                />
+            )}
             <AboutModal
                 color={color}
                 visible={aboutVisible}
