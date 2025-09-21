@@ -28,7 +28,7 @@ export default function MessageItem({ message, onPress }: Props) {
                 </ThemedText>
                 <Text style={styles.timestamp}>{formatted}</Text>
                 <ThemedText style={styles.body} selectable>
-                    {messageText} {"text"}
+                    {messageText}
                 </ThemedText>
             </ThemedView>
         </TouchableOpacity>
