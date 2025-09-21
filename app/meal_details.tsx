@@ -9,7 +9,7 @@ import { useColorScheme } from "@/hooks/useColorScheme";
 import {
     observeSecondPortion,
     subscribeSecondPortion,
-} from "@/repository/mealSecondPortion";
+} from "@/repository/mealRepository";
 import { encrypt } from "@/utility/AESUtil";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
