@@ -145,7 +145,7 @@ export default function HomeScreen() {
 
     const handleMenuPress = () => {
         const options = [
-            "Enviar Mensagem",
+            isStaff ? "Enviar Mensagem" : "Menu",
             "Ver Mensagens",
             "QR Code Scanner",
             "Sobre e Suporte",
@@ -156,6 +156,7 @@ export default function HomeScreen() {
             ActionSheetIOS.showActionSheetWithOptions(
                 {
                     options,
+                    disabledButtonIndices: isStaff ? [-1] : [0],
                     destructiveButtonIndex: 4,
                     cancelButtonIndex: 5,
                     userInterfaceStyle: "dark",
