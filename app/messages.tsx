@@ -7,12 +7,13 @@ import {
     query,
     ref,
 } from "firebase/database";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useLayoutEffect, useState } from "react";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
 
 import { ThemedText } from "@/components/ThemedText";
 import MessageItem from "@/components/ui/MessageItem";
 import type { Message } from "@/model/Message";
+import { useNavigation } from "@react-navigation/native";
 import { useLocalSearchParams } from "expo-router";
 
 export default function MessagesScreen() {
@@ -21,19 +22,31 @@ export default function MessagesScreen() {
         cursusId: string;
     }>();
 
+    const navigation = useNavigation();
+
     const [messages, setMessages] = useState<Message[]>([]);
     const [loading, setLoading] = useState(true);
+
+    useLayoutEffect(() => {
+        if (navigation.setOptions) {
+            if (cursusId === "21") {
+                navigation.setOptions({ title: "42 Cursus" });
+            } else if (cursusId === "9") {
+                navigation.setOptions({ title: "C Piscine" });
+            } else if (cursusId === "66") {
+                navigation.setOptions({
+                    title: "C-Piscine-Reloaded",
+                });
+            }
+        }
+    }, [cursusId]);
 
     useEffect(() => {
         const messagesRef = ref(
             database,
             `campus/${campusId}/cursus/${cursusId}/messages`
         );
-        const q = query(
-            messagesRef,
-            orderByChild("timestamp"),
-            limitToLast(7)
-        );
+        const q = query(messagesRef, orderByChild("timestamp"), limitToLast(7));
 
         const unsubscribe = onValue(q, (snapshot) => {
             const list: Message[] = [];
@@ -58,7 +71,7 @@ export default function MessagesScreen() {
         });
 
         return () => unsubscribe();
-    }, []);
+    }, [campusId, cursusId]);
 
     if (loading)
         return (
