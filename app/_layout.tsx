@@ -182,6 +182,15 @@ export default function RootLayout() {
                                 headerBackVisible: true,
                             }}
                         />
+                        <Stack.Screen
+                            name="send_message"
+                            options={{
+                                headerShown: true,
+                                title: "Mensagem",
+                                headerBackTitle: "Voltar",
+                                headerBackVisible: true,
+                            }}
+                        />
                         <Stack.Screen name="+not-found" />
                     </StackHeader>
                     <StatusBar style="auto" />
