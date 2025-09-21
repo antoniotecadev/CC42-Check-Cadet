@@ -85,16 +85,20 @@ export default function MealsScreen() {
                 database,
                 `campus/${campusId}/cursus/${cursusId}/meals`
             );
+            // If user is staff, allow pagination with page size 15.
+            // If not staff, always fetch only the last 7 items and disallow pagination.
+            const pageSize = staff ? 15 : 7;
             let q = query(mealsRef, orderByKey());
-            if (startAtKey) {
+            if (startAtKey && staff) {
+                // only staff can request next pages
                 q = query(
                     mealsRef,
                     orderByKey(),
                     endBefore(startAtKey),
-                    limitToLast(15)
+                    limitToLast(pageSize)
                 );
             } else {
-                q = query(mealsRef, orderByKey(), limitToLast(15));
+                q = query(mealsRef, orderByKey(), limitToLast(pageSize));
             }
             onValue(
                 q,
@@ -129,12 +133,12 @@ export default function MealsScreen() {
                     setLoading(false);
                     setRefreshing(false);
                     setLoadingMore(false);
-                    setEndReached(mealList.length < 15);
+                    setEndReached(mealList.length < pageSize);
                 },
                 { onlyOnce: true }
             );
         },
-        [campusId, cursusId]
+        [campusId, cursusId, staff]
     );
 
     useEffect(() => {
@@ -147,6 +151,8 @@ export default function MealsScreen() {
     };
 
     const loadMore = () => {
+        // Only staff can paginate. Non-staff see only the last `pageSize` items.
+        if (!staff) return;
         if (!endReached && lastKey) {
             setLoadingMore(true);
             fetchMeals(lastKey, true);
