@@ -144,7 +144,7 @@ export default function HomeScreen() {
     }, []);
 
     const handleMenuPress = () => {
-        const options = ["QR Code Scanner", "Sobre", "Sair", "Cancelar"];
+        const options = ["QR Code Scanner", "Sobre e Suporte", "Sair", "Cancelar"];
         if (Platform.OS === "ios") {
             ActionSheetIOS.showActionSheetWithOptions(
                 {
@@ -169,7 +169,7 @@ export default function HomeScreen() {
                         handleQrCodeScanner;
                     },
                 },
-                { text: "Sobre", onPress: () => setAboutVisible(true) },
+                { text: "Sobre e Suporte", onPress: () => setAboutVisible(true) },
                 { text: "Sair", onPress: handleSignOut, style: "destructive" },
                 { text: "Cancelar", style: "cancel" },
             ]);

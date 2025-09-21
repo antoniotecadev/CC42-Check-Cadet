@@ -55,6 +55,7 @@ export default function AboutModal({
                                 intra="ateca"
                                 gitHub="antoniotecadev"
                                 email="antonioteca@hotmail.com"
+                                whatsapp="+244932359808"
                             />
                             <Profile
                                 name="António Pedro"
@@ -62,6 +63,7 @@ export default function AboutModal({
                                 intra="ansebast"
                                 gitHub="AntonioSebastiaoPedro"
                                 email="antoniosebastiaopedro19@gmail.com"
+                                whatsapp="+244951713308"
                             />
                         </ScrollView>
                     </LinearGradient>
@@ -77,6 +79,7 @@ type ProfileProps = {
     intra: string;
     gitHub: string;
     email: string;
+    whatsapp?: string;
 };
 
 const Profile: React.FC<ProfileProps> = ({
@@ -85,6 +88,7 @@ const Profile: React.FC<ProfileProps> = ({
     intra,
     gitHub,
     email,
+    whatsapp,
 }) => {
     return (
         <>
@@ -105,10 +109,20 @@ const Profile: React.FC<ProfileProps> = ({
                 <Text style={styles.link}>github.com/{gitHub}</Text>
             </TouchableOpacity>
             <TouchableOpacity
-                onPress={() => Linking.openURL(`mailto:{email}`)}
+                onPress={() => Linking.openURL(`mailto:${email}`)}
             >
                 <Text style={styles.link}>{email}</Text>
             </TouchableOpacity>
+            {whatsapp ? (
+                <TouchableOpacity
+                    onPress={() =>
+                        // Abre o WhatsApp web ou app (wa.me) com o número internacional
+                        Linking.openURL(`https://wa.me/${whatsapp.replace(/\+/g, "")}`)
+                    }
+                >
+                    <Text style={styles.link}>WhatsApp: {whatsapp}</Text>
+                </TouchableOpacity>
+            ) : null}
         </>
     );
 };
