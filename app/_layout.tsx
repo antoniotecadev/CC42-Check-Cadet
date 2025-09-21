@@ -173,6 +173,15 @@ export default function RootLayout() {
                                 headerBackVisible: true,
                             }}
                         />
+                        <Stack.Screen
+                            name="messages"
+                            options={{
+                                headerShown: true,
+                                title: "Mensagens",
+                                headerBackTitle: "Voltar",
+                                headerBackVisible: true,
+                            }}
+                        />
                         <Stack.Screen name="+not-found" />
                     </StackHeader>
                     <StatusBar style="auto" />

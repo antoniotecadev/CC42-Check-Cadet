@@ -144,19 +144,26 @@ export default function HomeScreen() {
     }, []);
 
     const handleMenuPress = () => {
-        const options = ["QR Code Scanner", "Sobre e Suporte", "Sair", "Cancelar"];
+        const options = [
+            "Ver Mensagens",
+            "QR Code Scanner",
+            "Sobre e Suporte",
+            "Sair",
+            "Cancelar",
+        ];
         if (Platform.OS === "ios") {
             ActionSheetIOS.showActionSheetWithOptions(
                 {
                     options,
-                    destructiveButtonIndex: 2,
-                    cancelButtonIndex: 3,
+                    destructiveButtonIndex: 3,
+                    cancelButtonIndex: 4,
                     userInterfaceStyle: "dark",
                 },
                 (selectedIndex) => {
-                    if (selectedIndex === 0) handleQrCodeScanner();
-                    if (selectedIndex === 1) setAboutVisible(true);
-                    if (selectedIndex === 2) handleSignOut();
+                    if (selectedIndex === 0) handleMenuCursus();
+                    if (selectedIndex === 1) handleQrCodeScanner();
+                    if (selectedIndex === 2) setAboutVisible(true);
+                    if (selectedIndex === 3) handleSignOut();
                 }
             );
         } else if (Platform.OS === "web") {
@@ -169,10 +176,46 @@ export default function HomeScreen() {
                         handleQrCodeScanner;
                     },
                 },
-                { text: "Sobre e Suporte", onPress: () => setAboutVisible(true) },
+                {
+                    text: "Sobre e Suporte",
+                    onPress: () => setAboutVisible(true),
+                },
                 { text: "Sair", onPress: handleSignOut, style: "destructive" },
                 { text: "Cancelar", style: "cancel" },
             ]);
+        }
+    };
+
+    const handleItemSelected = (cursusId: number) => {
+        router.push({
+            pathname: "/messages",
+            params: {
+                campusId: user?.campus?.[0]?.id || 0,
+                cursusId: cursusId,
+            },
+        });
+    };
+
+    const handleMenuCursus = () => {
+        const options = [
+            "42Cursus",
+            "C Piscine",
+            "C-Piscine-Reloaded",
+            "Cancelar",
+        ];
+        if (Platform.OS === "ios") {
+            ActionSheetIOS.showActionSheetWithOptions(
+                {
+                    options,
+                    cancelButtonIndex: 3,
+                    userInterfaceStyle: "dark",
+                },
+                (selectedIndex) => {
+                    if (selectedIndex === 0) handleItemSelected(21);
+                    if (selectedIndex === 1) handleItemSelected(9);
+                    if (selectedIndex === 2) handleItemSelected(66);
+                }
+            );
         }
     };
 
@@ -446,7 +489,7 @@ function EventsList({
 
     return (
         <FlashList
-            data={eventsFinal}            
+            data={eventsFinal}
             keyExtractor={(item) => item.id.toString()}
             refreshControl={
                 <RefreshControl
