@@ -45,8 +45,8 @@ export default function AboutModal({
                                 <Ionicons name="close" size={28} color="red" />
                             </TouchableOpacity>
                             <Text style={styles.description}>
-                                Esta aplicação foi criada para facilitar a
-                                gestão de refeições e eventos no campus.
+                                Check Cadet uma aplicação criada para facilitar a
+                                gestão de refeições e eventos no campus.{'\n'}
                                 Aproveite a experiência!
                             </Text>
                             <Profile
