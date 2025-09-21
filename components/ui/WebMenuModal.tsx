@@ -14,7 +14,7 @@ export default function WebMenuModal({
 }: WebMenuModalProps) {
     const options = [
         { label: "QR Code Scanner", value: 1 },
-        { label: "Sobre", value: 2 },
+        { label: "Sobre e Suporte", value: 2 },
         { label: "Sair", value: 3 },
         { label: "Cancelar", value: 0 },
     ];
