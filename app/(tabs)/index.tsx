@@ -111,36 +111,42 @@ export default function HomeScreen() {
             }
         };
 
-        const subscription = Notifications.addPushTokenListener(
-            async (token) => {
-                const userId = user?.id;
-                const campusId = user?.campus?.[0]?.id;
-                const cursusId = user?.projects_users?.[0]?.cursus_ids?.[0];
-                console.log("🔁 Novo token detectado:", token.data);
-                if (
-                    userId &&
-                    campusId &&
-                    (cursusId || isStaff) &&
-                    Platform.OS === "ios"
-                ) {
-                    const tokenRef = ref(
-                        database,
-                        isStaff
-                            ? `campus/${campusId}/tokenIOSNotification/staff/${userId}`
-                            : `campus/${campusId}/tokenIOSNotification/student/cursus/${cursusId}/${userId}`
-                    );
-                    try {
-                        await set(tokenRef, token.data);
-                    } catch (e: any) {
-                        showAlert("Erro", e.message);
+        let subscription: any | undefined = undefined;
+        if (Platform.OS !== "web") {
+            subscription = Notifications.addPushTokenListener(
+                async (token) => {
+                    const userId = user?.id;
+                    const campusId = user?.campus?.[0]?.id;
+                    const cursusId = user?.projects_users?.[0]?.cursus_ids?.[0];
+                    console.log("🔁 Novo token detectado:", token.data);
+                    if (
+                        userId &&
+                        campusId &&
+                        (cursusId || isStaff) &&
+                        Platform.OS === "ios"
+                    ) {
+                        const tokenRef = ref(
+                            database,
+                            isStaff
+                                ? `campus/${campusId}/tokenIOSNotification/staff/${userId}`
+                                : `campus/${campusId}/tokenIOSNotification/student/cursus/${cursusId}/${userId}`
+                        );
+                        try {
+                            await set(tokenRef, token.data);
+                        } catch (e: any) {
+                            showAlert("Erro", e.message);
+                        }
                     }
                 }
-            }
-        );
+            );
+        }
 
         fetchUser();
 
-        return () => subscription.remove();
+        return () => {
+            if (subscription && typeof subscription.remove === "function")
+                subscription.remove();
+        };
     }, []);
 
     const handleMenuPress = () => {
