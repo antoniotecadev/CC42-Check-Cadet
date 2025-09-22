@@ -51,7 +51,7 @@ const MealItem: React.FC<MealItemProps> = ({ item, color, borderColor }) => {
                         { color: item.isSubscribed ? "green" : "red" },
                     ]}
                 >
-                    {item.isSubscribed ? "Assinado" : ""}
+                    {item.isSubscribed ? "Subscrito" : ""}
                 </Text>
             </View>
         </View>
