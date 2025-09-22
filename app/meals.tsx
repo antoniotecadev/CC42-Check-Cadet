@@ -13,6 +13,7 @@ import { useNavigation } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
 import { router, useLocalSearchParams } from "expo-router";
 import {
+    DataSnapshot,
     endBefore,
     limitToLast,
     onValue,
@@ -37,7 +38,8 @@ interface Meal {
     description: string;
     createdDate: string;
     quantity: number;
-    numberSubscribed: number;
+    quantityReceived: number;
+    quantityNotReceived: number;
     isSubscribed: boolean;
     pathImage?: string;
 }
@@ -107,12 +109,16 @@ export default function MealsScreen() {
                     let newLastKey: string | null = null;
                     snapshot.forEach((dataSnapshot) => {
                         const meal = dataSnapshot.val();
-                        const subscription =
+                        let quantityReceived = 0;
+                        const subscription: DataSnapshot =
                             dataSnapshot.child("subscriptions");
+                        subscription.forEach((subSnap) => {
+                            quantityReceived += subSnap.val().quantity || 0;
+                        });
                         meal.id = dataSnapshot.key;
-                        meal.numberSubscribed = subscription?.size || 0;
-                        meal.quantity = Math.max(
-                            (meal.quantity || 0) - meal.numberSubscribed,
+                        meal.quantityReceived = quantityReceived;
+                        meal.quantityNotReceived = Math.max(
+                            (meal.quantity || 0) - meal.quantityReceived,
                             0
                         );
                         meal.isSubscribed = subscription.child(userId).exists();
@@ -332,7 +338,7 @@ export default function MealsScreen() {
                                 style={{ margin: 16 }}
                             />
                         ) : null
-                    }                    
+                    }
                     refreshing={refreshing}
                     onRefresh={onRefresh}
                     onEndReached={loadMore}

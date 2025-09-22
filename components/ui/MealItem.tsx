@@ -11,7 +11,8 @@ interface MealItemProps {
         type: string;
         description: string;
         quantity: number;
-        numberSubscribed: number;
+        quantityReceived: number;
+        quantityNotReceived: number;
         createdDate: string;
         isSubscribed: boolean;
     };
@@ -41,8 +42,8 @@ const MealItem: React.FC<MealItemProps> = ({ item, color, borderColor }) => {
                 <ThemedText style={styles.desc}>{item.description}</ThemedText>
 
                 <Text style={styles.type}>
-                    {item.type} {item.createdDate} {item.quantity}/
-                    {item.numberSubscribed}{" "}
+                    {item.type} {item.createdDate} {item.quantityNotReceived}/
+                    {item.quantityReceived}{" "}
                 </Text>
                 <Text
                     style={[
