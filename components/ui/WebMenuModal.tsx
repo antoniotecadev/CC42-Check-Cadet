@@ -41,6 +41,8 @@ export default function WebMenuModal({
                                 style={[
                                     styles.text,
                                     opt.value === 4 && { color: "#E53935" },
+                                    opt.value === 0 &&
+                                        !isStaff && { color: "#ddd" },
                                 ]}
                             >
                                 {opt.label}
