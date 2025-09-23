@@ -2,25 +2,21 @@ import React from "react";
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 interface WebMenuModalProps {
-    isStaff: boolean;
     visible: boolean;
     onClose: () => void;
     onSelect: (option: number) => void;
 }
 
-export default function WebMenuModal({
-    isStaff,
+export default function WebMenuModalCursus({
     visible,
     onClose,
     onSelect,
 }: WebMenuModalProps) {
     const options = [
-        { label: isStaff ? "Enviar Mensagem" : "Menu", value: 0 },
-        { label: "Ver Mensagens", value: 1 },
-        { label: "QR Code Scanner", value: 2 },
-        { label: "Sobre e Suporte", value: 3 },
-        { label: "Sair", value: 4 },
-        { label: "Cancelar", value: 5 },
+        { label: "42 Cursus", value: 0 },
+        { label: "C Piscine", value: 1 },
+        { label: "C-Piscine-Reloaded", value: 2 },
+        { label: "Cancelar", value: 3 },
     ];
 
     return (
@@ -29,18 +25,17 @@ export default function WebMenuModal({
                 <View style={styles.modal}>
                     {options.map((opt) => (
                         <TouchableOpacity
-                            disabled={opt.value === 0 && !isStaff}
                             key={opt.value}
                             style={styles.option}
                             onPress={() => {
                                 onClose();
-                                if (opt.value !== 5) onSelect(opt.value);
+                                if (opt.value !== 3) onSelect(opt.value);
                             }}
                         >
                             <Text
                                 style={[
                                     styles.text,
-                                    opt.value === 4 && { color: "#E53935" },
+                                    opt.value === 3 && { color: "#E53935" },
                                 ]}
                             >
                                 {opt.label}

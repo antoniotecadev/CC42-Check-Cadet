@@ -8,7 +8,7 @@ import {
     ref,
 } from "firebase/database";
 import React, { useEffect, useLayoutEffect, useState } from "react";
-import { ActivityIndicator, StyleSheet, View } from "react-native";
+import { ActivityIndicator, Platform, StyleSheet, View } from "react-native";
 
 import { ThemedText } from "@/components/ThemedText";
 import MessageItem from "@/components/ui/MessageItem";
@@ -23,6 +23,8 @@ export default function MessagesScreen() {
     }>();
 
     const navigation = useNavigation();
+
+    const isWeb = Platform.OS === "web";
 
     const [messages, setMessages] = useState<Message[]>([]);
     const [loading, setLoading] = useState(true);
@@ -82,7 +84,7 @@ export default function MessagesScreen() {
 
     if (!messages.length)
         return (
-            <View style={styles.center}>
+            <View style={[styles.center, isWeb ? styles.inner : {}]}>
                 <ThemedText>Nenhuma mensagem encontrada.</ThemedText>
             </View>
         );
@@ -92,11 +94,20 @@ export default function MessagesScreen() {
             data={messages}
             keyExtractor={(item) => item.id || Math.random().toString()}
             renderItem={({ item }) => <MessageItem message={item} />}
-            contentContainerStyle={{ paddingVertical: 8 }}
+            contentContainerStyle={[
+                { paddingVertical: 8 },
+                isWeb ? styles.inner : {},
+            ]}
         />
     );
 }
 
 const styles = StyleSheet.create({
     center: { flex: 1, justifyContent: "center", alignItems: "center" },
+    inner: {
+        width: "100%",
+        maxWidth: 600, // limite superior
+        minWidth: 480, // limite inferior (opcional)
+        marginHorizontal: "auto", // centraliza na web (usando style prop em web pura)
+    },
 });

@@ -23,6 +23,7 @@ import LatestMessageDialog from "@/components/LatestMessageDialog";
 import AboutModal from "@/components/ui/AboutModal";
 import EventItem from "@/components/ui/EventItem";
 import WebMenuModal from "@/components/ui/WebMenuModal";
+import WebMenuModalCursus from "@/components/ui/WebMenuModalCursus";
 import { database } from "@/firebaseConfig";
 import useItemStorage from "@/hooks/storage/useItemStorage";
 import useTokenStorage from "@/hooks/storage/useTokenStorage";
@@ -57,6 +58,7 @@ export default function HomeScreen() {
     const [user, setUser] = useState<any>(null);
     const [aboutVisible, setAboutVisible] = useState(false);
     const [webMenuVisible, setWebMenuVisible] = useState(false);
+    const [webMenuCursusVisible, setWebMenuCursusVisible] = useState(false);
     const [userCrypt, setUserCrypt] = useState<string | null>(null);
 
     const isStaff: boolean = !!user?.["staff?"];
@@ -113,32 +115,30 @@ export default function HomeScreen() {
 
         let subscription: any | undefined = undefined;
         if (Platform.OS !== "web") {
-            subscription = Notifications.addPushTokenListener(
-                async (token) => {
-                    const userId = user?.id;
-                    const campusId = user?.campus?.[0]?.id;
-                    const cursusId = user?.projects_users?.[0]?.cursus_ids?.[0];
-                    console.log("🔁 Novo token detectado:", token.data);
-                    if (
-                        userId &&
-                        campusId &&
-                        (cursusId || isStaff) &&
-                        Platform.OS === "ios"
-                    ) {
-                        const tokenRef = ref(
-                            database,
-                            isStaff
-                                ? `campus/${campusId}/tokenIOSNotification/staff/${userId}`
-                                : `campus/${campusId}/tokenIOSNotification/student/cursus/${cursusId}/${userId}`
-                        );
-                        try {
-                            await set(tokenRef, token.data);
-                        } catch (e: any) {
-                            showAlert("Erro", e.message);
-                        }
+            subscription = Notifications.addPushTokenListener(async (token) => {
+                const userId = user?.id;
+                const campusId = user?.campus?.[0]?.id;
+                const cursusId = user?.projects_users?.[0]?.cursus_ids?.[0];
+                console.log("🔁 Novo token detectado:", token.data);
+                if (
+                    userId &&
+                    campusId &&
+                    (cursusId || isStaff) &&
+                    Platform.OS === "ios"
+                ) {
+                    const tokenRef = ref(
+                        database,
+                        isStaff
+                            ? `campus/${campusId}/tokenIOSNotification/staff/${userId}`
+                            : `campus/${campusId}/tokenIOSNotification/student/cursus/${cursusId}/${userId}`
+                    );
+                    try {
+                        await set(tokenRef, token.data);
+                    } catch (e: any) {
+                        showAlert("Erro", e.message);
                     }
                 }
-            );
+            });
         }
 
         fetchUser();
@@ -148,6 +148,20 @@ export default function HomeScreen() {
                 subscription.remove();
         };
     }, []);
+
+    const handleMenuHome = (selectedIndex: number) => {
+        if (selectedIndex === 0) handleSendMessage();
+        if (selectedIndex === 1) handleMenuCursus();
+        if (selectedIndex === 2) handleQrCodeScanner();
+        if (selectedIndex === 3) setAboutVisible(true);
+        if (selectedIndex === 4) handleSignOut();
+    };
+
+    const handleMenuHomeCursus = (selectedIndex: number) => {
+        if (selectedIndex === 0) handleViewMessages(21);
+        if (selectedIndex === 1) handleViewMessages(9);
+        if (selectedIndex === 2) handleViewMessages(66);
+    };
 
     const handleMenuPress = () => {
         const options = [
@@ -168,19 +182,7 @@ export default function HomeScreen() {
                     userInterfaceStyle: "dark",
                 },
                 (selectedIndex) => {
-                    if (selectedIndex === 0)
-                        router.push({
-                            pathname: "/send_message",
-                            params: {
-                                userId: user?.id,
-                                campusId: user?.campus?.[0]?.id || 0,
-                                campusName: user?.campus?.[0]?.name || "",
-                            },
-                        });
-                    if (selectedIndex === 1) handleMenuCursus();
-                    if (selectedIndex === 2) handleQrCodeScanner();
-                    if (selectedIndex === 3) setAboutVisible(true);
-                    if (selectedIndex === 4) handleSignOut();
+                    handleMenuHome(selectedIndex);
                 }
             );
         } else if (Platform.OS === "web") {
@@ -188,7 +190,18 @@ export default function HomeScreen() {
         }
     };
 
-    const handleItemSelected = (cursusId: number) => {
+    const handleSendMessage = () => {
+        router.push({
+            pathname: "/send_message",
+            params: {
+                userId: user?.id,
+                campusId: user?.campus?.[0]?.id || 0,
+                campusName: user?.campus?.[0]?.name || "",
+            },
+        });
+    };
+
+    const handleViewMessages = (cursusId: number) => {
         router.push({
             pathname: "/messages",
             params: {
@@ -213,18 +226,12 @@ export default function HomeScreen() {
                     userInterfaceStyle: "dark",
                 },
                 (selectedIndex) => {
-                    if (selectedIndex === 0) handleItemSelected(21);
-                    if (selectedIndex === 1) handleItemSelected(9);
-                    if (selectedIndex === 2) handleItemSelected(66);
+                    handleMenuHomeCursus(selectedIndex);
                 }
             );
+        } else if (Platform.OS === "web") {
+            setWebMenuCursusVisible(true);
         }
-    };
-
-    const handleWebMenuSelect = (option: number) => {
-        if (option === 1) handleQrCodeScanner();
-        if (option === 2) setAboutVisible(true);
-        if (option === 3) handleSignOut();
     };
 
     const handleSignOut = () => {
@@ -289,9 +296,15 @@ export default function HomeScreen() {
                 onClose={() => setAboutVisible(false)}
             />
             <WebMenuModal
+                isStaff={isStaff}
                 visible={webMenuVisible}
                 onClose={() => setWebMenuVisible(false)}
-                onSelect={handleWebMenuSelect}
+                onSelect={handleMenuHome}
+            />
+            <WebMenuModalCursus
+                visible={webMenuCursusVisible}
+                onClose={() => setWebMenuCursusVisible(false)}
+                onSelect={handleMenuHomeCursus}
             />
             <ParallaxScrollView
                 headerBackgroundColor={{ light: "#A1CEDC", dark: "#1D3D47" }}

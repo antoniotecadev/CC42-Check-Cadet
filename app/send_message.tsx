@@ -24,6 +24,8 @@ export default function SendMessage() {
     const campusId = params.campusId ?? "";
     const campusName = params.campusName ?? "";
 
+    const isWeb = Platform.OS === "web";
+
     const [title, setTitle] = useState("");
     const [message, setMessage] = useState("");
     const [loading, setLoading] = useState(false);
@@ -54,22 +56,51 @@ export default function SendMessage() {
     return (
         <KeyboardAvoidingView
             behavior={Platform.OS === "ios" ? "padding" : undefined}
-            style={styles.container}
+            style={[styles.container, isWeb ? styles.inner : {}]}
         >
             <ScrollView
                 contentContainerStyle={styles.content}
                 keyboardShouldPersistTaps="handled"
             >
-                <Picker
-                    itemStyle={{ height: 50, marginBottom: 12 }}
-                    selectedValue={cursus}
-                    onValueChange={setCursus}
-                    style={{ color: "#333" }} // ou ajuste conforme seu tema
-                >
-                    {cursusType.map((item) => (
-                        <Picker.Item key={item} label={item} value={item} />
-                    ))}
-                </Picker>
+                {isWeb ? (
+                    <select
+                        value={cursus}
+                        onChange={(e) => setCursus(e.target.value)}
+                        style={{
+                            padding: "12px 16px",
+                            fontSize: 16,
+                            borderRadius: 8,
+                            border: `1px solid #ddd`,
+                            background: "#fafafa",
+                            color: "#333",
+                            marginBottom: 10,
+                            outline: "none",
+                            width: "100%",
+                            appearance: "none",
+                            WebkitAppearance: "none",
+                            MozAppearance: "none",
+                            boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
+                            cursor: "pointer",
+                        }}
+                    >
+                        {cursusType.map((item) => (
+                            <option key={item} value={item}>
+                                {item}
+                            </option>
+                        ))}
+                    </select>
+                ) : (
+                    <Picker
+                        itemStyle={{ height: 50, marginBottom: 12 }}
+                        selectedValue={cursus}
+                        onValueChange={setCursus}
+                        style={{ color: "#333" }} // ou ajuste conforme seu tema
+                    >
+                        {cursusType.map((item) => (
+                            <Picker.Item key={item} label={item} value={item} />
+                        ))}
+                    </Picker>
+                )}
 
                 <TextInput
                     style={styles.input}
@@ -163,5 +194,11 @@ const styles = StyleSheet.create({
     success: {
         color: "#2E7D32",
         marginBottom: 8,
+    },
+    inner: {
+        width: "100%",
+        maxWidth: 600, // limite superior
+        minWidth: 480, // limite inferior (opcional)
+        marginHorizontal: "auto", // centraliza na web (usando style prop em web pura)
     },
 });
