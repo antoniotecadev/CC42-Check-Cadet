@@ -41,7 +41,7 @@ Notifications.setNotificationHandler({
 export default function RootLayout() {
     const { getItem } = useItemStorage();
     // Show React Query DevTools in development only on web
-    const showDevtools = __DEV__ && Platform.OS === 'web';
+    const showDevtools = __DEV__ && Platform.OS === "web";
     const colorScheme = useColorScheme();
     const [loaded] = useFonts({
         SpaceMono: require("@/assets/fonts/SpaceMono-Regular.ttf"),
@@ -53,6 +53,7 @@ export default function RootLayout() {
     }, []);
 
     useEffect(() => {
+        if (Platform.OS === "web") return;
         let isMounted = true;
 
         async function redirect(notification: Notifications.Notification) {
@@ -105,7 +106,7 @@ export default function RootLayout() {
             // ex: navegue para outra tela aqui também
             redirect(response?.notification);
         }
-        if (Platform.OS !== "web") checkInitialNotification();
+        checkInitialNotification();
 
         return () => {
             isMounted = false;
