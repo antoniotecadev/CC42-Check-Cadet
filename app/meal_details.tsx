@@ -136,7 +136,7 @@ export default function MealDetailScreen() {
                         )}
                         <Text style={styles.date}>{meal.createdDate}</Text>
                         <Text style={styles.qty}>
-                            Quantidade: {meal.quantity}{" "}
+                            Quantidade: {meal.quantityNotReceived}{" "}
                             {meal.numberSubscribed
                                 ? "/ " + meal.numberSubscribed
                                 : ""}
