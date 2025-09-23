@@ -1,6 +1,6 @@
 import { database } from "@/firebaseConfig";
+import useItemStorage from "@/hooks/storage/useItemStorage";
 import type { Message } from "@/model/Message";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { get, limitToLast, orderByChild, query, ref } from "firebase/database";
 import React, { useEffect, useState } from "react";
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -25,6 +25,8 @@ export default function LatestMessageDialog({
     const [message, setMessage] = useState<Message | null>(null);
     const [messageId, setMessageId] = useState<string | null>(null);
     const [showModal, setShowModal] = useState(false);
+
+    const { getItem, setItem } = useItemStorage();
 
     useEffect(() => {
         let mounted = true;
@@ -58,13 +60,10 @@ export default function LatestMessageDialog({
                             timestamp: val.timestamp || null,
                         };
 
-                        const lastSeenId = await AsyncStorage.getItem(
-                            PREFS_KEY_LAST_ID
-                        );
-                        const dontShow =
-                            (await AsyncStorage.getItem(
-                                PREFS_KEY_DONT_SHOW
-                            )) === "true";
+                        const lastSeenId = await getItem(PREFS_KEY_LAST_ID);
+                        const dontShow = (await getItem(
+                            PREFS_KEY_DONT_SHOW
+                        )) === "true";
 
                         // Show if: not blocked, or it's a different/new message
                         if (
@@ -95,8 +94,8 @@ export default function LatestMessageDialog({
 
     const onDontShowAgain = async () => {
         if (messageId) {
-            await AsyncStorage.setItem(PREFS_KEY_LAST_ID, messageId);
-            await AsyncStorage.setItem(PREFS_KEY_DONT_SHOW, "true");
+            await setItem(PREFS_KEY_LAST_ID, messageId);
+            await setItem(PREFS_KEY_DONT_SHOW, "true");
         }
         setShowModal(false);
     };
@@ -104,9 +103,9 @@ export default function LatestMessageDialog({
     const onOk = async () => {
         if (messageId) {
             // Save last seen id so we can detect new messages later
-            await AsyncStorage.setItem(PREFS_KEY_LAST_ID, messageId);
+            await setItem(PREFS_KEY_LAST_ID, messageId);
             // Also reset the dont-show flag so future messages show
-            await AsyncStorage.setItem(PREFS_KEY_DONT_SHOW, "false");
+            await setItem(PREFS_KEY_DONT_SHOW, "false");
         }
         setShowModal(false);
     };
