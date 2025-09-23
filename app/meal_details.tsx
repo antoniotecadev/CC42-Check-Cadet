@@ -151,7 +151,7 @@ export default function MealDetailScreen() {
                         userId={userId}
                     />
                     {/* Second portion subscribe button */}
-                    <View style={{ marginHorizontal: 16, marginTop: 12 }}>
+                    <View style={{ margin: 16 }}>
                         <TouchableOpacity
                             disabled={
                                 !(

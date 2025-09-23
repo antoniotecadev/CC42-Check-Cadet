@@ -164,14 +164,16 @@ export default function RatingSection({
                 </View>
             </View>
             {userPresentOrSuscribed && (
-                <CommentBox
-                    campusId={campusId}
-                    cursusId={cursusId}
-                    userId={userId}
-                    type={type}
-                    typeId={typeId}
-                    containerStyle={{ marginHorizontal: 6 }}
-                />
+                <View>
+                    <CommentBox
+                        campusId={campusId}
+                        cursusId={cursusId}
+                        userId={userId}
+                        type={type}
+                        typeId={typeId}
+                        containerStyle={{ marginHorizontal: 6 }}
+                    />
+                </View>
             )}
         </>
     );
