@@ -35,7 +35,7 @@ const firebaseConfig = {
 const app =
     getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
 
-let auth;
+let auth: any;
 if (Platform.OS === "web") {
     // Navegador
     auth = getAuth(app);

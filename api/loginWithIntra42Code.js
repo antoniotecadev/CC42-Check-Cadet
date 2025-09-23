@@ -77,9 +77,9 @@ if (!admin.apps.length) {
 export default async function handler(req, res) {
 
     // Adiciona os cabeçalhos CORS
-    // res.setHeader('Access-Control-Allow-Origin', '*'); // Ou substitua * pelo domínio específico do seu frontend para maior segurança
-    // res.setHeader('Access-Control-Allow-Methods', 'POST'); // Permite apenas o método POST
-    // res.setHeader('Access-Control-Allow-Headers', 'Content-Type'); // Permite o cabeçalho Content-Type
+    res.setHeader('Access-Control-Allow-Origin', '*'); // Ou substitua * pelo domínio específico do seu frontend para maior segurança
+    res.setHeader('Access-Control-Allow-Methods', 'POST'); // Permite apenas o método POST
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type'); // Permite o cabeçalho Content-Type
 
     // Se a requisição for OPTIONS (pré-vinda), apenas retorna os cabeçalhos CORS
     if (req.method === "OPTIONS") {

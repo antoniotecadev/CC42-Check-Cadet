@@ -176,6 +176,7 @@ export function useLogin42() {
         code: string,
         redirectUri: string
     ): Promise<boolean> {
+        console.log("Trocando código por token... " + redirectUri);
         try {
             const response = await axios.post(
                 "https://check-cadet.vercel.app/api/loginWithIntra42Code",
