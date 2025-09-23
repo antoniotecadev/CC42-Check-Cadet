@@ -17,4 +17,9 @@ declare module "firebase/auth" {
      * Retorna instância do Auth (compat fallback).
      */
     export function getAuth(app?: any): any;
+    /**
+     * Faz login no Firebase usando um token customizado (JWT gerado pelo backend).
+     * Tipagem mínima: use `any` para compatibilidade.
+     */
+    export function signInWithCustomToken(auth: any, token: string): Promise<any>;
 }
