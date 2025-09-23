@@ -382,7 +382,7 @@ export default function EventUsersScreen() {
                     />
                 )}
                 {/* Chips de presentes e ausentes - agora absolutos no topo direito */}
-                <View style={styles.chipAbsoluteRow} pointerEvents="box-none">
+                <View style={styles.chipAbsoluteRow}>
                     <View style={[styles.chip, styles.chipPresent]}>
                         <MaterialCommunityIcons
                             name="account-check"
@@ -436,7 +436,7 @@ export default function EventUsersScreen() {
                 />
                 {/* Floating Action Buttons */}
                 {staff && (
-                    <View style={styles.fabContainer} pointerEvents="box-none">
+                    <View style={styles.fabContainer}>
                         <TouchableOpacity
                             style={[
                                 styles.fab,

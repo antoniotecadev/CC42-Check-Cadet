@@ -319,8 +319,8 @@ export default function HomeScreen() {
                                 alignItems: "center",
                                 zIndex: 1,
                                 backgroundColor: "transparent",
+                                pointerEvents: "none",
                             }}
-                            pointerEvents="none"
                         >
                             <ThemedText
                                 type="defaultSemiBold"
