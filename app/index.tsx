@@ -1,7 +1,8 @@
 import useTokenStorage from "@/hooks/storage/useTokenStorage";
 import { router } from "expo-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
+    Image,
     ImageBackground,
     Platform,
     StyleSheet,
@@ -12,6 +13,8 @@ import {
 
 export default function SplashScreen() {
     const { width, height } = useWindowDimensions();
+    const [isReady, setIsReady] = useState(false);
+
     const {
         getAccessToken,
         getRefreshToken,
@@ -39,6 +42,49 @@ export default function SplashScreen() {
         Platform.OS === "web"
             ? require("@/assets/images/42_default_background.jpg")
             : require("@/assets/images/back_default_42_16_9.png");
+
+    useEffect(() => {
+        let cancelled = false;
+
+        async function preload() {
+            try {
+                // On web require(...) returns a path usable directly as uri.
+                if (Platform.OS === "web") {
+                    // imageBackground is a module reference from require(...)
+                    const uri =
+                        typeof imageBackground === "number"
+                            ? imageBackground
+                            : (imageBackground as any)?.uri || imageBackground;
+                    if (typeof uri === "string") {
+                        await Image.prefetch(uri as string);
+                    }
+                }
+            } catch (e) {
+                // ignore preload errors, we'll still render
+            } finally {
+                if (!cancelled) setIsReady(true);
+            }
+        }
+
+        preload();
+
+        return () => {
+            cancelled = true;
+        };
+    }, []);
+
+    if (!isReady && Platform.OS === "web") {
+        return (
+            <View
+                style={[
+                    styles.container,
+                    { width, height, backgroundColor: "black" },
+                ]}
+            >
+                <Text style={{ color: "white" }}>Carregando...</Text>
+            </View>
+        );
+    }
 
     return (
         <ImageBackground
