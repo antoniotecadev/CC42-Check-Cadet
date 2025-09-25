@@ -1,6 +1,6 @@
 // Listas de opções para criação de refeições
 export const mealType = [
-  'Lanche',
+  'Pequeno almoço',
   'Almoço',
   'Jantar',
 ];

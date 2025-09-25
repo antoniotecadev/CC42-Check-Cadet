@@ -303,7 +303,7 @@ export default function CreateMealModal({
                                         styles.input,
                                         { borderColor: color },
                                     ]}
-                                    placeholder="Tipo (ex: lanche, almoço...)"
+                                    placeholder="Tipo (ex: Pequeno almoço, almoço...)"
                                     value={type}
                                     onChangeText={setType}
                                 />
