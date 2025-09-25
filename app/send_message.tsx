@@ -1,3 +1,4 @@
+import { useColorCoalition } from "@/components/ColorCoalitionContext";
 import { cursusType } from "@/constants/cursusOptions";
 import messageService from "@/services/messageService";
 import { Picker } from "@react-native-picker/picker";
@@ -25,6 +26,8 @@ export default function SendMessage() {
     const campusName = params.campusName ?? "";
 
     const isWeb = Platform.OS === "web";
+
+    const { color: colorCoalition } = useColorCoalition();
 
     const [title, setTitle] = useState("");
     const [message, setMessage] = useState("");
@@ -130,13 +133,14 @@ export default function SendMessage() {
                     style={[
                         styles.button,
                         loading ? styles.buttonDisabled : null,
+                        { backgroundColor: colorCoalition },
                     ]}
                     onPress={onSend}
                     disabled={loading}
                     accessibilityRole="button"
                 >
                     {loading ? (
-                        <ActivityIndicator color="#fff" />
+                        <ActivityIndicator color={colorCoalition} />
                     ) : (
                         <Text style={styles.buttonText}>ENVIAR MENSAGEM</Text>
                     )}

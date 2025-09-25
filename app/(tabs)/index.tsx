@@ -176,7 +176,7 @@ export default function HomeScreen() {
             ActionSheetIOS.showActionSheetWithOptions(
                 {
                     options,
-                    disabledButtonIndices: isStaff ? [-1] : [0],
+                    disabledButtonIndices: isStaff ? [] : [0],
                     destructiveButtonIndex: 4,
                     cancelButtonIndex: 5,
                     userInterfaceStyle: "dark",
