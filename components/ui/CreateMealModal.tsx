@@ -16,6 +16,7 @@ import {
 import useAlert from "@/hooks/useAlert";
 import { useCreateMeal } from "@/hooks/useCreateMeal";
 import { optimizeImage } from "@/utility/ImageUtil";
+import { Ionicons } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
@@ -257,10 +258,13 @@ export default function CreateMealModal({
                                             { backgroundColor: color },
                                         ]}
                                         onPress={takePhoto}
+                                        accessibilityLabel="Tirar Foto"
                                     >
-                                        <Text style={styles.photoBtnText}>
-                                            Tirar Foto
-                                        </Text>
+                                        <Ionicons
+                                            name={isWeb ? "camera" : "camera"}
+                                            size={20}
+                                            color="#fff"
+                                        />
                                     </TouchableOpacity>
                                     <TouchableOpacity
                                         style={[
@@ -268,10 +272,13 @@ export default function CreateMealModal({
                                             { backgroundColor: color },
                                         ]}
                                         onPress={pickImage}
+                                        accessibilityLabel="Abrir Galeria"
                                     >
-                                        <Text style={styles.photoBtnText}>
-                                            Galeria
-                                        </Text>
+                                        <Ionicons
+                                            name={isWeb ? "image" : "images"}
+                                            size={20}
+                                            color="#fff"
+                                        />
                                     </TouchableOpacity>
                                 </View>
                                 <TextInput
@@ -694,10 +701,13 @@ const styles = StyleSheet.create({
         marginBottom: 8,
     },
     photoBtn: {
-        flex: 1,
-        marginHorizontal: 4,
-        padding: 8,
-        borderRadius: 8,
+    flex: 1,
+    marginHorizontal: 4,
+    padding: 8,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: 40,
     },
     photoBtnText: {
         color: "#fff",
