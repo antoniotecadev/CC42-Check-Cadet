@@ -209,7 +209,7 @@ export default function CreateMealModal({
             setType(initialMeal.type || "");
             setTags([...tags, initialMeal.description]);
             setQuantity(
-                initialMeal.quantity ? String(initialMeal.quantity) : "0"
+                initialMeal.quantityNotReceived ? String(initialMeal.quantityNotReceived) : "0"
             );
             setImage(initialMeal.pathImage || null);
         } else if (!visible) {
