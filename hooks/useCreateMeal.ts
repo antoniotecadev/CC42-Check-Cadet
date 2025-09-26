@@ -462,11 +462,59 @@ export function useCreateMeal() {
         }
     }
 
+    async function onNotifyMeal(
+        meal: any,
+        campusId: string,
+        cursusId: string,
+        option: string
+    ): Promise<void> {
+        const originalType = meal.type;
+        const optionLabel = option;
+
+        try {
+            if (option === "Segunda via") {
+                const mealsRef = ref(
+                    database,
+                    `campus/${campusId}/cursus/${cursusId}/meals/${meal.id}/secondPortion`
+                );
+                const map = {
+                    hasSecondPortion: true,
+                    quantitySecondPortion: meal.quantityNotReceived || 0,
+                };
+                await set(mealsRef, map).then(() => {
+                    showAlert(
+                        "Sucesso",
+                        `Segunda via de ${meal.name} disponibilizado(a) com sucesso!`
+                    );
+                });
+            }
+
+            try {
+                meal.type = `${originalType}: ${optionLabel}`;
+                const topicStudent = `meals_${campusId}_${cursusId}`;
+                await sendNotificationForBackEnd(
+                    meal,
+                    campusId,
+                    cursusId,
+                    topicStudent,
+                    undefined
+                );
+            } finally {
+                meal.type = originalType;
+            }
+        } catch (e: any) {
+            console.error("Erro ao notificar refeição:", e);
+            showAlert("Erro", e?.message || "Erro ao enviar notificação");
+            throw e;
+        }
+    }
+
     return {
         createMeal,
         updateMealImage,
         updateMealData,
         deleteMealFromFirebase,
+        onNotifyMeal,
         loading,
         error,
     };

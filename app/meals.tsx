@@ -3,6 +3,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import CreateMealModal from "@/components/ui/CreateMealModal";
 import MealItem from "@/components/ui/MealItem";
+import NotifyMealModal from "@/components/ui/NotifyMealModal";
 import { database } from "@/firebaseConfig";
 import useItemStorage from "@/hooks/storage/useItemStorage";
 import useAlert from "@/hooks/useAlert";
@@ -51,7 +52,7 @@ export default function MealsScreen() {
     const colorScheme = useColorScheme();
     const { color } = useColorCoalition();
     const { height } = useWindowDimensions();
-    const { deleteMealFromFirebase } = useCreateMeal();
+    const { deleteMealFromFirebase, onNotifyMeal } = useCreateMeal();
 
     const isWeb = Platform.OS === "web";
     const { userId, campusId, campusName, cursusId, cursusName } =
@@ -62,15 +63,17 @@ export default function MealsScreen() {
             cursusId: string;
             cursusName: string;
         }>();
-    const [loading, setLoading] = useState(true);
-    const [meals, setMeals] = useState<Meal[]>([]);
     const [staff, setStaff] = useState<boolean>(false);
-    const [refreshing, setRefreshing] = useState(false);
-    const [endReached, setEndReached] = useState(false);
-    const [loadingMore, setLoadingMore] = useState(false);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [refreshing, setRefreshing] = useState<boolean>(false);
+    const [endReached, setEndReached] = useState<boolean>(false);
+    const [loadingMore, setLoadingMore] = useState<boolean>(false);
+    const [showCreateModal, setShowCreateModal] = useState<boolean>(false);
+
+    const [meals, setMeals] = useState<Meal[]>([]);
     const [lastKey, setLastKey] = useState<string | null>(null);
-    const [showCreateModal, setShowCreateModal] = useState(false);
     const [editMeal, setEditMeal] = useState<Meal | null>(null);
+    const [notifyMeal, setNotifyMeal] = useState<Meal | null>(null);
 
     useEffect(() => {
         const status = async () => {
@@ -183,14 +186,15 @@ export default function MealsScreen() {
         else
             ActionSheetIOS.showActionSheetWithOptions(
                 {
-                    options: ["Editar", "Eliminar", "Cancelar"],
-                    destructiveButtonIndex: 1,
-                    cancelButtonIndex: 2,
+                    options: ["Editar", "Notificar", "Eliminar", "Cancelar"],
+                    destructiveButtonIndex: 2,
+                    cancelButtonIndex: 3,
                     userInterfaceStyle: "dark",
                 },
                 (selectedIndex) => {
                     if (selectedIndex === 0) setEditMeal(item);
-                    if (selectedIndex === 1) {
+                    if (selectedIndex === 1) setNotifyMeal(item);
+                    if (selectedIndex === 2) {
                         showConfirm(
                             "Eliminar",
                             item.name,
@@ -264,6 +268,15 @@ export default function MealsScreen() {
                 onCreated={() => {
                     setEditMeal(null);
                     onRefresh(false);
+                }}
+            />
+            <NotifyMealModal
+                visible={!!notifyMeal}
+                meal={notifyMeal}
+                onClose={() => setNotifyMeal(null)}
+                onNotify={(opt) => {
+                    onNotifyMeal(notifyMeal, campusId, cursusId, String(opt));
+                    setNotifyMeal(null);
                 }}
             />
             <ThemedView
