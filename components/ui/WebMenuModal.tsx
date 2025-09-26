@@ -43,6 +43,10 @@ export default function WebMenuModal({
                                     opt.value === 4 && { color: "#E53935" },
                                     opt.value === 0 &&
                                         !isStaff && { color: "#ddd" },
+                                    opt.value === 5 && {
+                                        fontWeight: "600",
+                                        color: "#555",
+                                    },
                                 ]}
                             >
                                 {opt.label}
