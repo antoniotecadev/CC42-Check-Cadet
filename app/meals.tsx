@@ -4,11 +4,13 @@ import { ThemedView } from "@/components/ThemedView";
 import CreateMealModal from "@/components/ui/CreateMealModal";
 import MealItem from "@/components/ui/MealItem";
 import NotifyMealModal from "@/components/ui/NotifyMealModal";
+import WebMenuModal from "@/components/ui/WebMenuModal";
 import { database } from "@/firebaseConfig";
 import useItemStorage from "@/hooks/storage/useItemStorage";
 import useAlert from "@/hooks/useAlert";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { useCreateMeal } from "@/hooks/useCreateMeal";
+import { Meal } from "@/model/Meal";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
@@ -31,19 +33,6 @@ import {
     TouchableOpacity,
     useWindowDimensions,
 } from "react-native";
-
-interface Meal {
-    id: string;
-    name: string;
-    type: string;
-    description: string;
-    createdDate: string;
-    quantity: number;
-    quantityReceived: number;
-    quantityNotReceived: number;
-    isSubscribed: boolean;
-    pathImage?: string;
-}
 
 export default function MealsScreen() {
     const { showConfirm } = useAlert();
@@ -74,6 +63,18 @@ export default function MealsScreen() {
     const [lastKey, setLastKey] = useState<string | null>(null);
     const [editMeal, setEditMeal] = useState<Meal | null>(null);
     const [notifyMeal, setNotifyMeal] = useState<Meal | null>(null);
+
+    const [webMenu, setWebMenu] = useState<{
+        visible: boolean;
+        meal: Meal | null;
+    }>({ visible: false, meal: null });
+
+    const options = [
+        { label: "Editar", value: 0 },
+        { label: "Notificar", value: 1 },
+        { label: "Eliminar", value: 2 },
+        { label: "Cancelar", value: 3 },
+    ];
 
     useEffect(() => {
         const status = async () => {
@@ -168,6 +169,26 @@ export default function MealsScreen() {
         }
     };
 
+    const handleMenuWeb = (selectedIndex: number, meal: Meal) => {
+        if (selectedIndex === 0) setEditMeal(meal);
+        if (selectedIndex === 1) setNotifyMeal(meal);
+        if (selectedIndex === 2) {
+            showConfirm(
+                "Eliminar",
+                meal.name,
+                async () => {
+                    await deleteMealFromFirebase(
+                        campusId,
+                        cursusId,
+                        { id: meal.id, pathImage: meal.pathImage },
+                        onRefresh
+                    );
+                },
+                () => null
+            );
+        }
+    };
+
     const handleMenuPress = () => {
         ActionSheetIOS.showActionSheetWithOptions(
             {
@@ -181,8 +202,8 @@ export default function MealsScreen() {
         );
     };
 
-    const handleItemLongPress = (item: Meal) => {
-        if (isWeb) setEditMeal(item);
+    const handleItemLongPress = (meal: Meal) => {
+        if (isWeb) setWebMenu({ visible: true, meal });
         else
             ActionSheetIOS.showActionSheetWithOptions(
                 {
@@ -192,17 +213,17 @@ export default function MealsScreen() {
                     userInterfaceStyle: "dark",
                 },
                 (selectedIndex) => {
-                    if (selectedIndex === 0) setEditMeal(item);
-                    if (selectedIndex === 1) setNotifyMeal(item);
+                    if (selectedIndex === 0) setEditMeal(meal);
+                    if (selectedIndex === 1) setNotifyMeal(meal);
                     if (selectedIndex === 2) {
                         showConfirm(
                             "Eliminar",
-                            item.name,
+                            meal.name,
                             async () => {
                                 await deleteMealFromFirebase(
                                     campusId,
                                     cursusId,
-                                    { id: item.id, pathImage: item.pathImage },
+                                    { id: meal.id, pathImage: meal.pathImage },
                                     onRefresh
                                 );
                             },
@@ -269,6 +290,14 @@ export default function MealsScreen() {
                     setEditMeal(null);
                     onRefresh(false);
                 }}
+            />
+            <WebMenuModal
+                isHome={false}
+                options={options}
+                isStaff={staff}
+                visible={webMenu.visible}
+                onClose={() => setWebMenu({ ...webMenu, visible: false })}
+                onSelect={(option) => handleMenuWeb(option, webMenu.meal!)}
             />
             <NotifyMealModal
                 visible={!!notifyMeal}

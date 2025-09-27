@@ -2,6 +2,8 @@ import React from "react";
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 interface WebMenuModalProps {
+    isHome: boolean;
+    options: { label: string; value: number }[];
     isStaff: boolean;
     visible: boolean;
     onClose: () => void;
@@ -9,50 +11,72 @@ interface WebMenuModalProps {
 }
 
 export default function WebMenuModal({
+    isHome,
+    options,
     isStaff,
     visible,
     onClose,
     onSelect,
 }: WebMenuModalProps) {
-    const options = [
-        { label: isStaff ? "Enviar Mensagem" : "Menu", value: 0 },
-        { label: "Ver Mensagens", value: 1 },
-        { label: "QR Code Scanner", value: 2 },
-        { label: "Sobre e Suporte", value: 3 },
-        { label: "Sair", value: 4 },
-        { label: "Cancelar", value: 5 },
-    ];
-
     return (
         <Modal visible={visible} transparent animationType="fade">
             <View style={styles.overlay}>
                 <View style={styles.modal}>
-                    {options.map((opt) => (
-                        <TouchableOpacity
-                            disabled={opt.value === 0 && !isStaff}
-                            key={opt.value}
-                            style={styles.option}
-                            onPress={() => {
-                                onClose();
-                                if (opt.value !== 5) onSelect(opt.value);
-                            }}
-                        >
-                            <Text
-                                style={[
-                                    styles.text,
-                                    opt.value === 4 && { color: "#E53935" },
-                                    opt.value === 0 &&
-                                        !isStaff && { color: "#ddd" },
-                                    opt.value === 5 && {
-                                        fontWeight: "600",
-                                        color: "#555",
-                                    },
-                                ]}
-                            >
-                                {opt.label}
-                            </Text>
-                        </TouchableOpacity>
-                    ))}
+                    {isHome
+                        ? options.map((opt) => (
+                              <TouchableOpacity
+                                  disabled={opt.value === 0 && !isStaff}
+                                  key={opt.value}
+                                  style={styles.option}
+                                  onPress={() => {
+                                      onClose();
+                                      if (opt.value !== 5) onSelect(opt.value);
+                                  }}
+                              >
+                                  <Text
+                                      style={[
+                                          styles.text,
+                                          opt.value === 4 && {
+                                              color: "#E53935",
+                                          },
+                                          opt.value === 0 &&
+                                              !isStaff && { color: "#ddd" },
+                                          opt.value === 5 && {
+                                              fontWeight: "600",
+                                              color: "#555",
+                                          },
+                                      ]}
+                                  >
+                                      {opt.label}
+                                  </Text>
+                              </TouchableOpacity>
+                          ))
+                        : isStaff &&
+                          options.map((opt) => (
+                              <TouchableOpacity
+                                  key={opt.value}
+                                  style={styles.option}
+                                  onPress={() => {
+                                      onClose();
+                                      if (opt.value !== 3) onSelect(opt.value);
+                                  }}
+                              >
+                                  <Text
+                                      style={[
+                                          styles.text,
+                                          opt.value === 2 && {
+                                              color: "#E53935",
+                                          },
+                                          opt.value === 3 && {
+                                              fontWeight: "600",
+                                              color: "#555",
+                                          },
+                                      ]}
+                                  >
+                                      {opt.label}
+                                  </Text>
+                              </TouchableOpacity>
+                          ))}
                 </View>
             </View>
         </Modal>

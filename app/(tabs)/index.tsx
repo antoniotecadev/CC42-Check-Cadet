@@ -56,16 +56,28 @@ export default function HomeScreen() {
     const refreshRef = useRef<() => void>(null);
 
     const [user, setUser] = useState<any>(null);
+
+    const [userCrypt, setUserCrypt] = useState<string | null>(null);
+
     const [aboutVisible, setAboutVisible] = useState(false);
     const [webMenuVisible, setWebMenuVisible] = useState(false);
     const [webMenuCursusVisible, setWebMenuCursusVisible] = useState(false);
-    const [userCrypt, setUserCrypt] = useState<string | null>(null);
 
     const isStaff: boolean = !!user?.["staff?"];
 
     const blurhash =
         "|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuayj[";
 
+    
+    const options = [
+        { label: isStaff ? "Enviar Mensagem" : "Menu", value: 0 },
+        { label: "Ver Mensagens", value: 1 },
+        { label: "QR Code Scanner", value: 2 },
+        { label: "Sobre e Suporte", value: 3 },
+        { label: "Sair", value: 4 },
+        { label: "Cancelar", value: 5 },
+    ];
+    
     const handleRefreshReady = (refreshFn: (() => void) | null) => {
         refreshRef.current = refreshFn;
     };
@@ -296,6 +308,8 @@ export default function HomeScreen() {
                 onClose={() => setAboutVisible(false)}
             />
             <WebMenuModal
+                isHome={true}
+                options={options}
                 isStaff={isStaff}
                 visible={webMenuVisible}
                 onClose={() => setWebMenuVisible(false)}
