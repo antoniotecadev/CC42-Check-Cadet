@@ -1,5 +1,7 @@
 import React from "react";
-import { Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Modal, StyleSheet, TouchableOpacity, View } from "react-native";
+import { ThemedText } from "../ThemedText";
+import { ThemedView } from "../ThemedView";
 
 interface WebMenuModalProps {
     isHome: boolean;
@@ -21,7 +23,7 @@ export default function WebMenuModal({
     return (
         <Modal visible={visible} transparent animationType="fade">
             <View style={styles.overlay}>
-                <View style={styles.modal}>
+                <ThemedView style={styles.modal}>
                     {isHome
                         ? options.map((opt) => (
                               <TouchableOpacity
@@ -33,7 +35,7 @@ export default function WebMenuModal({
                                       if (opt.value !== 5) onSelect(opt.value);
                                   }}
                               >
-                                  <Text
+                                  <ThemedText
                                       style={[
                                           styles.text,
                                           opt.value === 4 && {
@@ -48,7 +50,7 @@ export default function WebMenuModal({
                                       ]}
                                   >
                                       {opt.label}
-                                  </Text>
+                                  </ThemedText>
                               </TouchableOpacity>
                           ))
                         : isStaff &&
@@ -61,7 +63,7 @@ export default function WebMenuModal({
                                       if (opt.value !== 3) onSelect(opt.value);
                                   }}
                               >
-                                  <Text
+                                  <ThemedText
                                       style={[
                                           styles.text,
                                           opt.value === 2 && {
@@ -74,10 +76,10 @@ export default function WebMenuModal({
                                       ]}
                                   >
                                       {opt.label}
-                                  </Text>
+                                  </ThemedText>
                               </TouchableOpacity>
                           ))}
-                </View>
+                </ThemedView>
             </View>
         </Modal>
     );
@@ -91,7 +93,6 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     modal: {
-        backgroundColor: "#fff",
         borderRadius: 16,
         paddingVertical: 16,
         paddingHorizontal: 32,
@@ -107,6 +108,5 @@ const styles = StyleSheet.create({
     },
     text: {
         fontSize: 17,
-        color: "#222",
     },
 });

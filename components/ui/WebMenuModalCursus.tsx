@@ -1,5 +1,7 @@
 import React from "react";
-import { Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Modal, StyleSheet, TouchableOpacity, View } from "react-native";
+import { ThemedText } from "../ThemedText";
+import { ThemedView } from "../ThemedView";
 
 interface WebMenuModalProps {
     visible: boolean;
@@ -22,7 +24,7 @@ export default function WebMenuModalCursus({
     return (
         <Modal visible={visible} transparent animationType="fade">
             <View style={styles.overlay}>
-                <View style={styles.modal}>
+                <ThemedView style={styles.modal}>
                     {options.map((opt) => (
                         <TouchableOpacity
                             key={opt.value}
@@ -32,17 +34,17 @@ export default function WebMenuModalCursus({
                                 if (opt.value !== 3) onSelect(opt.value);
                             }}
                         >
-                            <Text
+                            <ThemedText
                                 style={[
                                     styles.text,
                                     opt.value === 3 && { color: "#E53935" },
                                 ]}
                             >
                                 {opt.label}
-                            </Text>
+                            </ThemedText>
                         </TouchableOpacity>
                     ))}
-                </View>
+                </ThemedView>
             </View>
         </Modal>
     );
@@ -56,7 +58,6 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     modal: {
-        backgroundColor: "#fff",
         borderRadius: 16,
         paddingVertical: 16,
         paddingHorizontal: 32,
@@ -72,6 +73,5 @@ const styles = StyleSheet.create({
     },
     text: {
         fontSize: 17,
-        color: "#222",
     },
 });

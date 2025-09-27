@@ -126,7 +126,8 @@ export default function CursusScreen() {
                 <View style={styles.header}>
                     <TextInput
                         style={[styles.input, { borderColor }]}
-                        placeholder="Buscar cursus..."
+                        placeholder="Pesquisar cursus..."
+                        placeholderTextColor={colorScheme === "light" ? "#888" : "#666"}
                         value={search}
                         onChangeText={setSearch}
                     />
