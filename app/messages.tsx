@@ -1,3 +1,4 @@
+import { useColorCoalition } from "@/components/ColorCoalitionContext";
 import { database } from "@/firebaseConfig";
 import { FlashList } from "@shopify/flash-list";
 import {
@@ -17,6 +18,8 @@ import { useNavigation } from "@react-navigation/native";
 import { useLocalSearchParams } from "expo-router";
 
 export default function MessagesScreen() {
+    const { color: colorCoalition } = useColorCoalition();
+
     const { campusId, cursusId } = useLocalSearchParams<{
         campusId: string;
         cursusId: string;
@@ -26,8 +29,8 @@ export default function MessagesScreen() {
 
     const isWeb = Platform.OS === "web";
 
+    const [loading, setLoading] = useState<boolean>(true);
     const [messages, setMessages] = useState<Message[]>([]);
-    const [loading, setLoading] = useState(true);
 
     useLayoutEffect(() => {
         if (navigation.setOptions) {
@@ -78,7 +81,7 @@ export default function MessagesScreen() {
     if (loading)
         return (
             <View style={styles.center}>
-                <ActivityIndicator size="large" />
+                <ActivityIndicator color={colorCoalition} size="large" />
             </View>
         );
 
