@@ -218,6 +218,10 @@ export default function EventUsersScreen() {
     // Debounced query to avoid excessive re-renders while typing
     const [debouncedQuery, setDebouncedQuery] = useState<string>("");
 
+    // Web menus
+    const [showWebMenu, setShowWebMenu] = useState<boolean>(false);
+    const [showWebFilterMenu, setShowWebFilterMenu] = useState<boolean>(false);
+
     useEffect(() => {
         const handler = setTimeout(() => {
             setDebouncedQuery(searchQuery);
@@ -282,6 +286,10 @@ export default function EventUsersScreen() {
     }
 
     const handleMenuPress = () => {
+        if (isWeb) {
+            setShowWebMenu(true);
+            return;
+        }
         ActionSheetIOS.showActionSheetWithOptions(
             {
                 options: [
@@ -302,6 +310,10 @@ export default function EventUsersScreen() {
     };
 
     const handleMenuFilter = () => {
+        if (isWeb) {
+            setShowWebFilterMenu(true);
+            return;
+        }
         ActionSheetIOS.showActionSheetWithOptions(
             {
                 options: [
@@ -411,16 +423,45 @@ export default function EventUsersScreen() {
                     />
                 )}
                 {/* Search input */}
-                <View style={styles.searchContainer}>
+                <View
+                    style={[
+                        styles.searchContainer,
+                        isWeb ? styles.searchRow : {},
+                    ]}
+                >
                     <TextInput
                         placeholder={"Procurar por nome ou login..."}
-                        placeholderTextColor={colorScheme === "dark" ? "#aaa" : "#666"}
+                        placeholderTextColor={
+                            colorScheme === "dark" ? "#aaa" : "#666"
+                        }
                         value={searchQuery}
                         onChangeText={setSearchQuery}
-                        style={[styles.searchInput, { backgroundColor: colorScheme === "dark" ? "#222" : "#fff", color: colorScheme === "dark" ? "#fff" : "#000" }]}
+                        style={[
+                            styles.searchInput,
+                            {
+                                backgroundColor:
+                                    colorScheme === "dark" ? "#222" : "#fff",
+                                color: colorScheme === "dark" ? "#fff" : "#000",
+                            },
+                        ]}
                         returnKeyType="search"
                         clearButtonMode="while-editing"
                     />
+                    {staff && isWeb && (
+                        <View style={styles.webMenuWrapper}>
+                            <TouchableOpacity
+                                onPress={() => setShowWebMenu((s) => !s)}
+                                style={styles.webMenuButton}
+                            >
+                                <MaterialCommunityIcons
+                                    name="dots-vertical"
+                                    size={20}
+                                    color={color}
+                                />
+                            </TouchableOpacity>
+                        </View>
+                    )}
+                    {/* filter menu moved to end to ensure overlay */}
                 </View>
                 {/* Chips de presentes e ausentes - agora absolutos no topo direito */}
                 <View style={styles.chipAbsoluteRow}>
@@ -475,6 +516,120 @@ export default function EventUsersScreen() {
                     refreshing={refreshing}
                     onRefresh={onRefresh}
                 />
+                {/* Web menus rendered after the list to ensure they overlay other content */}
+                {isWeb && staff && showWebMenu && (
+                    <View
+                        style={[
+                            styles.webMenu,
+                            {
+                                position: "absolute",
+                                top: 90,
+                                right: 24,
+                                backgroundColor:
+                                    colorScheme === "dark" ? "#222" : "#fff",
+                            },
+                        ]}
+                    >
+                        <TouchableOpacity
+                            onPress={() => {
+                                setShowWebMenu(false);
+                                setShowWebFilterMenu(true);
+                            }}
+                            style={styles.webMenuItem}
+                        >
+                            <ThemedText>Filtrar</ThemedText>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            onPress={() => {
+                                setShowWebMenu(false);
+                                handlePrintPdf();
+                            }}
+                            style={styles.webMenuItem}
+                        >
+                            <ThemedText>Imprimir ou Partilhar</ThemedText>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            onPress={() => {
+                                setShowWebMenu(false);
+                                handleExportExcel();
+                            }}
+                            style={styles.webMenuItem}
+                        >
+                            <ThemedText>Exportar para Excel</ThemedText>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            onPress={() => setShowWebMenu(false)}
+                            style={styles.webMenuItem}
+                        >
+                            <ThemedText>Cancelar</ThemedText>
+                        </TouchableOpacity>
+                    </View>
+                )}
+
+                {isWeb && showWebFilterMenu && (
+                    <View
+                        style={[
+                            styles.webMenu,
+                            {
+                                position: "absolute",
+                                top: 90,
+                                right: 24,
+                                backgroundColor:
+                                    colorScheme === "dark" ? "#222" : "#fff",
+                            },
+                        ]}
+                    >
+                        <TouchableOpacity
+                            onPress={() => {
+                                setShowWebFilterMenu(false);
+                                setFilter(
+                                    type === EVENTS
+                                        ? "Filtrar presentes"
+                                        : "Filtrar assinados"
+                                );
+                            }}
+                            style={styles.webMenuItem}
+                        >
+                            <ThemedText>
+                                {type === EVENTS
+                                    ? "Filtrar presentes"
+                                    : "Filtrar assinados"}
+                            </ThemedText>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            onPress={() => {
+                                setShowWebFilterMenu(false);
+                                setFilter(
+                                    type === EVENTS
+                                        ? "Filtrar ausentes"
+                                        : "Filtrar não assinados"
+                                );
+                            }}
+                            style={styles.webMenuItem}
+                        >
+                            <ThemedText>
+                                {type === EVENTS
+                                    ? "Filtrar ausentes"
+                                    : "Filtrar não assinados"}
+                            </ThemedText>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            onPress={() => {
+                                setShowWebFilterMenu(false);
+                                setFilter("Filtrar todos");
+                            }}
+                            style={styles.webMenuItem}
+                        >
+                            <ThemedText>Filtrar todos</ThemedText>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            onPress={() => setShowWebFilterMenu(false)}
+                            style={styles.webMenuItem}
+                        >
+                            <ThemedText>Cancelar</ThemedText>
+                        </TouchableOpacity>
+                    </View>
+                )}
                 {/* Floating Action Buttons */}
                 {staff && (
                     <View style={styles.fabContainer}>
@@ -637,13 +792,45 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         paddingTop: 12,
         paddingBottom: 6,
+        overflow: "visible",
     },
     searchInput: {
+        width: "100%",
         height: 40,
         borderRadius: 8,
         paddingHorizontal: 12,
         fontSize: 14,
         borderWidth: 1,
         borderColor: "rgba(0,0,0,0.08)",
+    },
+    searchRow: {
+        flexDirection: "row",
+    },
+    webMenuWrapper: {
+        position: "relative",
+        marginLeft: 8,
+        zIndex: 1000,
+    },
+    webMenuButton: {
+        padding: 6,
+        borderRadius: 6,
+    },
+    webMenu: {
+        position: "absolute",
+        top: 40,
+        right: 0,
+        minWidth: 180,
+        borderRadius: 6,
+        elevation: 20,
+        zIndex: 1001,
+        shadowColor: "#000",
+        shadowOpacity: 0.18,
+        shadowRadius: 8,
+        shadowOffset: { width: 0, height: 4 },
+        paddingVertical: 6,
+    },
+    webMenuItem: {
+        paddingVertical: 8,
+        paddingHorizontal: 12,
     },
 });
