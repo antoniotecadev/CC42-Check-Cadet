@@ -13,6 +13,8 @@ import { Alert, Platform } from "react-native";
 
 // listMealQrCode: array de objetos { id: string }
 export async function subscription({
+    mealQuantity,
+    mealPortion,
     mealId,
     listMealQrCode,
     userStaffId,
@@ -26,6 +28,8 @@ export async function subscription({
     showModal,
     onResumeCamera,
 }: BarcodeResultParams) {
+    const uid = mealPortion === "second" ? `-${userId}` : userId;
+
     try {
         setLoading(true);
 
@@ -49,26 +53,39 @@ export async function subscription({
         // Verifica se já assinou a primeira refeição
         const subscriptionsRef = ref(
             database,
-            `campus/${campusId}/cursus/${cursusId}/meals/${mealIds[0]}/subscriptions/${userId}`
+            `campus/${campusId}/cursus/${cursusId}/meals/${mealIds[0]}/subscriptions/${uid}`
         );
         const snapshot = await get(subscriptionsRef);
         if (snapshot.exists()) {
-            setLoading(false);
-            showModal({
-                title: "Aviso!",
-                message: `${displayName}\nVocê já assinou esta refeição.`,
-                color: "#FDD835",
-                imageSource: { uri: imageSource },
-                onClose: onResumeCamera,
-            });
-            return;
+            const isAlreadyReceived: boolean = Boolean(
+                snapshot.child("status").val()
+            );
+            if (isAlreadyReceived) {
+                setLoading(false);
+                showModal({
+                    title: "Aviso!",
+                    message: `${displayName}\nJá subscreveu 😉 ${
+                        mealPortion === "first" ? "Primeira" : "Segunda"
+                    } via.`,
+                    color: "#FDD835",
+                    imageSource: { uri: imageSource },
+                    onClose: onResumeCamera,
+                });
+                return;
+            }
         }
 
         // Monta updates para todas as refeições
-        const updates: Record<string, boolean> = {};
+        const updates: Record<string, any> = {};
+        const updatesStatus: Record<string, any> = {
+            status: true,
+            quantity: mealQuantity,
+            createdBy: registeredBy,
+        };
+
         mealIds.forEach((id) => {
-            updates[`cursus/${cursusId}/meals/${id}/subscriptions/${userId}`] =
-                true;
+            updates[`cursus/${cursusId}/meals/${id}/subscriptions/${uid}`] =
+                updatesStatus;
         });
 
         const campusRef = ref(database, `campus/${campusId}`);
@@ -88,7 +105,7 @@ export async function subscription({
         setLoading(false);
         showModal({
             title: "Sucesso!",
-            message: `${displayName}\nAssinatura realizada com sucesso!`,
+            message: `${displayName}\nSubscrição realizada com sucesso!`,
             color: "#4CAF50",
             imageSource: { uri: imageSource },
             onClose: onResumeCamera,

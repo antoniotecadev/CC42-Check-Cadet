@@ -3,6 +3,8 @@ import { subscription } from "@/repository/mealRepository";
 import { decrypt } from "./AESUtil";
 
 export interface BarcodeResultParams {
+    mealQuantity?: number;
+    mealPortion?: "first" | "second";
     barcodeResult?: string;
     eventId?: string;
     mealId?: string;
@@ -26,6 +28,8 @@ export interface BarcodeResultParams {
 }
 
 export async function handleQrCode({
+    mealQuantity,
+    mealPortion,
     barcodeResult,
     eventId,
     mealId,
@@ -105,6 +109,8 @@ export async function handleQrCode({
             const mealId = partsQrCode[0];
             const userStaffId = partsQrCode[1];
             subscription({
+                mealQuantity: 1,
+                mealPortion: "first",
                 mealId,
                 userStaffId,
                 registeredBy: userStaffId,
@@ -137,6 +143,8 @@ export async function handleQrCode({
             const userCampusId = partsQrCode[4];
             const userImageUrl = partsQrCode[5];
             subscription({
+                mealQuantity,
+                mealPortion,
                 mealId,
                 userStaffId: undefined, // Não é necessário na lista de assinaturas
                 registeredBy: userStaffId,
