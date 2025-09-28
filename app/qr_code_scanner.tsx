@@ -4,7 +4,7 @@ import { handleQrCode } from "@/utility/QRCodeUtil";
 import { useAudioPlayer } from "expo-audio";
 import { CameraType, CameraView, useCameraPermissions } from "expo-camera";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useCallback, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import {
     ActivityIndicator,
     Platform,
@@ -50,57 +50,47 @@ export default function QrCodeScanner() {
     const scannedRef = useRef(false);
     const router = useRouter();
 
-    const handleBarCodeScanned = useCallback(
-        async (result: { data: string }) => {
-            if (scannedRef.current) return;
-            scannedRef.current = true; // bloqueia imediatamente
+    const handleBarCodeScanned = async (result: { data: string }) => {
+        if (scannedRef.current) return;
+        scannedRef.current = true; // bloqueia imediatamente
 
-            // Beep sound
-            player.play();
-            Vibration.vibrate(100);
-
-            const barcode = result.data;
-            await handleQrCode({
-                mealQuantity,
-                mealPortion,
-                barcodeResult: barcode,
-                eventId: eventId,
-                mealId: mealId,
-                userId: user?.id,
-                displayName: user?.displayname,
-                cursusId: user?.cursusId,
-                campusId: user?.campusId,
-                imageSource: user?.image,
-                setLoading: (loading) => setLoading(loading),
-                showModal: ({
+        // Beep sound
+        player.play();
+        Vibration.vibrate(100);
+        const barcode = result.data;
+        await handleQrCode({
+            mealQuantity,
+            mealPortion,
+            barcodeResult: barcode,
+            eventId: eventId,
+            mealId: mealId,
+            userId: user?.id,
+            displayName: user?.displayname,
+            cursusId: user?.cursusId,
+            campusId: user?.campusId,
+            imageSource: user?.image,
+            setLoading: (loading) => setLoading(loading),
+            showModal: ({ title, message, color, imageSource, onClose }) => {
+                setModalVisible(true);
+                setModalData({
                     title,
                     message,
                     color,
                     imageSource,
                     onClose,
-                }) => {
-                    setModalVisible(true);
-                    setModalData({
-                        title,
-                        message,
-                        color,
-                        imageSource,
-                        onClose,
-                    });
-                },
-                onResumeCamera: () => {
-                    if (modalData.title === "Sucesso") {
-                        router.back();
-                    } else {
-                        player.seekTo(0); // Reinicia o som
-                        setModalVisible(false);
-                        scannedRef.current = false;
-                    }
-                },
-            });
-        },
-        []
-    );
+                });
+            },
+            onResumeCamera: () => {
+                if (modalData.title === "Sucesso") {
+                    router.back();
+                } else {
+                    player.seekTo(0); // Reinicia o som
+                    setModalVisible(false);
+                    scannedRef.current = false;
+                }
+            },
+        });
+    };
 
     if (!permission) {
         return <View />;
