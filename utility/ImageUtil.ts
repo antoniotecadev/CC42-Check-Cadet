@@ -6,10 +6,18 @@ import {
 } from "expo-image-manipulator";
 import { useEffect, useState } from "react";
 
-
 export function useBase64Image() {
-    const IMAGE = Asset.fromModule(require("@/assets/images/logo_42_luanda.png"));
-    const context = useImageManipulator(IMAGE.uri);
+    const downloadAsync = async () => {
+        await IMAGE.downloadAsync();
+    };
+
+    const IMAGE = Asset.fromModule(
+        require("@/assets/images/logo_42_luanda.png")
+    );
+
+    downloadAsync();
+    const localUri = IMAGE.localUri ?? IMAGE.uri;
+    const context = useImageManipulator(localUri);
     const [base64Uri, setBase64Uri] = useState<string | null>(null);
 
     useEffect(() => {
