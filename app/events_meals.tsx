@@ -215,6 +215,15 @@ export default function EventUsersScreen() {
 
     // Search query for name or login
     const [searchQuery, setSearchQuery] = useState<string>("");
+    // Debounced query to avoid excessive re-renders while typing
+    const [debouncedQuery, setDebouncedQuery] = useState<string>("");
+
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedQuery(searchQuery);
+        }, 250); // 250ms debounce
+        return () => clearTimeout(handler);
+    }, [searchQuery]);
 
     const userFilter = useMemo(() => {
         // base filtering by presence/subscription status
@@ -238,14 +247,14 @@ export default function EventUsersScreen() {
         }
 
         // apply text search on displayname or login (case-insensitive)
-        const q = (searchQuery || "").trim().toLowerCase();
+        const q = (debouncedQuery || "").trim().toLowerCase();
         if (!q) return base;
         return base.filter((u) => {
             const name = (u.displayname || "").toLowerCase();
             const login = (u.login || "").toLowerCase();
             return name.includes(q) || login.includes(q);
         });
-    }, [filter, userPresenceSubscribed, searchQuery]);
+    }, [filter, userPresenceSubscribed, debouncedQuery]);
 
     async function handlePrintPdf() {
         const html = generateAttendanceHtml({
