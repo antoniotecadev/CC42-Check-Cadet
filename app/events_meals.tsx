@@ -4,7 +4,7 @@ import { ThemedView } from "@/components/ThemedView";
 import EventUserItem from "@/components/ui/EventUserItem";
 import useItemStorage from "@/hooks/storage/useItemStorage";
 import { useColorScheme } from "@/hooks/useColorScheme";
-import { useIds } from "@/hooks/useEventAttendanceIds";
+import { useUser } from "@/hooks/useUsers";
 import {
     optimizeUsers,
     UserPresence,
@@ -51,6 +51,7 @@ export default function EventUsersScreen() {
         eventDate,
         mealId,
         mealName,
+        quantity,
         mealCreatedDate,
     } = useLocalSearchParams<{
         type: string;
@@ -62,11 +63,12 @@ export default function EventUsersScreen() {
         eventDate: string;
         mealId: string;
         mealName: string;
+        quantity?: string;
         mealCreatedDate: string;
     }>();
     const typeId = type === EVENTS ? eventId : mealId;
     const endPoint = type === EVENTS ? "participants" : "subscriptions";
-    const ids = useIds(campusId, cursusId, type, typeId, endPoint);
+    const user = useUser(campusId, cursusId, type, typeId, endPoint);
     const {
         data,
         isLoading,
@@ -110,7 +112,7 @@ export default function EventUsersScreen() {
         numberUnSubscribed: number = 0;
 
     if (type === EVENTS) {
-        userAttendanceList = optimizeUsers(users, ids, "events");
+        userAttendanceList = optimizeUsers(users, user.ids, "events");
         // Contagem de presentes e ausentes
         const counts = userAttendanceList.reduce(
             (acc, u) => {
@@ -123,7 +125,7 @@ export default function EventUsersScreen() {
         numberPresents = counts.isPresent;
         numberAbsents = counts.isAbsents;
     } else {
-        userSubscriptionsList = optimizeUsers(users, ids, "meals");
+        userSubscriptionsList = optimizeUsers(users, user.ids, "meals");
         // Contagem de asinados e não assinados
         const counts = userSubscriptionsList.reduce(
             (acc, u) => {
@@ -464,7 +466,7 @@ export default function EventUsersScreen() {
                     {/* filter menu moved to end to ensure overlay */}
                 </View>
                 {/* Chips de presentes e ausentes - agora absolutos no topo direito */}
-                <View style={styles.chipAbsoluteRow}>
+                <View style={styles.chipAbsoluteColumn}>
                     <View style={[styles.chip, styles.chipPresent]}>
                         <MaterialCommunityIcons
                             name="account-check"
@@ -487,6 +489,43 @@ export default function EventUsersScreen() {
                             {numberAbsentsORUnSubscribed}
                         </Text>
                     </View>
+                    {mealId && (
+                        <>
+                            <View style={[styles.chip, styles.chipReceived]}>
+                                <MaterialCommunityIcons
+                                    name="account-check"
+                                    size={18}
+                                    color={colorscheme}
+                                    style={{ marginRight: 4 }}
+                                />
+                                <Text
+                                    style={[
+                                        styles.chipText,
+                                        { color: colorscheme },
+                                    ]}
+                                >
+                                    {user.quantityReceived ?? 0}
+                                </Text>
+                            </View>
+                            <View style={[styles.chip, styles.chipNotReceived]}>
+                                <MaterialCommunityIcons
+                                    name="account-remove"
+                                    size={18}
+                                    color={colorscheme}
+                                    style={{ marginRight: 4 }}
+                                />
+                                <Text
+                                    style={[
+                                        styles.chipText,
+                                        { color: colorscheme },
+                                    ]}
+                                >
+                                    {Number(quantity) -
+                                        (user.quantityReceived ?? 0)}
+                                </Text>
+                            </View>
+                        </>
+                    )}
                 </View>
                 <FlashList
                     data={userFilter}
@@ -745,7 +784,7 @@ const styles = StyleSheet.create({
     fabRight: {
         alignSelf: "flex-end",
     },
-    chipAbsoluteRow: {
+    chipAbsoluteColumn: {
         position: "absolute",
         top: 65,
         right: 16,
@@ -777,6 +816,12 @@ const styles = StyleSheet.create({
     },
     chipAbsent: {
         backgroundColor: "#e74c3c",
+    },
+    chipReceived: {
+        backgroundColor: "#007AFF",
+    },
+    chipNotReceived: {
+        backgroundColor: "#FDD835",
     },
     chipText: {
         fontWeight: "bold",

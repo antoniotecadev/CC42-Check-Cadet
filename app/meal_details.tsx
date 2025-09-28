@@ -261,6 +261,7 @@ export default function MealDetailScreen() {
                                             campusId: campusId,
                                             cursusId: cursusId,
                                             mealName: meal.name,
+                                            quantity: meal.quantity,
                                             mealCreatedDate: meal.createdDate,
                                         },
                                     });
