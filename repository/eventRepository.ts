@@ -133,7 +133,7 @@ export async function markAttendance({
             setLoading(false);
             showModal({
                 title: "Aviso!",
-                message: `${displayName}\nVocê já marcou presença neste evento.`,
+                message: `${displayName}\nA presença já foi marcada neste evento.`,
                 color: "#FDD835",
                 imageSource: { uri: imageSource },
                 onClose: onResumeCamera,
