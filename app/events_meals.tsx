@@ -27,6 +27,7 @@ import {
     Platform,
     StyleSheet,
     Text,
+    TextInput,
     TouchableOpacity,
     View,
 } from "react-native";
@@ -212,20 +213,39 @@ export default function EventUsersScreen() {
 
     const [filter, setFilter] = useState<Filter>("Filtrar todos");
 
+    // Search query for name or login
+    const [searchQuery, setSearchQuery] = useState<string>("");
+
     const userFilter = useMemo(() => {
+        // base filtering by presence/subscription status
+        let base = userPresenceSubscribed;
         switch (filter) {
-            case "Filtrar todos":
-                return userPresenceSubscribed;
             case "Filtrar presentes":
-                return userPresenceSubscribed.filter((u) => u.isPresent);
+                base = userPresenceSubscribed.filter((u) => u.isPresent);
+                break;
             case "Filtrar ausentes":
-                return userPresenceSubscribed.filter((u) => !u.isPresent);
+                base = userPresenceSubscribed.filter((u) => !u.isPresent);
+                break;
             case "Filtrar assinados":
-                return userPresenceSubscribed.filter((u) => u.isSubscribed);
+                base = userPresenceSubscribed.filter((u) => u.isSubscribed);
+                break;
             case "Filtrar não assinados":
-                return userPresenceSubscribed.filter((u) => !u.isSubscribed);
+                base = userPresenceSubscribed.filter((u) => !u.isSubscribed);
+                break;
+            case "Filtrar todos":
+            default:
+                base = userPresenceSubscribed;
         }
-    }, [filter, userPresenceSubscribed]);
+
+        // apply text search on displayname or login (case-insensitive)
+        const q = (searchQuery || "").trim().toLowerCase();
+        if (!q) return base;
+        return base.filter((u) => {
+            const name = (u.displayname || "").toLowerCase();
+            const login = (u.login || "").toLowerCase();
+            return name.includes(q) || login.includes(q);
+        });
+    }, [filter, userPresenceSubscribed, searchQuery]);
 
     async function handlePrintPdf() {
         const html = generateAttendanceHtml({
@@ -381,6 +401,18 @@ export default function EventUsersScreen() {
                         style={{ marginTop: 16 }}
                     />
                 )}
+                {/* Search input */}
+                <View style={styles.searchContainer}>
+                    <TextInput
+                        placeholder={"Procurar por nome ou login..."}
+                        placeholderTextColor={colorScheme === "dark" ? "#aaa" : "#666"}
+                        value={searchQuery}
+                        onChangeText={setSearchQuery}
+                        style={[styles.searchInput, { backgroundColor: colorScheme === "dark" ? "#222" : "#fff", color: colorScheme === "dark" ? "#fff" : "#000" }]}
+                        returnKeyType="search"
+                        clearButtonMode="while-editing"
+                    />
+                </View>
                 {/* Chips de presentes e ausentes - agora absolutos no topo direito */}
                 <View style={styles.chipAbsoluteRow}>
                     <View style={[styles.chip, styles.chipPresent]}>
@@ -551,9 +583,9 @@ const styles = StyleSheet.create({
     },
     chipAbsoluteRow: {
         position: "absolute",
-        top: 32,
+        top: 65,
         right: 16,
-        flexDirection: "row",
+        flexDirection: "column",
         alignItems: "center",
         gap: 12,
         zIndex: 10,
@@ -591,5 +623,18 @@ const styles = StyleSheet.create({
         maxWidth: 600, // limite superior
         minWidth: 480, // limite inferior (opcional)
         marginHorizontal: "auto", // centraliza na web (usando style prop em web pura)
+    },
+    searchContainer: {
+        paddingHorizontal: 16,
+        paddingTop: 12,
+        paddingBottom: 6,
+    },
+    searchInput: {
+        height: 40,
+        borderRadius: 8,
+        paddingHorizontal: 12,
+        fontSize: 14,
+        borderWidth: 1,
+        borderColor: "rgba(0,0,0,0.08)",
     },
 });
