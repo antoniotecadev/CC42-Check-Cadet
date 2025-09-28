@@ -109,11 +109,11 @@ export default function RatingSection({
                                 ? "Toque para avaliar"
                                 : type === "events"
                                 ? "Ausente"
-                                : "Não assinado"}
+                                : "Não subscrito"}
                         </Text>
                     ) : (
                         <Text style={[styles.tapToRate, { color: "green" }]}>
-                            {type === "events" ? "Presente" : "Assinado"}
+                            {type === "events" ? "Presente" : "Subscrito"}
                         </Text>
                     )}
                     <View style={styles.starsRowSmall}>

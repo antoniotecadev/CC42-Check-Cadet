@@ -1,7 +1,7 @@
 import { useColorCoalition } from "@/components/ColorCoalitionContext";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
-import EventUserItem from "@/components/ui/EventUserItem";
+import EventMealUserItem from "@/components/ui/EventMealUserItem";
 import useItemStorage from "@/hooks/storage/useItemStorage";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { useUser } from "@/hooks/useUsers";
@@ -126,7 +126,7 @@ export default function EventUsersScreen() {
         numberAbsents = counts.isAbsents;
     } else {
         userSubscriptionsList = optimizeUsers(users, user.ids, "meals");
-        // Contagem de asinados e não assinados
+    
         const counts = userSubscriptionsList.reduce(
             (acc, u) => {
                 if (u.isSubscribed) acc.subscribed++;
@@ -143,7 +143,7 @@ export default function EventUsersScreen() {
     const title =
         type === EVENTS
             ? ["Lista de Presença", eventName]
-            : ["Lista de Assinaturas", mealName];
+            : ["Lista de Subscrições", mealName];
     const numberPresenceORSubscribed: number =
         type === EVENTS ? numberPresents : numberSubscribed;
     const numberAbsentsORUnSubscribed =
@@ -154,15 +154,15 @@ export default function EventUsersScreen() {
     // Carrega todas as páginas automaticamente até não ter mais
     React.useEffect(() => {
         if (!isLoading && hasNextPage && !isFetchingNextPage) {
-            fetchNextPage();
+            fetchNextPage();  
         }
     }, [isLoading, hasNextPage, isFetchingNextPage, fetchNextPage]);
-
-    async function handleExportExcel() {
+ 
+    async function handleExportExcel() { 
         // Monta os dados CSV
         const header = `Nº;Nome Completo;Login; ${
             type === EVENTS ? "Presença" : "Assinatura"
-        }\n`;
+        }\n`; 
         const rows = userPresenceSubscribed
             .map(
                 (u, i) =>
@@ -210,13 +210,13 @@ export default function EventUsersScreen() {
         | "Filtrar todos"
         | "Filtrar presentes"
         | "Filtrar ausentes"
-        | "Filtrar assinados"
-        | "Filtrar não assinados";
+        | "Filtrar subscritos"
+        | "Filtrar não subscritos";
 
     const [filter, setFilter] = useState<Filter>("Filtrar todos");
 
     // Search query for name or login
-    const [searchQuery, setSearchQuery] = useState<string>("");
+    const [searchQuery, setSearchQuery] = useState<string>(""); 
     // Debounced query to avoid excessive re-renders while typing
     const [debouncedQuery, setDebouncedQuery] = useState<string>("");
 
@@ -241,10 +241,10 @@ export default function EventUsersScreen() {
             case "Filtrar ausentes":
                 base = userPresenceSubscribed.filter((u) => !u.isPresent);
                 break;
-            case "Filtrar assinados":
+            case "Filtrar subscritos":
                 base = userPresenceSubscribed.filter((u) => u.isSubscribed);
                 break;
-            case "Filtrar não assinados":
+            case "Filtrar não subscritos":
                 base = userPresenceSubscribed.filter((u) => !u.isSubscribed);
                 break;
             case "Filtrar todos":
@@ -319,10 +319,10 @@ export default function EventUsersScreen() {
         ActionSheetIOS.showActionSheetWithOptions(
             {
                 options: [
-                    type === EVENTS ? "Filtrar presentes" : "Filtrar assinados",
+                    type === EVENTS ? "Filtrar presentes" : "Filtrar subscritos",
                     type === EVENTS
                         ? "Filtrar ausentes"
-                        : "Filtrar não assinados",
+                        : "Filtrar não subscritos",
                     "Filtrar todos",
                     "Cancelar",
                 ],
@@ -333,11 +333,11 @@ export default function EventUsersScreen() {
                 if (selectedIndex === 0)
                     type === EVENTS
                         ? setFilter("Filtrar presentes")
-                        : setFilter("Filtrar assinados");
+                        : setFilter("Filtrar subscritos");
                 if (selectedIndex === 1)
                     type === EVENTS
                         ? setFilter("Filtrar ausentes")
-                        : setFilter("Filtrar não assinados");
+                        : setFilter("Filtrar não subscritos");
                 if (selectedIndex === 2) setFilter("Filtrar todos");
             }
         );
@@ -530,7 +530,7 @@ export default function EventUsersScreen() {
                 <FlashList
                     data={userFilter}
                     renderItem={({ item }) => (
-                        <EventUserItem
+                        <EventMealUserItem
                             login={item.login}
                             colorscheme={colorscheme}
                             displayName={item.displayname}
@@ -624,7 +624,7 @@ export default function EventUsersScreen() {
                                 setFilter(
                                     type === EVENTS
                                         ? "Filtrar presentes"
-                                        : "Filtrar assinados"
+                                        : "Filtrar subscritos"
                                 );
                             }}
                             style={styles.webMenuItem}
@@ -632,7 +632,7 @@ export default function EventUsersScreen() {
                             <ThemedText>
                                 {type === EVENTS
                                     ? "Filtrar presentes"
-                                    : "Filtrar assinados"}
+                                    : "Filtrar subscritos"}
                             </ThemedText>
                         </TouchableOpacity>
                         <TouchableOpacity
@@ -641,7 +641,7 @@ export default function EventUsersScreen() {
                                 setFilter(
                                     type === EVENTS
                                         ? "Filtrar ausentes"
-                                        : "Filtrar não assinados"
+                                        : "Filtrar não subscritos"
                                 );
                             }}
                             style={styles.webMenuItem}
@@ -649,7 +649,7 @@ export default function EventUsersScreen() {
                             <ThemedText>
                                 {type === EVENTS
                                     ? "Filtrar ausentes"
-                                    : "Filtrar não assinados"}
+                                    : "Filtrar não subscritos"}
                             </ThemedText>
                         </TouchableOpacity>
                         <TouchableOpacity
