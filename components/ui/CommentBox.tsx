@@ -104,7 +104,7 @@ export default function CommentBox({
             keyboardVerticalOffset={80}
             style={{ flex: 0 }}
         >
-            <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+            {Platform.OS === "web" ? (
                 <View style={containerStyle}>
                     <View style={styles.card}>
                         <Text style={styles.title}>Comentário</Text>
@@ -158,7 +158,65 @@ export default function CommentBox({
                         )}
                     </View>
                 </View>
-            </TouchableWithoutFeedback>
+            ) : (
+                <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+                    <View style={containerStyle}>
+                        <View style={styles.card}>
+                            <Text style={styles.title}>Comentário</Text>
+                            {loadingComment ? (
+                                <ActivityIndicator
+                                    style={{ alignSelf: "center" }}
+                                />
+                            ) : (
+                                <>
+                                    <TextInput
+                                        value={comment}
+                                        onChangeText={(t) => {
+                                            if (t.length <= MAX_LEN && !saved)
+                                                setComment(t);
+                                        }}
+                                        placeholder="Escreva seu comentário"
+                                        style={[
+                                            styles.input,
+                                            saved ? styles.inputDisabled : null,
+                                        ]}
+                                        maxLength={MAX_LEN}
+                                        editable={!saved}
+                                    />
+                                    <Text style={styles.counter}>
+                                        {String(comment?.length ?? 0)}/{MAX_LEN}
+                                    </Text>
+                                    {error ? (
+                                        <Text style={styles.error}>{error}</Text>
+                                    ) : null}
+                                    {!saved && (
+                                        <TouchableOpacity
+                                            style={[
+                                                styles.button,
+                                                { backgroundColor: color },
+                                            ]}
+                                            disabled={loading}
+                                            onPress={handleSend}
+                                        >
+                                            {loading ? (
+                                                <Text style={{ color: "#fff" }}>
+                                                    Enviando comentário...
+                                                </Text>
+                                            ) : (
+                                                <Text
+                                                    style={styles.buttonText}
+                                                >
+                                                    COMENTAR
+                                                </Text>
+                                            )}
+                                        </TouchableOpacity>
+                                    )}
+                                </>
+                            )}
+                        </View>
+                    </View>
+                </TouchableWithoutFeedback>
+            )}
         </KeyboardAvoidingView>
     );
 }
