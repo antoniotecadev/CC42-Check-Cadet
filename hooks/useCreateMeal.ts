@@ -118,6 +118,26 @@ async function prepareFileForUpload(uri: string) {
     }
 }
 
+// Formata uma Date para o formato: "September 27, 2025 at 07:31 AM"
+function formatDateTime(date: Date) {
+    try {
+        const datePart = date.toLocaleDateString("en-US", {
+            month: "long",
+            day: "numeric",
+            year: "numeric",
+        });
+        const timePart = date.toLocaleTimeString("en-US", {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true,
+        });
+        return `${datePart} at ${timePart}`;
+    } catch (e) {
+        // Fallback para ISO se algo falhar
+        return date.toISOString();
+    }
+}
+
 export function useCreateMeal() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -229,7 +249,7 @@ export function useCreateMeal() {
                 `campus/${campusId}/cursus/${cursusId}/meals`
             );
             const mealId = push(mealsRef).key;
-            const createdDate = new Date().toISOString();
+            const createdDate = formatDateTime(new Date());
             const mealData = {
                 id: mealId,
                 name: meal.name,
@@ -345,7 +365,7 @@ export function useCreateMeal() {
                     oldImageUrl
                 );
             }
-            const updatedDate = new Date().toISOString();
+            const updatedDate = formatDateTime(new Date());
             const updates: any = {
                 name: meal.name,
                 type: meal.type,
