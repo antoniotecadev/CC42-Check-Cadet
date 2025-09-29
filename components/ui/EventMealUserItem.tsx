@@ -11,6 +11,7 @@ interface EventMealUserItemProps {
     type: string;
     isPresent?: boolean;
     isSusbscribed?: boolean;
+    isSecondPortion?: boolean;
 }
 
 const blurhash =
@@ -25,6 +26,7 @@ export const EventMealUserItem: React.FC<EventMealUserItemProps> = ({
     type,
     isPresent,
     isSusbscribed,
+    isSecondPortion,
 }) => {
     return (
         <TouchableOpacity
@@ -57,6 +59,8 @@ export const EventMealUserItem: React.FC<EventMealUserItemProps> = ({
                             ? isPresent
                                 ? "Presente"
                                 : "Ausente"
+                            : isSecondPortion
+                            ? "Segunda via"
                             : isSusbscribed
                             ? "Subscrito"
                             : "Não subscrito"}

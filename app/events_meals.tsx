@@ -126,7 +126,7 @@ export default function EventUsersScreen() {
         numberAbsents = counts.isAbsents;
     } else {
         userSubscriptionsList = optimizeUsers(users, user.ids, "meals");
-    
+
         const counts = userSubscriptionsList.reduce(
             (acc, u) => {
                 if (u.isSubscribed) acc.subscribed++;
@@ -154,15 +154,15 @@ export default function EventUsersScreen() {
     // Carrega todas as páginas automaticamente até não ter mais
     React.useEffect(() => {
         if (!isLoading && hasNextPage && !isFetchingNextPage) {
-            fetchNextPage();  
+            fetchNextPage();
         }
     }, [isLoading, hasNextPage, isFetchingNextPage, fetchNextPage]);
- 
-    async function handleExportExcel() { 
+
+    async function handleExportExcel() {
         // Monta os dados CSV
         const header = `Nº;Nome Completo;Login; ${
             type === EVENTS ? "Presença" : "Assinatura"
-        }\n`; 
+        }\n`;
         const rows = userPresenceSubscribed
             .map(
                 (u, i) =>
@@ -211,12 +211,13 @@ export default function EventUsersScreen() {
         | "Filtrar presentes"
         | "Filtrar ausentes"
         | "Filtrar subscritos"
-        | "Filtrar não subscritos";
+        | "Filtrar não subscritos"
+        | "Filtrar segunda via";
 
     const [filter, setFilter] = useState<Filter>("Filtrar todos");
 
     // Search query for name or login
-    const [searchQuery, setSearchQuery] = useState<string>(""); 
+    const [searchQuery, setSearchQuery] = useState<string>("");
     // Debounced query to avoid excessive re-renders while typing
     const [debouncedQuery, setDebouncedQuery] = useState<string>("");
 
@@ -231,8 +232,9 @@ export default function EventUsersScreen() {
         return () => clearTimeout(handler);
     }, [searchQuery]);
 
+    let filterSecondPortion: boolean = false;
     const userFilter = useMemo(() => {
-        // base filtering by presence/subscription status
+        filterSecondPortion = false;
         let base = userPresenceSubscribed;
         switch (filter) {
             case "Filtrar presentes":
@@ -243,6 +245,15 @@ export default function EventUsersScreen() {
                 break;
             case "Filtrar subscritos":
                 base = userPresenceSubscribed.filter((u) => u.isSubscribed);
+                break;
+            case "Filtrar segunda via":
+                // user.ids contains the raw subscription keys from Firebase
+                // subscriptions for second portion are stored with a leading '-'
+                const secondIds = new Set((user?.ids || []).map(String));
+                base = userPresenceSubscribed.filter((u) =>
+                    secondIds.has(`-${String(u.id)}`)
+                );
+                filterSecondPortion = true;
                 break;
             case "Filtrar não subscritos":
                 base = userPresenceSubscribed.filter((u) => !u.isSubscribed);
@@ -319,14 +330,18 @@ export default function EventUsersScreen() {
         ActionSheetIOS.showActionSheetWithOptions(
             {
                 options: [
-                    type === EVENTS ? "Filtrar presentes" : "Filtrar subscritos",
+                    type === EVENTS
+                        ? "Filtrar presentes"
+                        : "Filtrar subscritos",
                     type === EVENTS
                         ? "Filtrar ausentes"
                         : "Filtrar não subscritos",
+                    // add second portion filter only for meals
+                    ...(type === EVENTS ? [] : ["Filtrar segunda via"]),
                     "Filtrar todos",
                     "Cancelar",
                 ],
-                cancelButtonIndex: 3,
+                cancelButtonIndex: type === EVENTS ? 3 : 4,
                 userInterfaceStyle: "dark",
             },
             (selectedIndex) => {
@@ -338,7 +353,13 @@ export default function EventUsersScreen() {
                     type === EVENTS
                         ? setFilter("Filtrar ausentes")
                         : setFilter("Filtrar não subscritos");
-                if (selectedIndex === 2) setFilter("Filtrar todos");
+                if (type !== EVENTS && selectedIndex === 2)
+                    setFilter("Filtrar segunda via");
+                if (
+                    (type === EVENTS && selectedIndex === 2) ||
+                    (type !== EVENTS && selectedIndex === 3)
+                )
+                    setFilter("Filtrar todos");
             }
         );
     };
@@ -388,6 +409,7 @@ export default function EventUsersScreen() {
     }, [navigation, staff, colorScheme, title]);
 
     const onRefresh = useCallback(async () => {
+        filterSecondPortion = false;
         setRefreshing(true);
         await refetch();
         setRefreshing(false);
@@ -540,6 +562,7 @@ export default function EventUsersScreen() {
                             type={type}
                             isPresent={item.isPresent}
                             isSusbscribed={item.isSubscribed}
+                            isSecondPortion={filterSecondPortion}
                         />
                     )}
                     // onEndReached={() => { // option - if use remove function React.useEffectin line 72
@@ -652,6 +675,18 @@ export default function EventUsersScreen() {
                                     : "Filtrar não subscritos"}
                             </ThemedText>
                         </TouchableOpacity>
+                        {/* Apenas Segunda via - show only for meals on web as well */}
+                        {type !== EVENTS && (
+                            <TouchableOpacity
+                                onPress={() => {
+                                    setShowWebFilterMenu(false);
+                                    setFilter("Filtrar segunda via");
+                                }}
+                                style={styles.webMenuItem}
+                            >
+                                <ThemedText>Filtrar segunda via</ThemedText>
+                            </TouchableOpacity>
+                        )}
                         <TouchableOpacity
                             onPress={() => {
                                 setShowWebFilterMenu(false);
