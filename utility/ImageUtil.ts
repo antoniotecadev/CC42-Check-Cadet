@@ -1,42 +1,43 @@
 import { Asset } from "expo-asset";
-import {
-    ImageManipulator,
-    SaveFormat,
-    useImageManipulator,
-} from "expo-image-manipulator";
+import { ImageManipulator, manipulateAsync, SaveFormat } from "expo-image-manipulator";
 import { useEffect, useState } from "react";
 
 export function useBase64Image() {
-    const downloadAsync = async () => {
-        await IMAGE.downloadAsync();
-    };
-
-    const IMAGE = Asset.fromModule(
-        require("@/assets/images/logo_42_luanda.png")
-    );
-
-    downloadAsync();
-    const localUri = IMAGE.localUri ?? IMAGE.uri;
-    const context = useImageManipulator(localUri);
     const [base64Uri, setBase64Uri] = useState<string | null>(null);
 
     useEffect(() => {
+        let mounted = true;
+
         async function generateBase64() {
             try {
+                const IMAGE = Asset.fromModule(
+                    require("@/assets/images/logo_42_luanda.png")
+                );
+                // Ensure the asset is downloaded to a local file URI
                 await IMAGE.downloadAsync();
-                const manipulatedImage = await context.renderAsync();
-                const result = await manipulatedImage.saveAsync({
+                const localUri = IMAGE.localUri ?? IMAGE.uri;
+
+                // Use manipulateAsync directly; no actions needed to get base64
+                const result = await manipulateAsync(localUri, [], {
                     base64: true,
+                    format: SaveFormat.PNG,
                 });
-                setBase64Uri(`data:image/png;base64,${result.base64}`);
+
+                if (mounted) {
+                    setBase64Uri(result.base64 ? `data:image/png;base64,${result.base64}` : null);
+                }
             } catch (error) {
-                console.error("Error:", error);
-                setBase64Uri(null);
+                console.error("Error generating base64 image:", error);
+                if (mounted) setBase64Uri(null);
             }
         }
 
         generateBase64();
-    }, [context]);
+
+        return () => {
+            mounted = false;
+        };
+    }, []);
 
     return base64Uri;
 }
