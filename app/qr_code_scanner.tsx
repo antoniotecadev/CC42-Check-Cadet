@@ -282,11 +282,13 @@ const styles = StyleSheet.create({
         color: "#fff",
         textAlign: "center",
         marginBottom: 8,
+        marginStart: Platform.OS === "web" ? -50 : 0,
     },
     quantityRow: {
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "center",
+        marginStart: Platform.OS === "web" ? -50 : 0,
     },
     qtyButton: {
         width: 50,
