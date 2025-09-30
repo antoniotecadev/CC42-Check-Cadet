@@ -13,6 +13,12 @@ export default async function handler(req, res) {
     requestedHeaders || "Content-Type, Authorization"
   );
 
+  // Desabilitar cache do servidor/CDN
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
+  res.setHeader("Surrogate-Control", "no-store");
+
   if (req.method === "OPTIONS") {
     return res.status(200).end();
   }
@@ -75,6 +81,11 @@ export default async function handler(req, res) {
     if (contentType) res.setHeader("Content-Type", contentType);
     res.setHeader("Access-Control-Allow-Origin", origin);
     res.setHeader("Vary", "Origin");
+    
+    // Garantir que a resposta não seja cacheada
+    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+    res.setHeader("Pragma", "no-cache");
+    res.setHeader("Expires", "0");
 
     const arrayBuffer = await fetchRes.arrayBuffer();
     res.status(fetchRes.status).send(Buffer.from(arrayBuffer));

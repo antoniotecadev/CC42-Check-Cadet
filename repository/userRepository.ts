@@ -118,7 +118,9 @@ export function useUsersPaginated(
     let res;
     const { api } = useApiInterceptors();
     return useInfiniteQuery({
-        queryKey: type === "events" ? ["event-users", eventId] : ["meal-users"], // Chave única para identificar a query
+        queryKey: type === "events" 
+            ? ["event-users", eventId] 
+            : ["cursus-users", cursusId, campusId],
         queryFn: async ({ pageParam = 1 }) => {
             // Função que busca os usuários
             type === "events"
