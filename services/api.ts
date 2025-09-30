@@ -10,7 +10,7 @@ export default function useApiInterceptors() {
 
     const isWeb = Platform.OS === "web";
     const baseURL = isWeb
-        ? "https://check-cadet.vercel.app/api/42"
+        ? "https://check-cadet.vercel.app/api/42-proxy?path="
         : process.env.EXPO_PUBLIC_API_URL;
 
     const api = axios.create({
