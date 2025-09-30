@@ -21,6 +21,7 @@ type Props = {
     type: "meals" | "events" | string;
     typeId?: string | number | undefined | null;
     containerStyle?: any;
+    integrated?: boolean;
 };
 
 const MAX_LEN = 42;
@@ -32,6 +33,7 @@ export default function CommentBox({
     type,
     typeId,
     containerStyle,
+    integrated = false,
 }: Props) {
     const { color } = useColorCoalition();
 
@@ -106,8 +108,9 @@ export default function CommentBox({
         >
             {Platform.OS === "web" ? (
                 <View style={containerStyle}>
-                    <View style={styles.card}>
-                        <Text style={styles.title}>Comentário</Text>
+                    <View style={integrated ? styles.cardIntegrated : styles.card}>
+                        {!integrated && <Text style={styles.title}>Comentário</Text>}
+                        {integrated && <Text style={styles.titleIntegrated}>Deixe seu comentário:</Text>}
                         {loadingComment ? (
                             <ActivityIndicator
                                 style={{ alignSelf: "center" }}
@@ -122,11 +125,13 @@ export default function CommentBox({
                                     }}
                                     placeholder="Escreva seu comentário"
                                     style={[
-                                        styles.input,
+                                        integrated ? styles.inputIntegrated : styles.input,
                                         saved ? styles.inputDisabled : null,
                                     ]}
                                     maxLength={MAX_LEN}
                                     editable={!saved}
+                                    multiline={integrated}
+                                    numberOfLines={integrated ? 3 : 1}
                                 />
                                 <Text style={styles.counter}>
                                     {String(comment?.length ?? 0)}/{MAX_LEN}
@@ -137,7 +142,7 @@ export default function CommentBox({
                                 {!saved && (
                                     <TouchableOpacity
                                         style={[
-                                            styles.button,
+                                            integrated ? styles.buttonIntegrated : styles.button,
                                             { backgroundColor: color },
                                         ]}
                                         disabled={loading}
@@ -154,6 +159,13 @@ export default function CommentBox({
                                         )}
                                     </TouchableOpacity>
                                 )}
+                                {saved && (
+                                    <View style={styles.savedIndicator}>
+                                        <Text style={styles.savedText}>
+                                            ✓ Comentário salvo
+                                        </Text>
+                                    </View>
+                                )}
                             </>
                         )}
                     </View>
@@ -161,8 +173,9 @@ export default function CommentBox({
             ) : (
                 <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
                     <View style={containerStyle}>
-                        <View style={styles.card}>
-                            <Text style={styles.title}>Comentário</Text>
+                        <View style={integrated ? styles.cardIntegrated : styles.card}>
+                            {!integrated && <Text style={styles.title}>Comentário</Text>}
+                            {integrated && <Text style={styles.titleIntegrated}>Deixe seu comentário:</Text>}
                             {loadingComment ? (
                                 <ActivityIndicator
                                     style={{ alignSelf: "center" }}
@@ -177,11 +190,13 @@ export default function CommentBox({
                                         }}
                                         placeholder="Escreva seu comentário"
                                         style={[
-                                            styles.input,
+                                            integrated ? styles.inputIntegrated : styles.input,
                                             saved ? styles.inputDisabled : null,
                                         ]}
                                         maxLength={MAX_LEN}
                                         editable={!saved}
+                                        multiline={integrated}
+                                        numberOfLines={integrated ? 3 : 1}
                                     />
                                     <Text style={styles.counter}>
                                         {String(comment?.length ?? 0)}/{MAX_LEN}
@@ -192,7 +207,7 @@ export default function CommentBox({
                                     {!saved && (
                                         <TouchableOpacity
                                             style={[
-                                                styles.button,
+                                                integrated ? styles.buttonIntegrated : styles.button,
                                                 { backgroundColor: color },
                                             ]}
                                             disabled={loading}
@@ -211,6 +226,13 @@ export default function CommentBox({
                                             )}
                                         </TouchableOpacity>
                                     )}
+                                    {saved && (
+                                        <View style={styles.savedIndicator}>
+                                            <Text style={styles.savedText}>
+                                                ✓ Comentário salvo
+                                            </Text>
+                                        </View>
+                                    )}
                                 </>
                             )}
                         </View>
@@ -227,10 +249,20 @@ const styles = StyleSheet.create({
         padding: 12,
         alignItems: "flex-start",
     },
+    cardIntegrated: {
+        alignItems: "flex-start",
+        paddingTop: 0,
+    },
     title: {
         fontWeight: "bold",
         marginBottom: 8,
         color: "#888",
+    },
+    titleIntegrated: {
+        fontWeight: "600",
+        marginBottom: 12,
+        color: "#666",
+        fontSize: 15,
     },
     input: {
         width: "100%",
@@ -241,6 +273,18 @@ const styles = StyleSheet.create({
         padding: 8,
         marginBottom: 8,
         color: "#888",
+    },
+    inputIntegrated: {
+        width: "100%",
+        minHeight: 80,
+        borderColor: "#ddd",
+        borderWidth: 1,
+        borderRadius: 12,
+        padding: 12,
+        marginBottom: 8,
+        color: "#666",
+        textAlignVertical: "top",
+        backgroundColor: "#fafafa",
     },
     inputDisabled: {
         backgroundColor: "#f6f6f6",
@@ -264,9 +308,31 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignSelf: "stretch",
     },
+    buttonIntegrated: {
+        backgroundColor: "transparent",
+        borderRadius: 10,
+        paddingVertical: 12,
+        paddingHorizontal: 24,
+        alignItems: "center",
+        justifyContent: "center",
+        alignSelf: "center",
+        marginTop: 4,
+    },
     buttonText: {
         color: "#fff",
         textAlign: "center",
         fontWeight: "bold",
+    },
+    savedIndicator: {
+        alignSelf: "center",
+        marginTop: 8,
+        padding: 8,
+        backgroundColor: "#E8F5E8",
+        borderRadius: 8,
+    },
+    savedText: {
+        color: "#4CAF50",
+        fontWeight: "600",
+        fontSize: 14,
     },
 });

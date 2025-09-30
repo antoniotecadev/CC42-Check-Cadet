@@ -4,7 +4,7 @@ import { rate, userIsPresentOrSubscribed } from "@/repository/userRepository";
 import { styles } from "@/styles/ratingSection";
 import { FontAwesome } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
-import { Button, Text, View } from "react-native";
+import { Button, StyleSheet, Text, View } from "react-native";
 import CommentBox from "./CommentBox";
 
 interface RatingSectionProps {
@@ -68,7 +68,8 @@ export default function RatingSection({
     }, [typeId]);
 
     return (
-        <>
+        <View style={localStyles.container}>
+            {/* Card com resultado das avaliações */}
             <View style={[styles.ratingContainer, { backgroundColor: color }]}>
                 <View style={styles.ratingLeft}>
                     <Text style={styles.ratingValue}>
@@ -83,7 +84,7 @@ export default function RatingSection({
                                         ? "star-half-full"
                                         : star
                                 }
-                                size={28}
+                                size={20}
                                 color="#FFD700"
                                 style={{ marginRight: 2 }}
                             />
@@ -93,88 +94,157 @@ export default function RatingSection({
                         {rating?.ratingCount ?? 0} avaliações
                     </Text>
                 </View>
-                <View style={styles.ratingRight}>
-                    {!rating?.userRating ? (
-                        <Text
-                            style={[
-                                styles.tapToRate,
-                                {
-                                    color: userPresentOrSuscribed
-                                        ? "#3A86FF"
-                                        : "red",
-                                },
-                            ]}
-                        >
-                            {userPresentOrSuscribed
-                                ? "Toque para avaliar"
-                                : type === "events"
-                                ? "Ausente"
-                                : "Não subscrito"}
-                        </Text>
-                    ) : (
-                        <Text style={[styles.tapToRate, { color: "green" }]}>
-                            {type === "events" ? "Presente" : "Subscrito"}
-                        </Text>
-                    )}
-                    <View style={styles.starsRowSmall}>
-                        {[...Array(5)].map((_, i) => (
-                            <FontAwesome
-                                key={i}
-                                name={i < starsToShow ? "star" : "star-o"}
-                                size={22}
-                                color={i < starsToShow ? "#FFD700" : "#B0B0B0"}
-                                style={{ marginRight: 1 }}
-                                onPress={
-                                    rating?.userRating ||
-                                    !userPresentOrSuscribed
-                                        ? undefined // desabilita clique se já avaliou
-                                        : () => setUserRating(i + 1)
-                                }
-                            />
-                        ))}
-                    </View>
-                    <Button
-                        title={
-                            rating?.userRating
-                                ? `${rating.userRating} estrela${
-                                      rating.userRating > 1 ? "s" : ""
-                                  }`
-                                : "Enviar Avaliação"
-                        }
-                        onPress={() => {
-                            if (!rating?.userRating) {
-                                rate(
-                                    campusId,
-                                    cursusId,
-                                    type,
-                                    typeId,
-                                    userId,
-                                    userRating,
-                                    () =>
-                                        showSuccess(
-                                            "SUCESSO",
-                                            "Avaliação enviada com sucesso!"
-                                        ),
-                                    (error) => showError("ERRO", error.message)
-                                );
-                            }
-                        }}
-                        disabled={!!rating?.userRating || userRating === 0}
-                    />
-                </View>
             </View>
+
+            {/* Card integrado: Avaliação + Comentário */}
             {userPresentOrSuscribed && (
-                <View>
+                <View style={[localStyles.interactionCard, { backgroundColor: color }]}>
+                    <Text style={localStyles.sectionTitle}>Sua Avaliação & Comentário</Text>
+                    
+                    {/* Seção de avaliação por estrelas */}
+                    <View style={localStyles.ratingSection}>
+                        <Text style={localStyles.ratingLabel}>
+                            {rating?.userRating ? "Sua avaliação:" : "Avalie com estrelas:"}
+                        </Text>
+                        <View style={localStyles.starsContainer}>
+                            <View style={styles.starsRowSmall}>
+                                {[...Array(5)].map((_, i) => (
+                                    <FontAwesome
+                                        key={i}
+                                        name={i < starsToShow ? "star" : "star-o"}
+                                        size={30}
+                                        color={i < starsToShow ? "#FFD700" : "#B0B0B0"}
+                                        style={{ marginRight: 4 }}
+                                        onPress={
+                                            rating?.userRating
+                                                ? undefined
+                                                : () => setUserRating(i + 1)
+                                        }
+                                    />
+                                ))}
+                            </View>
+                            {!rating?.userRating && userRating > 0 && (
+                                <Button
+                                    title="Enviar Avaliação"
+                                    onPress={() => {
+                                        rate(
+                                            campusId,
+                                            cursusId,
+                                            type,
+                                            typeId,
+                                            userId,
+                                            userRating,
+                                            () =>
+                                                showSuccess(
+                                                    "SUCESSO",
+                                                    "Avaliação enviada com sucesso!"
+                                                ),
+                                            (error) => showError("ERRO", error.message)
+                                        );
+                                    }}
+                                />
+                            )}
+                            {rating?.userRating && (
+                                <Text style={localStyles.completedRating}>
+                                    ✓ {rating.userRating} estrela{rating.userRating > 1 ? "s" : ""}
+                                </Text>
+                            )}
+                        </View>
+                    </View>
+
+                    {/* Divisor visual */}
+                    <View style={localStyles.divider} />
+
+                    {/* Seção de comentário integrada */}
                     <CommentBox
                         campusId={campusId}
                         cursusId={cursusId}
                         userId={userId}
                         type={type}
                         typeId={typeId}
-                        containerStyle={{ marginHorizontal: 6 }}
+                        containerStyle={localStyles.commentSection}
+                        integrated={true}
                     />
                 </View>
             )}
-        </>
+
+            {/* Mensagem para usuários não presentes/subscritos */}
+            {!userPresentOrSuscribed && (
+                <View style={[localStyles.notPresentCard, { backgroundColor: color }]}>
+                    <Text style={localStyles.notPresentText}>
+                        {type === "events" 
+                            ? "📋 Você precisa estar presente no evento para avaliar" 
+                            : "🍽️ Você precisa estar subscrito na refeição para avaliar"}
+                    </Text>
+                </View>
+            )}
+        </View>
     );
 }
+
+const localStyles = StyleSheet.create({
+    container: {
+        marginHorizontal: 18,
+        marginBottom: 18,
+    },
+    interactionCard: {
+        borderRadius: 18,
+        padding: 20,
+        marginTop: 12,
+        elevation: 3,
+        shadowColor: "#000",
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        shadowOffset: { width: 0, height: 3 },
+    },
+    sectionTitle: {
+        fontSize: 18,
+        fontWeight: "bold",
+        color: "#3A86FF",
+        marginBottom: 16,
+        textAlign: "center",
+    },
+    ratingSection: {
+        alignItems: "center",
+        marginBottom: 8,
+    },
+    ratingLabel: {
+        fontSize: 15,
+        color: "#666",
+        marginBottom: 12,
+        fontWeight: "500",
+    },
+    starsContainer: {
+        alignItems: "center",
+        gap: 12,
+    },
+    completedRating: {
+        fontSize: 16,
+        color: "#4CAF50",
+        fontWeight: "bold",
+        marginTop: 8,
+    },
+    divider: {
+        height: 1,
+        backgroundColor: "#E0E0E0",
+        marginVertical: 16,
+        opacity: 0.5,
+    },
+    commentSection: {
+        flex: 0,
+    },
+    notPresentCard: {
+        borderRadius: 12,
+        padding: 16,
+        marginTop: 12,
+        alignItems: "center",
+        opacity: 0.8,
+    },
+    notPresentText: {
+        fontSize: 15,
+        color: "#666",
+        textAlign: "center",
+        fontStyle: "italic",
+    },
+});
+
