@@ -331,8 +331,8 @@ export default function HomeScreen() {
                             }
                             placeholder={{ blurhash }}
                             transition={1000}
-                            style={styles.coalitionLogo}
-                            contentFit="fill"
+                            style={[styles.coalitionLogo, { width: "100%", minWidth: 0 }]}
+                            contentFit="cover"
                         />
                         {/* Texto sobre a imagem */}
                         <ThemedView

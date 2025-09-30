@@ -29,8 +29,8 @@ export default function TabLayout() {
                     },
                     web: {
                         width: "100%",
-                        maxWidth: 480, // limite superior
-                        minWidth: 600, // limite inferior (opcional)
+                        maxWidth: 600, // limite superior
+                        minWidth: 320, // limite inferior (opcional)
                         marginHorizontal: "auto", // centraliza na web (usando style prop em web pura)
                     },
                     default: {},

@@ -81,6 +81,7 @@ const styles = StyleSheet.create({
     header: {
         height: HEADER_HEIGHT,
         overflow: "hidden",
+        width: "100%",
     },
     content: {
         flex: 1,
@@ -91,7 +92,6 @@ const styles = StyleSheet.create({
     inner: {
         width: "100%",
         maxWidth: 600, // limite superior
-        minWidth: 480, // limite inferior (opcional)
         marginHorizontal: "auto", // centraliza na web (usando style prop em web pura)
     },
 });
