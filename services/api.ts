@@ -2,13 +2,19 @@ import useTokenStorage from "@/hooks/storage/useTokenStorage";
 import { fetchApiKeyFromDatabase } from "@/services/firebaseApiKey";
 import axios from "axios";
 import { router } from "expo-router";
+import { Platform } from "react-native";
 
 export default function useApiInterceptors() {
     const { getAccessToken, getRefreshToken, saveToken, clearTokens } =
         useTokenStorage();
 
+    const isWeb = Platform.OS === "web";
+    const baseURL = isWeb
+        ? "https://check-cadet.vercel.app/api/42"
+        : process.env.EXPO_PUBLIC_API_URL;
+
     const api = axios.create({
-        baseURL: process.env.EXPO_PUBLIC_API_URL,
+        baseURL,
     });
 
     // Interceptor para adicionar token automaticamente
