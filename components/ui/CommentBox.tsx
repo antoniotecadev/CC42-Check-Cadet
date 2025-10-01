@@ -82,20 +82,20 @@ export default function CommentBox({
         // Validate that we have either comment or rating
         const hasComment = comment && comment.trim().length > 0;
         const hasRating = userRating > 0 && !hasExistingRating;
-        
+
         if (!hasComment && !hasRating) {
             setError("Adicione um comentário ou uma avaliação por estrelas");
             return;
         }
-        
+
         if (!campusId || !cursusId || !userId || !typeId) {
             setError("Dados insuficientes para enviar");
             return;
         }
-        
+
         setError(null);
         setLoading(true);
-        
+
         try {
             await sendRatingAndComment(
                 String(campusId),
@@ -125,9 +125,17 @@ export default function CommentBox({
         >
             {Platform.OS === "web" ? (
                 <View style={containerStyle}>
-                    <View style={integrated ? styles.cardIntegrated : styles.card}>
-                        {!integrated && <Text style={styles.title}>Comentário</Text>}
-                        {integrated && <Text style={styles.titleIntegrated}>Deixe seu comentário:</Text>}
+                    <View
+                        style={integrated ? styles.cardIntegrated : styles.card}
+                    >
+                        {!integrated && (
+                            <Text style={styles.title}>Comentário</Text>
+                        )}
+                        {integrated && (
+                            <Text style={styles.titleIntegrated}>
+                                Deixe seu comentário:
+                            </Text>
+                        )}
                         {loadingComment ? (
                             <ActivityIndicator
                                 style={{ alignSelf: "center" }}
@@ -142,7 +150,9 @@ export default function CommentBox({
                                     }}
                                     placeholder="Escreva seu comentário"
                                     style={[
-                                        integrated ? styles.inputIntegrated : styles.input,
+                                        integrated
+                                            ? styles.inputIntegrated
+                                            : styles.input,
                                         saved ? styles.inputDisabled : null,
                                     ]}
                                     maxLength={MAX_LEN}
@@ -159,7 +169,9 @@ export default function CommentBox({
                                 {!saved && (
                                     <TouchableOpacity
                                         style={[
-                                            integrated ? styles.buttonIntegrated : styles.button,
+                                            integrated
+                                                ? styles.buttonIntegrated
+                                                : styles.button,
                                             { backgroundColor: color },
                                         ]}
                                         disabled={loading}
@@ -171,9 +183,12 @@ export default function CommentBox({
                                             </Text>
                                         ) : (
                                             <Text style={styles.buttonText}>
-                                                {userRating > 0 && !hasExistingRating && comment.trim().length > 0
+                                                {userRating > 0 &&
+                                                !hasExistingRating &&
+                                                comment.trim().length > 0
                                                     ? "ENVIAR AVALIAÇÃO E COMENTÁRIO"
-                                                    : userRating > 0 && !hasExistingRating
+                                                    : userRating > 0 &&
+                                                      !hasExistingRating
                                                     ? "ENVIAR AVALIAÇÃO"
                                                     : "ENVIAR COMENTÁRIO"}
                                             </Text>
@@ -183,7 +198,10 @@ export default function CommentBox({
                                 {saved && (
                                     <View style={styles.savedIndicator}>
                                         <Text style={styles.savedText}>
-                                            ✓ {hasExistingRating ? "Comentário salvo" : "Avaliação e comentário salvos"}
+                                            ✓{" "}
+                                            {hasExistingRating
+                                                ? "Comentário salvo"
+                                                : "Avaliação e comentário salvos"}
                                         </Text>
                                     </View>
                                 )}
@@ -194,9 +212,19 @@ export default function CommentBox({
             ) : (
                 <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
                     <View style={containerStyle}>
-                        <View style={integrated ? styles.cardIntegrated : styles.card}>
-                            {!integrated && <Text style={styles.title}>Comentário</Text>}
-                            {integrated && <Text style={styles.titleIntegrated}>Deixe seu comentário:</Text>}
+                        <View
+                            style={
+                                integrated ? styles.cardIntegrated : styles.card
+                            }
+                        >
+                            {!integrated && (
+                                <Text style={styles.title}>Comentário</Text>
+                            )}
+                            {integrated && (
+                                <Text style={styles.titleIntegrated}>
+                                    Deixe seu comentário:
+                                </Text>
+                            )}
                             {loadingComment ? (
                                 <ActivityIndicator
                                     style={{ alignSelf: "center" }}
@@ -211,7 +239,9 @@ export default function CommentBox({
                                         }}
                                         placeholder="Escreva seu comentário"
                                         style={[
-                                            integrated ? styles.inputIntegrated : styles.input,
+                                            integrated
+                                                ? styles.inputIntegrated
+                                                : styles.input,
                                             saved ? styles.inputDisabled : null,
                                         ]}
                                         maxLength={MAX_LEN}
@@ -223,12 +253,16 @@ export default function CommentBox({
                                         {String(comment?.length ?? 0)}/{MAX_LEN}
                                     </Text>
                                     {error ? (
-                                        <Text style={styles.error}>{error}</Text>
+                                        <Text style={styles.error}>
+                                            {error}
+                                        </Text>
                                     ) : null}
                                     {!saved && (
                                         <TouchableOpacity
                                             style={[
-                                                integrated ? styles.buttonIntegrated : styles.button,
+                                                integrated
+                                                    ? styles.buttonIntegrated
+                                                    : styles.button,
                                                 { backgroundColor: color },
                                             ]}
                                             disabled={loading}
@@ -239,12 +273,13 @@ export default function CommentBox({
                                                     Enviando...
                                                 </Text>
                                             ) : (
-                                                <Text
-                                                    style={styles.buttonText}
-                                                >
-                                                    {userRating > 0 && !hasExistingRating && comment.trim().length > 0
+                                                <Text style={styles.buttonText}>
+                                                    {userRating > 0 &&
+                                                    !hasExistingRating &&
+                                                    comment.trim().length > 0
                                                         ? "ENVIAR AVALIAÇÃO E COMENTÁRIO"
-                                                        : userRating > 0 && !hasExistingRating
+                                                        : userRating > 0 &&
+                                                          !hasExistingRating
                                                         ? "ENVIAR AVALIAÇÃO"
                                                         : "ENVIAR COMENTÁRIO"}
                                                 </Text>
@@ -254,7 +289,15 @@ export default function CommentBox({
                                     {saved && (
                                         <View style={styles.savedIndicator}>
                                             <Text style={styles.savedText}>
-                                                ✓ {hasExistingRating ? "Comentário salvo" : "Avaliação e comentário salvos"}
+                                                ✓{" "}
+                                                {hasExistingRating &&
+                                                comment.trim().length > 0
+                                                    ? "Avaliação e comentário salvos"
+                                                    : hasExistingRating
+                                                    ? "Avaliação salva"
+                                                    : comment.trim().length > 0
+                                                    ? "Comentário salvo"
+                                                    : null}
                                             </Text>
                                         </View>
                                     )}
