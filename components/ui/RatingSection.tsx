@@ -14,6 +14,7 @@ interface RatingSectionProps {
     type: "events" | "meals";
     typeId: string;
     userId: string;
+    scrollViewRef?: React.RefObject<any>;
 }
 
 export default function RatingSection({
@@ -23,6 +24,7 @@ export default function RatingSection({
     type,
     typeId,
     userId,
+    scrollViewRef,
 }: RatingSectionProps) {
     const { showError, showSuccess } = useAlert();
     const [rating, setRating] = useState<RatingResult>();
@@ -152,6 +154,7 @@ export default function RatingSection({
                         userRating={userRating}
                         hasExistingRating={!!rating?.userRating}
                         onSubmitSuccess={handleSubmitSuccess}
+                        scrollViewRef={scrollViewRef}
                     />
                 </View>
             )}

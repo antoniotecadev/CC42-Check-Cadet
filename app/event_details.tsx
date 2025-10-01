@@ -8,11 +8,12 @@ import { getEventDuration, getTimeUntilEvent } from "@/utility/DateUtil";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
     Animated,
     Dimensions,
     ImageBackground,
+    KeyboardAvoidingView,
     Platform,
     ScrollView,
     StyleSheet,
@@ -34,6 +35,7 @@ const ATTENDANCE_ICON = "clipboard-list-outline";
 
 const EventDetailScreen = () => {
     const [staff, setStaff] = useState<boolean>(false);
+    const scrollViewRef = useRef<ScrollView>(null);
 
     const isWeb = Platform.OS === "web";
     const colorScheme = useColorScheme();
@@ -89,190 +91,224 @@ const EventDetailScreen = () => {
             lightColor={"#f7f7f7"}
             style={[styles.container, isWeb ? styles.inner : {}]}
         >
-            <ScrollView showsVerticalScrollIndicator={isWeb}>
-                {/* Header with image and gradient */}
-                <View style={styles.headerContainer}>
-                    <ImageBackground
-                        source={require("@/assets/images/back_default_42_16_9_horizontal.png")}
-                        style={styles.headerImage}
-                        resizeMode="cover"
-                    >
-                        <LinearGradient
-                            colors={[
-                                "rgba(0,0,0,0.7)",
-                                "rgba(0,0,0,0.2)",
-                                "transparent",
+            <KeyboardAvoidingView
+                behavior={Platform.OS === "ios" ? "padding" : "height"}
+                style={{ flex: 1 }}
+            >
+                <ScrollView
+                    ref={scrollViewRef}
+                    showsVerticalScrollIndicator={isWeb}
+                    keyboardShouldPersistTaps="handled"
+                    contentContainerStyle={{ paddingBottom: 100 }}
+                >
+                    {/* Header with image and gradient */}
+                    <View style={styles.headerContainer}>
+                        <ImageBackground
+                            source={require("@/assets/images/back_default_42_16_9_horizontal.png")}
+                            style={styles.headerImage}
+                            resizeMode="cover"
+                        >
+                            <LinearGradient
+                                colors={[
+                                    "rgba(0,0,0,0.7)",
+                                    "rgba(0,0,0,0.2)",
+                                    "transparent",
+                                ]}
+                                style={styles.headerGradient}
+                            />
+                            <View style={styles.headerTextContainer}>
+                                <Text style={styles.kind}>{event?.kind}</Text>
+                                <Text style={styles.title}>{event?.name}</Text>
+                                <Text style={styles.date}>
+                                    {new Date(event?.begin_at).toLocaleString()}
+                                </Text>
+                            </View>
+                        </ImageBackground>
+                    </View>
+
+                    {/* Quick Info Cards */}
+                    <View style={styles.infoRow}>
+                        <View
+                            style={[
+                                styles.infoCard,
+                                {
+                                    width: infoCardWidth,
+                                    backgroundColor: color,
+                                },
                             ]}
-                            style={styles.headerGradient}
-                        />
-                        <View style={styles.headerTextContainer}>
-                            <Text style={styles.kind}>{event?.kind}</Text>
-                            <Text style={styles.title}>{event?.name}</Text>
-                            <Text style={styles.date}>
-                                {new Date(event?.begin_at).toLocaleString()}
+                        >
+                            <MaterialIcons
+                                name="access-time"
+                                size={22}
+                                color="#3A86FF"
+                            />
+                            <Text style={styles.infoText}>
+                                {getEventDuration(
+                                    event?.begin_at,
+                                    event?.end_at
+                                )}
                             </Text>
                         </View>
-                    </ImageBackground>
-                </View>
-
-                {/* Quick Info Cards */}
-                <View style={styles.infoRow}>
-                    <View
-                        style={[
-                            styles.infoCard,
-                            { width: infoCardWidth, backgroundColor: color },
-                        ]}
-                    >
-                        <MaterialIcons
-                            name="access-time"
-                            size={22}
-                            color="#3A86FF"
-                        />
-                        <Text style={styles.infoText}>
-                            {getEventDuration(event?.begin_at, event?.end_at)}
-                        </Text>
-                    </View>
-                    <View
-                        style={[
-                            styles.infoCard,
-                            { width: infoCardWidth, backgroundColor: color },
-                        ]}
-                    >
-                        <MaterialIcons
-                            name="calendar-today"
-                            size={22}
-                            color="#3A86FF"
-                        />
-                        <Text style={styles.infoText}>
-                            {getTimeUntilEvent(event?.begin_at)}
-                        </Text>
-                    </View>
-                    <View
-                        style={[
-                            styles.infoCard,
-                            { width: infoCardWidth, backgroundColor: color },
-                        ]}
-                    >
-                        <MaterialIcons
-                            name="location-on"
-                            size={22}
-                            color="#3A86FF"
-                        />
-                        <Text style={styles.infoText}>{event?.location}</Text>
-                    </View>
-                    <View
-                        style={[
-                            styles.infoCard,
-                            { width: infoCardWidth, backgroundColor: color },
-                        ]}
-                    >
-                        <MaterialIcons
-                            name="people-outline"
-                            size={22}
-                            color="#3A86FF"
-                        />
-                        <Text style={styles.infoText}>
-                            {event?.nbr_subscribers || 0}/
-                            {event?.max_people || 0}
-                        </Text>
-                    </View>
-                </View>
-
-                {/* Description */}
-                <View style={[styles.card, { backgroundColor: color }]}>
-                    <Text style={styles.sectionTitle}>Descrição</Text>
-                    <ThemedText style={styles.description}>
-                        {event?.description}
-                    </ThemedText>
-                </View>
-                {/* Rating Section */}
-                <RatingSection
-                    color={color}
-                    campusId={campusId}
-                    cursusId={cursusId}
-                    type="events"
-                    typeId={eventId}
-                    userId={userId}
-                />
-                {/* Floating Action Buttons */}
-                {staff && (
-                    <View style={styles.fabRow}>
-                        <Animated.View
+                        <View
                             style={[
-                                styles.fabWrapper,
-                                { transform: [{ scale: scaleAnim }] },
+                                styles.infoCard,
+                                {
+                                    width: infoCardWidth,
+                                    backgroundColor: color,
+                                },
                             ]}
                         >
-                            <TouchableOpacity
-                                style={[styles.fab, { backgroundColor: color }]}
-                                activeOpacity={0.8}
-                                onPressIn={handlePressIn}
-                                onPressOut={handlePressOut}
-                                onPress={() =>
-                                    router.push({
-                                        pathname: "/qr_code",
-                                        params: {
-                                            content: encrypt(
-                                                "cc42event" +
-                                                    eventId +
-                                                    "#" +
-                                                    userId
-                                            ),
-                                            title: event?.kind,
-                                            description: event?.name,
-                                            isEvent: "true",
-                                            userId: userId,
-                                            campusId: campusId,
-                                            cursusId: cursusId,
-                                        },
-                                    })
-                                }
-                            >
-                                <MaterialCommunityIcons
-                                    name={QR_ICON}
-                                    size={44}
-                                    color="#3A86FF"
-                                />
-                                {/* <Text style={styles.fabLabel}>QR Code</Text> */}
-                            </TouchableOpacity>
-                        </Animated.View>
-                        <Animated.View
+                            <MaterialIcons
+                                name="calendar-today"
+                                size={22}
+                                color="#3A86FF"
+                            />
+                            <Text style={styles.infoText}>
+                                {getTimeUntilEvent(event?.begin_at)}
+                            </Text>
+                        </View>
+                        <View
                             style={[
-                                styles.fabWrapper,
-                                { transform: [{ scale: scaleAnim }] },
+                                styles.infoCard,
+                                {
+                                    width: infoCardWidth,
+                                    backgroundColor: color,
+                                },
                             ]}
                         >
-                            <TouchableOpacity
-                                style={[styles.fab, { backgroundColor: color }]}
-                                activeOpacity={0.8}
-                                onPressIn={handlePressIn}
-                                onPressOut={handlePressOut}
-                                onPress={() => {
-                                    router.push({
-                                        pathname: "/event_users",
-                                        params: {
-                                            type: "events",
-                                            eventId: eventId,
-                                            userId: userId,
-                                            campusId: campusId,
-                                            cursusId: cursusId,
-                                            eventName: eventName,
-                                            eventDate: eventDate,
-                                        },
-                                    });
-                                }}
-                            >
-                                <MaterialCommunityIcons
-                                    name={ATTENDANCE_ICON}
-                                    size={44}
-                                    color="#3A86FF"
-                                />
-                                {/* <Text style={styles.fabLabel}>Lista Presença</Text> */}
-                            </TouchableOpacity>
-                        </Animated.View>
+                            <MaterialIcons
+                                name="location-on"
+                                size={22}
+                                color="#3A86FF"
+                            />
+                            <Text style={styles.infoText}>
+                                {event?.location}
+                            </Text>
+                        </View>
+                        <View
+                            style={[
+                                styles.infoCard,
+                                {
+                                    width: infoCardWidth,
+                                    backgroundColor: color,
+                                },
+                            ]}
+                        >
+                            <MaterialIcons
+                                name="people-outline"
+                                size={22}
+                                color="#3A86FF"
+                            />
+                            <Text style={styles.infoText}>
+                                {event?.nbr_subscribers || 0}/
+                                {event?.max_people || 0}
+                            </Text>
+                        </View>
                     </View>
-                )}
-            </ScrollView>
+
+                    {/* Description */}
+                    <View style={[styles.card, { backgroundColor: color }]}>
+                        <Text style={styles.sectionTitle}>Descrição</Text>
+                        <ThemedText style={styles.description}>
+                            {event?.description}
+                        </ThemedText>
+                    </View>
+                    {/* Rating Section */}
+                    <RatingSection
+                        color={color}
+                        campusId={campusId}
+                        cursusId={cursusId}
+                        type="events"
+                        typeId={eventId}
+                        userId={userId}
+                        scrollViewRef={scrollViewRef}
+                    />
+                    {/* Floating Action Buttons */}
+                    {staff && (
+                        <View style={styles.fabRow}>
+                            <Animated.View
+                                style={[
+                                    styles.fabWrapper,
+                                    { transform: [{ scale: scaleAnim }] },
+                                ]}
+                            >
+                                <TouchableOpacity
+                                    style={[
+                                        styles.fab,
+                                        { backgroundColor: color },
+                                    ]}
+                                    activeOpacity={0.8}
+                                    onPressIn={handlePressIn}
+                                    onPressOut={handlePressOut}
+                                    onPress={() =>
+                                        router.push({
+                                            pathname: "/qr_code",
+                                            params: {
+                                                content: encrypt(
+                                                    "cc42event" +
+                                                        eventId +
+                                                        "#" +
+                                                        userId
+                                                ),
+                                                title: event?.kind,
+                                                description: event?.name,
+                                                isEvent: "true",
+                                                userId: userId,
+                                                campusId: campusId,
+                                                cursusId: cursusId,
+                                            },
+                                        })
+                                    }
+                                >
+                                    <MaterialCommunityIcons
+                                        name={QR_ICON}
+                                        size={44}
+                                        color="#3A86FF"
+                                    />
+                                    {/* <Text style={styles.fabLabel}>QR Code</Text> */}
+                                </TouchableOpacity>
+                            </Animated.View>
+                            <Animated.View
+                                style={[
+                                    styles.fabWrapper,
+                                    { transform: [{ scale: scaleAnim }] },
+                                ]}
+                            >
+                                <TouchableOpacity
+                                    style={[
+                                        styles.fab,
+                                        { backgroundColor: color },
+                                    ]}
+                                    activeOpacity={0.8}
+                                    onPressIn={handlePressIn}
+                                    onPressOut={handlePressOut}
+                                    onPress={() => {
+                                        router.push({
+                                            pathname: "/event_users",
+                                            params: {
+                                                type: "events",
+                                                eventId: eventId,
+                                                userId: userId,
+                                                campusId: campusId,
+                                                cursusId: cursusId,
+                                                eventName: eventName,
+                                                eventDate: eventDate,
+                                            },
+                                        });
+                                    }}
+                                >
+                                    <MaterialCommunityIcons
+                                        name={ATTENDANCE_ICON}
+                                        size={44}
+                                        color="#3A86FF"
+                                    />
+                                    {/* <Text style={styles.fabLabel}>Lista Presença</Text> */}
+                                </TouchableOpacity>
+                            </Animated.View>
+                        </View>
+                    )}
+                </ScrollView>
+            </KeyboardAvoidingView>
         </ThemedView>
     );
 };

@@ -14,8 +14,9 @@ import { encrypt } from "@/utility/AESUtil";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { router, Stack, useLocalSearchParams } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
+    KeyboardAvoidingView,
     Platform,
     ScrollView,
     StyleSheet,
@@ -38,6 +39,7 @@ export default function MealDetailScreen() {
         mealData: string;
     }>();
     const meal = JSON.parse(mealData);
+    const scrollViewRef = useRef<ScrollView>(null);
     const colorCard = colorScheme === "dark" ? "#333" : "#fff";
 
     const [modalData, setModalData] = useState<{
@@ -116,171 +118,194 @@ export default function MealDetailScreen() {
                 lightColor={"#f7f7f7"}
                 style={[styles.container, isWeb ? styles.inner : {}]}
             >
-                <ScrollView showsVerticalScrollIndicator={isWeb}>
-                    <ThemedView darkColor="#333" style={styles.card}>
-                        <ThemedText style={styles.type}>{meal.type}</ThemedText>
-                        <ThemedText style={styles.name}>{meal.name}</ThemedText>
-                        <Text style={styles.desc}>{meal.description}</Text>
-                        {meal.pathImage ? (
-                            <Image
-                                source={{ uri: meal.pathImage }}
-                                style={styles.image}
-                                contentFit="cover"
-                            />
-                        ) : (
-                            <MaterialIcons
-                                size={100}
-                                color={color}
-                                name="restaurant"
-                            />
-                        )}
-                        <Text style={styles.date}>{meal.createdDate}</Text>
-                        <Text style={styles.qty}>
-                            Quantidade: {meal.quantityNotReceived}{" "}
-                            {meal.numberSubscribed
-                                ? "/ " + meal.numberSubscribed
-                                : ""}
-                        </Text>
-                    </ThemedView>
-                    <RatingSection
-                        color={colorCard}
-                        campusId={campusId}
-                        cursusId={cursusId}
-                        type="meals"
-                        typeId={meal.id}
-                        userId={userId}
-                    />
-                    {/* Second portion subscribe button */}
-                    <View style={{ marginHorizontal: 18, marginBottom: 16 }}>
-                        <TouchableOpacity
-                            disabled={
-                                !(
-                                    secondInfo?.enabled &&
-                                    !secondInfo.subscribed
-                                ) || loadingSecond
-                            }
-                            onPress={async () => {
-                                setLoadingSecond(true);
-                                const res = await subscribeSecondPortion(
-                                    String(campusId),
-                                    String(cursusId),
-                                    String(meal.id),
-                                    String(userId)
-                                );
-                                if (res.success) {
-                                    setLoadingSecond(false);
-                                    setModalData({
-                                        modalVisible: true,
-                                        title: "Sucesso",
-                                        message:
-                                            meal.name + "\nInscrição feita",
-                                        color: "#4caf50ff",
-                                    });
-                                } else {
-                                    setLoadingSecond(false);
-                                    showAlert(
-                                        "Aviso",
-                                        res.message ||
-                                            "Não foi possível inscrever-se na segunda via"
-                                    );
-                                }
-                            }}
-                            style={[
-                                styles.button,
-                                {
-                                    backgroundColor:
-                                        secondInfo == null
-                                            ? "#BDBDBD"
-                                            : secondInfo?.subscribed
-                                            ? secondInfo.received
-                                                ? "#4caf50ff"
-                                                : "#007AFF"
-                                            : secondInfo.enabled
-                                            ? "#4caf50ff"
-                                            : "#e53935ff",
-                                },
-                            ]}
-                        >
-                            <Text style={{ color: "#fff", fontWeight: "bold" }}>
-                                {loadingSecond
-                                    ? "Processando..."
-                                    : secondInfo
-                                    ? secondInfo.subscribed
-                                        ? secondInfo.received
-                                            ? "RECEBEU SEGUNDA VIA"
-                                            : "INSCRIÇÃO FEITA"
-                                        : secondInfo.enabled
-                                        ? "INSCREVER - SE"
-                                        : "SEGUNDA VIA TERMINOU"
-                                    : "SEGUNDA VIA INDISPONÍVEL"}
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-                    {staff && (
-                        <View style={styles.fabRow}>
-                            <TouchableOpacity
-                                onPress={() =>
-                                    router.push({
-                                        pathname: "/qr_code",
-                                        params: {
-                                            content: encrypt(
-                                                "cc42meal" +
-                                                    meal.id +
-                                                    "#" +
-                                                    userId
-                                            ),
-                                            title: meal?.name,
-                                            description: meal?.description,
-                                            isEvent: "false",
-                                            userId: userId,
-                                            campusId: campusId,
-                                            cursusId: cursusId,
-                                        },
-                                    })
-                                }
-                                style={[
-                                    styles.fab,
-                                    { backgroundColor: colorCard },
-                                ]}
-                            >
-                                <MaterialCommunityIcons
-                                    name="qrcode"
-                                    size={44}
-                                    color="#3A86FF"
+                <KeyboardAvoidingView
+                    behavior={Platform.OS === "ios" ? "padding" : "height"}
+                    style={{ flex: 1 }}
+                >
+                    <ScrollView
+                        ref={scrollViewRef}
+                        showsVerticalScrollIndicator={isWeb}
+                        keyboardShouldPersistTaps="handled"
+                        contentContainerStyle={{ paddingBottom: 100 }}
+                    >
+                        <ThemedView darkColor="#333" style={styles.card}>
+                            <ThemedText style={styles.type}>
+                                {meal.type}
+                            </ThemedText>
+                            <ThemedText style={styles.name}>
+                                {meal.name}
+                            </ThemedText>
+                            <Text style={styles.desc}>{meal.description}</Text>
+                            {meal.pathImage ? (
+                                <Image
+                                    source={{ uri: meal.pathImage }}
+                                    style={styles.image}
+                                    contentFit="cover"
                                 />
-                                {/* <Text style={styles.fabText}>QR Code</Text> */}
-                            </TouchableOpacity>
+                            ) : (
+                                <MaterialIcons
+                                    size={100}
+                                    color={color}
+                                    name="restaurant"
+                                />
+                            )}
+                            <Text style={styles.date}>{meal.createdDate}</Text>
+                            <Text style={styles.qty}>
+                                Quantidade: {meal.quantityNotReceived}{" "}
+                                {meal.numberSubscribed
+                                    ? "/ " + meal.numberSubscribed
+                                    : ""}
+                            </Text>
+                        </ThemedView>
+                        <RatingSection
+                            color={colorCard}
+                            campusId={campusId}
+                            cursusId={cursusId}
+                            type="meals"
+                            typeId={meal.id}
+                            userId={userId}
+                            scrollViewRef={scrollViewRef}
+                        />
+                        {/* Second portion subscribe button */}
+                        <View
+                            style={{ marginHorizontal: 18, marginBottom: 16 }}
+                        >
                             <TouchableOpacity
-                                onPress={() => {
-                                    router.push({
-                                        pathname: "/meal_users",
-                                        params: {
-                                            type: "meals",
-                                            mealId: meal.id,
-                                            userId: userId,
-                                            campusId: campusId,
-                                            cursusId: cursusId,
-                                            mealName: meal.name,
-                                            quantity: meal.quantity,
-                                            mealCreatedDate: meal.createdDate,
-                                        },
-                                    });
+                                disabled={
+                                    !(
+                                        secondInfo?.enabled &&
+                                        !secondInfo.subscribed
+                                    ) || loadingSecond
+                                }
+                                onPress={async () => {
+                                    setLoadingSecond(true);
+                                    const res = await subscribeSecondPortion(
+                                        String(campusId),
+                                        String(cursusId),
+                                        String(meal.id),
+                                        String(userId)
+                                    );
+                                    if (res.success) {
+                                        setLoadingSecond(false);
+                                        setModalData({
+                                            modalVisible: true,
+                                            title: "Sucesso",
+                                            message:
+                                                meal.name + "\nInscrição feita",
+                                            color: "#4caf50ff",
+                                        });
+                                    } else {
+                                        setLoadingSecond(false);
+                                        showAlert(
+                                            "Aviso",
+                                            res.message ||
+                                                "Não foi possível inscrever-se na segunda via"
+                                        );
+                                    }
                                 }}
                                 style={[
-                                    styles.fab,
-                                    { backgroundColor: colorCard },
+                                    styles.button,
+                                    {
+                                        backgroundColor:
+                                            secondInfo == null
+                                                ? "#BDBDBD"
+                                                : secondInfo?.subscribed
+                                                ? secondInfo.received
+                                                    ? "#4caf50ff"
+                                                    : "#007AFF"
+                                                : secondInfo.enabled
+                                                ? "#4caf50ff"
+                                                : "#e53935ff",
+                                    },
                                 ]}
                             >
-                                <MaterialCommunityIcons
-                                    name="clipboard-list-outline"
-                                    size={44}
-                                    color="#3A86FF"
-                                />
-                                {/* <Text style={styles.fabText}>Inscrições</Text> */}
+                                <Text
+                                    style={{
+                                        color: "#fff",
+                                        fontWeight: "bold",
+                                    }}
+                                >
+                                    {loadingSecond
+                                        ? "Processando..."
+                                        : secondInfo
+                                        ? secondInfo.subscribed
+                                            ? secondInfo.received
+                                                ? "RECEBEU SEGUNDA VIA"
+                                                : "INSCRIÇÃO FEITA"
+                                            : secondInfo.enabled
+                                            ? "INSCREVER - SE"
+                                            : "SEGUNDA VIA TERMINOU"
+                                        : "SEGUNDA VIA INDISPONÍVEL"}
+                                </Text>
                             </TouchableOpacity>
                         </View>
-                    )}
-                </ScrollView>
+                        {staff && (
+                            <View style={styles.fabRow}>
+                                <TouchableOpacity
+                                    onPress={() =>
+                                        router.push({
+                                            pathname: "/qr_code",
+                                            params: {
+                                                content: encrypt(
+                                                    "cc42meal" +
+                                                        meal.id +
+                                                        "#" +
+                                                        userId
+                                                ),
+                                                title: meal?.name,
+                                                description: meal?.description,
+                                                isEvent: "false",
+                                                userId: userId,
+                                                campusId: campusId,
+                                                cursusId: cursusId,
+                                            },
+                                        })
+                                    }
+                                    style={[
+                                        styles.fab,
+                                        { backgroundColor: colorCard },
+                                    ]}
+                                >
+                                    <MaterialCommunityIcons
+                                        name="qrcode"
+                                        size={44}
+                                        color="#3A86FF"
+                                    />
+                                    {/* <Text style={styles.fabText}>QR Code</Text> */}
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    onPress={() => {
+                                        router.push({
+                                            pathname: "/meal_users",
+                                            params: {
+                                                type: "meals",
+                                                mealId: meal.id,
+                                                userId: userId,
+                                                campusId: campusId,
+                                                cursusId: cursusId,
+                                                mealName: meal.name,
+                                                quantity: meal.quantity,
+                                                mealCreatedDate:
+                                                    meal.createdDate,
+                                            },
+                                        });
+                                    }}
+                                    style={[
+                                        styles.fab,
+                                        { backgroundColor: colorCard },
+                                    ]}
+                                >
+                                    <MaterialCommunityIcons
+                                        name="clipboard-list-outline"
+                                        size={44}
+                                        color="#3A86FF"
+                                    />
+                                    {/* <Text style={styles.fabText}>Inscrições</Text> */}
+                                </TouchableOpacity>
+                            </View>
+                        )}
+                    </ScrollView>
+                </KeyboardAvoidingView>
             </ThemedView>
         </>
     );
