@@ -28,7 +28,7 @@ type Props = {
     scrollViewRef?: React.RefObject<any>;
 };
 
-const MAX_LEN = 42;
+const MAX_LEN = 200;
 
 export default function CommentBox({
     campusId,
