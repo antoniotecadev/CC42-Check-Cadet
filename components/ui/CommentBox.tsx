@@ -1,4 +1,4 @@
-import { getComment, sendComment } from "@/repository/userRepository";
+import { getComment, sendRatingAndComment } from "@/repository/userRepository";
 import React, { useEffect, useState } from "react";
 import {
     ActivityIndicator,
@@ -22,6 +22,9 @@ type Props = {
     typeId?: string | number | undefined | null;
     containerStyle?: any;
     integrated?: boolean;
+    userRating?: number;
+    hasExistingRating?: boolean;
+    onSubmitSuccess?: () => void;
 };
 
 const MAX_LEN = 42;
@@ -34,6 +37,9 @@ export default function CommentBox({
     typeId,
     containerStyle,
     integrated = false,
+    userRating = 0,
+    hasExistingRating = false,
+    onSubmitSuccess,
 }: Props) {
     const { color } = useColorCoalition();
 
@@ -73,27 +79,38 @@ export default function CommentBox({
     }, [campusId, cursusId, userId, type, typeId]);
 
     const handleSend = async () => {
-        if (!comment || comment.trim().length === 0) {
-            setError("Comentário obrigatório");
+        // Validate that we have either comment or rating
+        const hasComment = comment && comment.trim().length > 0;
+        const hasRating = userRating > 0 && !hasExistingRating;
+        
+        if (!hasComment && !hasRating) {
+            setError("Adicione um comentário ou uma avaliação por estrelas");
             return;
         }
+        
         if (!campusId || !cursusId || !userId || !typeId) {
-            setError("Dados insuficientes para enviar comentário");
+            setError("Dados insuficientes para enviar");
             return;
         }
+        
         setError(null);
         setLoading(true);
+        
         try {
-            await sendComment(
+            await sendRatingAndComment(
                 String(campusId),
                 String(cursusId),
                 type,
                 String(typeId),
                 String(userId),
-                comment.trim()
+                hasRating ? userRating : null,
+                hasComment ? comment.trim() : null
             );
             setSaved(true);
             Keyboard.dismiss();
+            if (onSubmitSuccess) {
+                onSubmitSuccess();
+            }
         } catch (e: any) {
             setError(e?.message ?? String(e));
         } finally {
@@ -150,11 +167,15 @@ export default function CommentBox({
                                     >
                                         {loading ? (
                                             <Text style={{ color: "#fff" }}>
-                                                Enviando comentário...
+                                                Enviando...
                                             </Text>
                                         ) : (
                                             <Text style={styles.buttonText}>
-                                                COMENTAR
+                                                {userRating > 0 && !hasExistingRating && comment.trim().length > 0
+                                                    ? "ENVIAR AVALIAÇÃO E COMENTÁRIO"
+                                                    : userRating > 0 && !hasExistingRating
+                                                    ? "ENVIAR AVALIAÇÃO"
+                                                    : "ENVIAR COMENTÁRIO"}
                                             </Text>
                                         )}
                                     </TouchableOpacity>
@@ -162,7 +183,7 @@ export default function CommentBox({
                                 {saved && (
                                     <View style={styles.savedIndicator}>
                                         <Text style={styles.savedText}>
-                                            ✓ Comentário salvo
+                                            ✓ {hasExistingRating ? "Comentário salvo" : "Avaliação e comentário salvos"}
                                         </Text>
                                     </View>
                                 )}
@@ -215,13 +236,17 @@ export default function CommentBox({
                                         >
                                             {loading ? (
                                                 <Text style={{ color: "#fff" }}>
-                                                    Enviando comentário...
+                                                    Enviando...
                                                 </Text>
                                             ) : (
                                                 <Text
                                                     style={styles.buttonText}
                                                 >
-                                                    COMENTAR
+                                                    {userRating > 0 && !hasExistingRating && comment.trim().length > 0
+                                                        ? "ENVIAR AVALIAÇÃO E COMENTÁRIO"
+                                                        : userRating > 0 && !hasExistingRating
+                                                        ? "ENVIAR AVALIAÇÃO"
+                                                        : "ENVIAR COMENTÁRIO"}
                                                 </Text>
                                             )}
                                         </TouchableOpacity>
@@ -229,7 +254,7 @@ export default function CommentBox({
                                     {saved && (
                                         <View style={styles.savedIndicator}>
                                             <Text style={styles.savedText}>
-                                                ✓ Comentário salvo
+                                                ✓ {hasExistingRating ? "Comentário salvo" : "Avaliação e comentário salvos"}
                                             </Text>
                                         </View>
                                     )}

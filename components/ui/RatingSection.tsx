@@ -1,10 +1,10 @@
 import useAlert from "@/hooks/useAlert";
 import { fetchRatings, RatingResult } from "@/repository/eventRepository";
-import { rate, userIsPresentOrSubscribed } from "@/repository/userRepository";
+import { userIsPresentOrSubscribed } from "@/repository/userRepository";
 import { styles } from "@/styles/ratingSection";
 import { FontAwesome } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
-import { Button, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import CommentBox from "./CommentBox";
 
 interface RatingSectionProps {
@@ -32,6 +32,12 @@ export default function RatingSection({
 
     // Se o usuário já avaliou, mostra a nota dele, senão mostra o que ele está selecionando
     const starsToShow = rating?.userRating ?? userRating; // userRating = estado local para seleção
+
+    // Reset userRating when user submits successfully
+    const handleSubmitSuccess = () => {
+        setUserRating(0);
+        showSuccess("SUCESSO", "Enviado com sucesso!");
+    };
 
     useEffect(() => {
         let isMounted = true;
@@ -104,7 +110,7 @@ export default function RatingSection({
                     {/* Seção de avaliação por estrelas */}
                     <View style={localStyles.ratingSection}>
                         <Text style={localStyles.ratingLabel}>
-                            {rating?.userRating ? "Sua avaliação:" : "Avalie com estrelas:"}
+                            {rating?.userRating ? "Sua avaliação:" : "Avalie com estrelas"}
                         </Text>
                         <View style={localStyles.starsContainer}>
                             <View style={styles.starsRowSmall}>
@@ -123,27 +129,6 @@ export default function RatingSection({
                                     />
                                 ))}
                             </View>
-                            {!rating?.userRating && userRating > 0 && (
-                                <Button
-                                    title="Enviar Avaliação"
-                                    onPress={() => {
-                                        rate(
-                                            campusId,
-                                            cursusId,
-                                            type,
-                                            typeId,
-                                            userId,
-                                            userRating,
-                                            () =>
-                                                showSuccess(
-                                                    "SUCESSO",
-                                                    "Avaliação enviada com sucesso!"
-                                                ),
-                                            (error) => showError("ERRO", error.message)
-                                        );
-                                    }}
-                                />
-                            )}
                             {rating?.userRating && (
                                 <Text style={localStyles.completedRating}>
                                     ✓ {rating.userRating} estrela{rating.userRating > 1 ? "s" : ""}
@@ -164,6 +149,9 @@ export default function RatingSection({
                         typeId={typeId}
                         containerStyle={localStyles.commentSection}
                         integrated={true}
+                        userRating={userRating}
+                        hasExistingRating={!!rating?.userRating}
+                        onSubmitSuccess={handleSubmitSuccess}
                     />
                 </View>
             )}

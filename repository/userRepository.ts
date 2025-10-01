@@ -94,6 +94,47 @@ export function rate(
         });
 }
 
+/**
+ * Send both rating and comment together.
+ * If rating is 0 or null, only comment is sent.
+ * If comment is empty, only rating is sent.
+ * Both can be sent together.
+ */
+export async function sendRatingAndComment(
+    campusId: string,
+    cursusId: string,
+    type: string,
+    typeId: string,
+    userId: string,
+    rating: number | null,
+    comment: string | null
+): Promise<void> {
+    const promises: Promise<void>[] = [];
+
+    // Send rating if provided and > 0
+    if (rating && rating > 0) {
+        const ratingRef = ref(
+            database,
+            `campus/${campusId}/cursus/${cursusId}/${type}/${typeId}/ratings/${userId}`
+        );
+        promises.push(set(ratingRef, rating));
+    }
+
+    // Send comment if provided and not empty
+    if (comment && comment.trim().length > 0) {
+        const commentRef = ref(
+            database,
+            `campus/${campusId}/cursus/${cursusId}/${type}/${typeId}/comments/${userId}`
+        );
+        promises.push(set(commentRef, comment.trim()));
+    }
+
+    // Execute both operations
+    if (promises.length > 0) {
+        await Promise.all(promises);
+    }
+}
+
 export interface UserPresence {
     id: number;
     kind: string;
