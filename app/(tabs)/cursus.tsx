@@ -62,9 +62,7 @@ export default function CursusScreen() {
             const cursusId = await getItem("cursus_id");
             const campusName = await getItem("campus_name");
             const isStaff = await getItem("staff");
-            console.warn(
-                `userId: ${userId}\ncampusId: ${campusId}\ncursusId: ${cursusId}\ncampusName: ${campusName}\nisStaff: ${isStaff}`
-            );
+            
             if (campusId && userId) {
                 setUser({
                     id: userId,
