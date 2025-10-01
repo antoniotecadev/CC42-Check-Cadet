@@ -1,4 +1,5 @@
 import { getComment, sendRatingAndComment } from "@/repository/userRepository";
+import { MaterialIcons } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
 import {
     ActivityIndicator,
@@ -48,6 +49,8 @@ export default function CommentBox({
     const [loadingComment, setLoadingComment] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     const [saved, setSaved] = useState<boolean>(false);
+    const [isAnonymous, setIsAnonymous] = useState<boolean>(false);
+    const [showAnonymousOption, setShowAnonymousOption] = useState<boolean>(false);
 
     useEffect(() => {
         let mounted = true;
@@ -55,7 +58,7 @@ export default function CommentBox({
             if (!campusId || !cursusId || !userId || !typeId) return;
             setLoadingComment(true);
             try {
-                const c = await getComment(
+                const result = await getComment(
                     String(campusId),
                     String(cursusId),
                     type,
@@ -63,8 +66,11 @@ export default function CommentBox({
                     String(userId)
                 );
                 if (mounted) {
-                    setComment(c ?? "");
-                    setSaved(Boolean(c && String(c).trim().length > 0));
+                    setComment(result.comment ?? "");
+                    setIsAnonymous(result.isAnonymous);
+                    setSaved(Boolean(result.comment && String(result.comment).trim().length > 0));
+                    // Show anonymous option if there's already a comment or if it was anonymous
+                    setShowAnonymousOption(Boolean(result.comment && String(result.comment).trim().length > 0) || result.isAnonymous);
                 }
             } catch (e: any) {
                 if (mounted) setError(e?.message ?? String(e));
@@ -104,7 +110,8 @@ export default function CommentBox({
                 String(typeId),
                 String(userId),
                 hasRating ? userRating : null,
-                hasComment ? comment.trim() : null
+                hasComment ? comment.trim() : null,
+                hasComment ? isAnonymous : false
             );
             setSaved(true);
             Keyboard.dismiss();
@@ -148,6 +155,7 @@ export default function CommentBox({
                                         if (t.length <= MAX_LEN && !saved)
                                             setComment(t);
                                     }}
+                                    onFocus={() => !saved && setShowAnonymousOption(true)}
                                     placeholder="Escreva seu comentário"
                                     style={[
                                         integrated
@@ -163,6 +171,24 @@ export default function CommentBox({
                                 <Text style={styles.counter}>
                                     {String(comment?.length ?? 0)}/{MAX_LEN}
                                 </Text>
+                                
+                                {/* Anonymous checkbox - show when focused or has content */}
+                                {showAnonymousOption && !saved && (
+                                    <TouchableOpacity
+                                        style={styles.checkboxContainer}
+                                        onPress={() => setIsAnonymous(!isAnonymous)}
+                                        disabled={saved}
+                                    >
+                                        <MaterialIcons
+                                            name={isAnonymous ? "check-box" : "check-box-outline-blank"}
+                                            size={20}
+                                            color={isAnonymous ? "#3A86FF" : "#888"}
+                                        />
+                                        <Text style={styles.checkboxLabel}>
+                                            Comentário anônimo
+                                        </Text>
+                                    </TouchableOpacity>
+                                )}
                                 {error ? (
                                     <Text style={styles.error}>{error}</Text>
                                 ) : null}
@@ -200,8 +226,8 @@ export default function CommentBox({
                                         <Text style={styles.savedText}>
                                             ✓{" "}
                                             {hasExistingRating
-                                                ? "Comentário salvo"
-                                                : "Avaliação e comentário salvos"}
+                                                ? `Comentário ${isAnonymous ? "(anônimo) " : ""}salvo`
+                                                : `Avaliação e comentário ${isAnonymous ? "(anônimo) " : ""}salvos`}
                                         </Text>
                                     </View>
                                 )}
@@ -237,6 +263,7 @@ export default function CommentBox({
                                             if (t.length <= MAX_LEN && !saved)
                                                 setComment(t);
                                         }}
+                                        onFocus={() => !saved && setShowAnonymousOption(true)}
                                         placeholder="Escreva seu comentário"
                                         style={[
                                             integrated
@@ -252,6 +279,24 @@ export default function CommentBox({
                                     <Text style={styles.counter}>
                                         {String(comment?.length ?? 0)}/{MAX_LEN}
                                     </Text>
+                                    
+                                    {/* Anonymous checkbox - show when focused or has content */}
+                                    {showAnonymousOption && !saved && (
+                                        <TouchableOpacity
+                                            style={styles.checkboxContainer}
+                                            onPress={() => setIsAnonymous(!isAnonymous)}
+                                            disabled={saved}
+                                        >
+                                            <MaterialIcons
+                                                name={isAnonymous ? "check-box" : "check-box-outline-blank"}
+                                                size={20}
+                                                color={isAnonymous ? "#3A86FF" : "#888"}
+                                            />
+                                            <Text style={styles.checkboxLabel}>
+                                                Comentário anônimo
+                                            </Text>
+                                        </TouchableOpacity>
+                                    )}
                                     {error ? (
                                         <Text style={styles.error}>
                                             {error}
@@ -292,11 +337,11 @@ export default function CommentBox({
                                                 ✓{" "}
                                                 {hasExistingRating &&
                                                 comment.trim().length > 0
-                                                    ? "Avaliação e comentário salvos"
+                                                    ? `Avaliação e comentário ${isAnonymous ? "(anônimo) " : ""}salvos`
                                                     : hasExistingRating
                                                     ? "Avaliação salva"
                                                     : comment.trim().length > 0
-                                                    ? "Comentário salvo"
+                                                    ? `Comentário ${isAnonymous ? "(anônimo) " : ""}salvo`
                                                     : null}
                                             </Text>
                                         </View>
@@ -402,5 +447,17 @@ const styles = StyleSheet.create({
         color: "#4CAF50",
         fontWeight: "600",
         fontSize: 14,
+    },
+    checkboxContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginBottom: 12,
+        alignSelf: "flex-start",
+    },
+    checkboxLabel: {
+        marginLeft: 8,
+        color: "#666",
+        fontSize: 14,
+        fontWeight: "500",
     },
 });

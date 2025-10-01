@@ -6,6 +6,7 @@ import { get, ref, set } from "firebase/database";
 /**
  * Send a comment for a specific item (meal or event).
  * Stores the comment under: campus/{campusId}/cursus/{cursusId}/{type}/{typeId}/comments/{userId}
+ * Structure: { comment: string, isAnonymous: boolean }
  */
 export function sendComment(
     campusId: string,
@@ -13,20 +14,26 @@ export function sendComment(
     type: string,
     typeId: string,
     userId: string,
-    comment: string
+    comment: string,
+    anonymous: boolean = false
 ): Promise<void> {
     const commentRef = ref(
         database,
         `campus/${campusId}/cursus/${cursusId}/${type}/${typeId}/comments/${userId}`
     );
 
+    const commentData = {
+        comment: comment,
+        isAnonymous: anonymous
+    };
+
     // Return the promise so callers can await and handle errors
-    return set(commentRef, comment);
+    return set(commentRef, commentData);
 }
 
 /**
  * Get a comment for a specific item (meal or event) by a user.
- * Returns the comment string or null if not present.
+ * Returns the comment string and isAnonymous flag, or null if not present.
  */
 export async function getComment(
     campusId: string,
@@ -34,17 +41,34 @@ export async function getComment(
     type: string,
     typeId: string,
     userId: string
-): Promise<string | null> {
+): Promise<{ comment: string | null; isAnonymous: boolean }> {
     const commentRef = ref(
         database,
         `campus/${campusId}/cursus/${cursusId}/${type}/${typeId}/comments/${userId}`
     );
-
+    
     const snapshot = await get(commentRef);
     if (snapshot.exists()) {
-        return snapshot.val() as string;
+        const data = snapshot.val();
+        
+        // Handle both old format (string) and new format (object)
+        if (typeof data === 'string') {
+            return {
+                comment: data,
+                isAnonymous: false
+            };
+        } else if (data && typeof data === 'object') {
+            return {
+                comment: data.comment || null,
+                isAnonymous: data.isAnonymous || false
+            };
+        }
     }
-    return null;
+    
+    return {
+        comment: null,
+        isAnonymous: false
+    };
 }
 
 export async function userIsPresentOrSubscribed({
@@ -99,6 +123,7 @@ export function rate(
  * If rating is 0 or null, only comment is sent.
  * If comment is empty, only rating is sent.
  * Both can be sent together.
+ * Comment structure: { comment: string, isAnonymous: boolean }
  */
 export async function sendRatingAndComment(
     campusId: string,
@@ -107,11 +132,12 @@ export async function sendRatingAndComment(
     typeId: string,
     userId: string,
     rating: number | null,
-    comment: string | null
+    comment: string | null,
+    anonymous: boolean = false
 ): Promise<void> {
     const promises: Promise<void>[] = [];
 
-    // Send rating if provided and > 0
+    // Send rating if provided and > 0 (ratings are never anonymous)
     if (rating && rating > 0) {
         const ratingRef = ref(
             database,
@@ -126,7 +152,11 @@ export async function sendRatingAndComment(
             database,
             `campus/${campusId}/cursus/${cursusId}/${type}/${typeId}/comments/${userId}`
         );
-        promises.push(set(commentRef, comment.trim()));
+        const commentData = {
+            comment: comment.trim(),
+            isAnonymous: anonymous
+        };
+        promises.push(set(commentRef, commentData));
     }
 
     // Execute both operations

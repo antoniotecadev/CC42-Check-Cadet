@@ -110,7 +110,7 @@ export default function RatingSection({
                     {/* Seção de avaliação por estrelas */}
                     <View style={localStyles.ratingSection}>
                         <Text style={localStyles.ratingLabel}>
-                            {rating?.userRating ? "Sua avaliação:" : "Avalie com estrelas"}
+                            {rating?.userRating ? "Sua avaliação" : "Avalie com estrelas"}
                         </Text>
                         <View style={localStyles.starsContainer}>
                             <View style={styles.starsRowSmall}>
