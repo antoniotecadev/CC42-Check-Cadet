@@ -38,6 +38,21 @@ import { ThemedView } from "../ThemedView";
 import Chip from "./Chip";
 import WebCameraCapture from "./WebCameraCapture";
 
+// Tipos para resolver problemas de tipagem
+interface SubcategoryItem {
+    name: string;
+    icon: string;
+    items: string[];
+}
+
+interface Category {
+    id: string;
+    name: string;
+    icon: string;
+    color: string;
+    subcategories: Record<string, SubcategoryItem>;
+}
+
 interface Props {
     visible: boolean;
     onClose: () => void;
@@ -71,11 +86,69 @@ export default function CreateMealModal({
     const [mealValue, setMealValue] = useState<string>("");
     const [image, setImage] = useState<string | null>(null);
     const [showCameraWeb, setShowCameraWeb] = useState<boolean>(false);
+    
+    // Novo sistema de seleção em etapas
+    const [selectedCategory, setSelectedCategory] = useState<string>("");
+    const [selectedSubcategory, setSelectedSubcategory] = useState<string>("");
+    const [showCategorySelector, setShowCategorySelector] = useState<boolean>(false);
 
     const { color } = useColorCoalition();
     const { showError, showInfo } = useAlert();
     const { createMeal, updateMealData, updateMealImage, loading } =
         useCreateMeal();
+
+    // Estrutura organizada de categorias
+    const categories = {
+        carbohydrates: {
+            id: 'carbohydrates',
+            name: 'CARBOIDRATOS',
+            icon: '🍚',
+            color: '#4A90E2',
+            subcategories: {
+                rice: { name: carbohydrates[0], icon: '🍚', items: riceList },
+                pasta: { name: carbohydrates[1], icon: '🍝', items: pastaList },
+                funge: { name: carbohydrates[2], icon: '🥣', items: fungeList },
+                potato: { name: carbohydrates[3], icon: '🥔', items: potatoList },
+                bread: { name: carbohydrates[4], icon: '🍞', items: breadsList }
+            }
+        },
+        proteins: {
+            id: 'proteins',
+            name: 'PROTEÍNAS, VEGETAIS E LEGUMINOSAS',
+            icon: '🥩',
+            color: '#E74C3C',
+            subcategories: {
+                legumes: { name: proteinsLegumesVegetables[0], icon: '🫘', items: leguminousList },
+                meats: { name: proteinsLegumesVegetables[1], icon: '🥩', items: meatsList },
+                eggs: { name: proteinsLegumesVegetables[2], icon: '🥚', items: eggsList },
+                vegetables: { name: proteinsLegumesVegetables[3], icon: '🥬', items: vegetablesAndSaladsList },
+                sauces: { name: proteinsLegumesVegetables[4], icon: '🍯', items: saucesList }
+            }
+        }
+    };
+
+    const addIngredient = (ingredient: string) => {
+        if (!tags.includes(ingredient)) {
+            setTags([...tags, ingredient]);
+        }
+        setShowCategorySelector(false);
+        setSelectedCategory("");
+        setSelectedSubcategory("");
+    };
+
+    // Helper functions para acessar categories de forma type-safe
+    const getSelectedCategory = (): Category | null => {
+        return selectedCategory && categories[selectedCategory as keyof typeof categories] 
+            ? categories[selectedCategory as keyof typeof categories] 
+            : null;
+    };
+
+    const getSelectedSubcategory = (): SubcategoryItem | null => {
+        const category = getSelectedCategory();
+        return category && selectedSubcategory && category.subcategories[selectedSubcategory] 
+            ? category.subcategories[selectedSubcategory] 
+            : null;
+    };
 
     const removeTag = (tagToRemove: string) => {
         setTags(tags.filter((tag) => tag !== tagToRemove));
@@ -360,30 +433,21 @@ export default function CreateMealModal({
                                             ))}
                                         </Picker>
                                     ))}
-                                <TextInput
-                                    onPress={() =>
-                                        setShowPicker((prev) => ({
-                                            ...prev,
-                                            mealDescription:
-                                                !showPicker.mealDescription,
-                                            mealType: false,
-                                        }))
-                                    }
-                                    editable={false}
+                                <TouchableOpacity
+                                    onPress={() => setShowCategorySelector(!showCategorySelector)}
                                     style={[
                                         styles.input,
-                                        { borderColor: color },
+                                        { borderColor: color, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
                                     ]}
-                                    placeholder="Descrição"
-                                    value={tags.toString()}
-                                    multiline
-                                />
-                                <View
-                                    style={{
-                                        flexDirection: "row",
-                                        flexWrap: "wrap",
-                                    }}
                                 >
+                                    <Text style={{ color: tags.length > 0 ? '#333' : '#999' }}>
+                                        {tags.length > 0 ? 'Ingredientes selecionados' : 'Adicionar ingredientes'}
+                                    </Text>
+                                    <Ionicons name="chevron-down" size={20} color="#666" />
+                                </TouchableOpacity>
+                                
+                                {/* Chips dos ingredientes selecionados */}
+                                <View style={{ flexDirection: "row", flexWrap: "wrap", marginBottom: 10 }}>
                                     {tags.map((tag) => (
                                         <Chip
                                             key={tag}
@@ -392,219 +456,109 @@ export default function CreateMealModal({
                                         />
                                     ))}
                                 </View>
-                                {(showPicker.mealDescription || isWeb) &&
-                                    (isWeb ? (
-                                        <select
-                                            value={mealValue}
-                                            onChange={(e) => {
-                                                if (
-                                                    typeof e.target.value ===
-                                                        "string" &&
-                                                    isNaN(
-                                                        Number(e.target.value)
-                                                    ) &&
-                                                    !tags.includes(
-                                                        e.target.value
-                                                    )
-                                                ) {
-                                                    setTags([
-                                                        ...tags,
-                                                        e.target.value,
-                                                    ]);
-                                                }
-                                                setMealValue(e.target.value);
-                                            }}
-                                            style={{
-                                                padding: "12px 16px",
-                                                fontSize: 16,
-                                                borderRadius: 8,
-                                                border: `1px solid ${color}`,
-                                                background: "#fafafa",
-                                                color: "#333",
-                                                marginBottom: 10,
-                                                outline: "none",
-                                                width: "100%",
-                                                appearance: "none",
-                                                WebkitAppearance: "none",
-                                                MozAppearance: "none",
-                                                boxShadow:
-                                                    "0 1px 4px rgba(0,0,0,0.04)",
-                                                cursor: "pointer",
+
+                                {/* Seletor de categorias em etapas */}
+                                {showCategorySelector && (
+                                    <View style={styles.categorySelector}>
+                                        {!selectedCategory ? (
+                                            // Etapa 1: Selecionar categoria principal
+                                            <View>
+                                                <Text style={styles.selectorTitle}>Escolha uma categoria:</Text>
+                                                <View style={styles.categoryGrid}>
+                                                    {Object.values(categories).map((category) => (
+                                                        <TouchableOpacity
+                                                            key={category.id}
+                                                            style={[styles.categoryCard, { borderColor: category.color }]}
+                                                            onPress={() => setSelectedCategory(category.id)}
+                                                        >
+                                                            <Text style={styles.categoryIcon}>{category.icon}</Text>
+                                                            <Text style={[styles.categoryName, { color: category.color }]}>
+                                                                {category.name}
+                                                            </Text>
+                                                        </TouchableOpacity>
+                                                    ))}
+                                                </View>
+                                            </View>
+                                        ) : !selectedSubcategory ? (
+                                            // Etapa 2: Selecionar subcategoria
+                                            <View>
+                                                <View style={styles.breadcrumb}>
+                                                    <TouchableOpacity onPress={() => setSelectedCategory("")}>
+                                                        <Text style={styles.breadcrumbText}>
+                                                            {categories[selectedCategory as keyof typeof categories].icon} {categories[selectedCategory as keyof typeof categories].name}
+                                                        </Text>
+                                                    </TouchableOpacity>
+                                                    <Text style={styles.breadcrumbSeparator}>  </Text>
+                                                    <Text style={styles.breadcrumbCurrent}>Escolha o tipo:</Text>
+                                                </View>
+                                                <View style={styles.subcategoryList}>
+                                                    {Object.entries(categories[selectedCategory as keyof typeof categories].subcategories).map(([key, subcategory]) => (
+                                                        <TouchableOpacity
+                                                            key={key}
+                                                            style={styles.subcategoryItem}
+                                                            onPress={() => setSelectedSubcategory(key)}
+                                                        >
+                                                            <Text style={styles.subcategoryIcon}>{subcategory.icon}</Text>
+                                                            <Text style={styles.subcategoryName}>{subcategory.name}</Text>
+                                                            <Ionicons name="chevron-forward" size={16} color="#666" />
+                                                        </TouchableOpacity>
+                                                    ))}
+                                                </View>
+                                            </View>
+                                        ) : (
+                                            // Etapa 3: Selecionar item específico
+                                            <View>
+                                                <View style={styles.breadcrumb}>
+                                                    <TouchableOpacity onPress={() => setSelectedCategory("")}>
+                                                        <Text style={styles.breadcrumbText}>{getSelectedCategory()?.icon}</Text>
+                                                    </TouchableOpacity>
+                                                    <Text style={styles.breadcrumbSeparator}> {'>'}  </Text>
+                                                    <TouchableOpacity onPress={() => setSelectedSubcategory("")}>
+                                                        <Text style={styles.breadcrumbText}>
+                                                            {getSelectedSubcategory()?.name}
+                                                        </Text>
+                                                    </TouchableOpacity>
+                                                    <Text style={styles.breadcrumbSeparator}> {'>'}  </Text>
+                                                    <Text style={styles.breadcrumbCurrent}>Selecione:</Text>
+                                                </View>
+                                                <View style={styles.itemsList}>
+                                                    {getSelectedSubcategory()?.items?.map((item) => (
+                                                        <TouchableOpacity
+                                                            key={item}
+                                                            style={[
+                                                                styles.itemButton,
+                                                                tags.includes(item) && styles.itemSelected
+                                                            ]}
+                                                            onPress={() => addIngredient(item)}
+                                                        >
+                                                            <Text style={[
+                                                                styles.itemText,
+                                                                tags.includes(item) && styles.itemTextSelected
+                                                            ]}>
+                                                                {item}
+                                                            </Text>
+                                                            {tags.includes(item) && (
+                                                                <Ionicons name="checkmark" size={16} color="#fff" />
+                                                            )}
+                                                        </TouchableOpacity>
+                                                    )) || null}
+                                                </View>
+                                            </View>
+                                        )}
+                                        
+                                        {/* Botão fechar */}
+                                        <TouchableOpacity
+                                            style={styles.closeSelector}
+                                            onPress={() => {
+                                                setShowCategorySelector(false);
+                                                setSelectedCategory("");
+                                                setSelectedSubcategory("");
                                             }}
                                         >
-                                            <option key={0} value={"0"}>
-                                                {"CARBOIDRATO"}
-                                            </option>
-                                            <option
-                                                key={1}
-                                                value={carbohydrates[0]}
-                                            >
-                                                {carbohydrates[0]}
-                                            </option>
-                                            {PickerItemDescription(riceList)}
-                                            <option
-                                                key={2}
-                                                value={carbohydrates[1]}
-                                            >
-                                                {carbohydrates[1]}
-                                            </option>
-                                            {PickerItemDescription(pastaList)}
-                                            <option
-                                                key={3}
-                                                value={carbohydrates[2]}
-                                            >
-                                                {carbohydrates[2]}
-                                            </option>
-                                            {PickerItemDescription(fungeList)}
-                                            <option
-                                                key={4}
-                                                value={carbohydrates[3]}
-                                            >
-                                                {carbohydrates[3]}
-                                            </option>
-                                            {PickerItemDescription(potatoList)}
-                                            <option
-                                                key={5}
-                                                value={carbohydrates[4]}
-                                            >
-                                                {carbohydrates[4]}
-                                            </option>
-                                            {PickerItemDescription(breadsList)}
-                                            <option key={6} value={"1"}>
-                                                {
-                                                    "PROTEÍNAS, VEGETAIS E LEGUMENOSES"
-                                                }
-                                            </option>
-                                            <option key={7} value={"2"}>
-                                                {proteinsLegumesVegetables[0]}
-                                            </option>
-                                            {PickerItemDescription(
-                                                leguminousList
-                                            )}
-                                            <option key={8} value={"3"}>
-                                                {proteinsLegumesVegetables[1]}
-                                            </option>
-                                            {PickerItemDescription(meatsList)}
-
-                                            <option key={9} value={"4"}>
-                                                {proteinsLegumesVegetables[2]}
-                                            </option>
-                                            {PickerItemDescription(eggsList)}
-
-                                            <option key={10} value={"5"}>
-                                                {proteinsLegumesVegetables[3]}
-                                            </option>
-                                            {PickerItemDescription(
-                                                vegetablesAndSaladsList
-                                            )}
-                                            <option key={11} value={"6"}>
-                                                {proteinsLegumesVegetables[4]}
-                                            </option>
-                                            {PickerItemDescription(saucesList)}
-                                        </select>
-                                    ) : (
-                                        <Picker
-                                            selectedValue={mealValue}
-                                            onValueChange={(value) => {
-                                                if (
-                                                    typeof value === "string" &&
-                                                    isNaN(Number(value)) &&
-                                                    !tags.includes(value)
-                                                ) {
-                                                    setTags([...tags, value]);
-                                                }
-                                                setMealValue(value);
-                                            }}
-                                            style={{ color: "#333" }}
-                                        >
-                                            <Picker.Item
-                                                key={0}
-                                                label={"CARBOIDRATO"}
-                                                value={"0"}
-                                            />
-                                            <Picker.Item
-                                                key={1}
-                                                label={carbohydrates[0]}
-                                                value={carbohydrates[0]}
-                                            />
-                                            {PickerItemDescription(riceList)}
-                                            <Picker.Item
-                                                key={2}
-                                                label={carbohydrates[1]}
-                                                value={carbohydrates[1]}
-                                            />
-                                            {PickerItemDescription(pastaList)}
-                                            <Picker.Item
-                                                key={3}
-                                                label={carbohydrates[2]}
-                                                value={carbohydrates[2]}
-                                            />
-                                            {PickerItemDescription(fungeList)}
-                                            <Picker.Item
-                                                key={4}
-                                                label={carbohydrates[3]}
-                                                value={carbohydrates[3]}
-                                            />
-                                            {PickerItemDescription(potatoList)}
-                                            <Picker.Item
-                                                key={5}
-                                                label={carbohydrates[4]}
-                                                value={carbohydrates[4]}
-                                            />
-                                            {PickerItemDescription(breadsList)}
-                                            <Picker.Item
-                                                key={6}
-                                                label={
-                                                    "PROTEÍNAS, VEGETAIS E LEGUMENOSES"
-                                                }
-                                                value={"1"}
-                                            />
-                                            <Picker.Item
-                                                key={7}
-                                                label={
-                                                    proteinsLegumesVegetables[0]
-                                                }
-                                                value={"2"}
-                                            />
-                                            {PickerItemDescription(
-                                                leguminousList
-                                            )}
-                                            <Picker.Item
-                                                key={8}
-                                                label={
-                                                    proteinsLegumesVegetables[1]
-                                                }
-                                                value={"3"}
-                                            />
-                                            {PickerItemDescription(meatsList)}
-                                            <Picker.Item
-                                                key={9}
-                                                label={
-                                                    proteinsLegumesVegetables[2]
-                                                }
-                                                value={"4"}
-                                            />
-                                            {PickerItemDescription(eggsList)}
-                                            <Picker.Item
-                                                key={10}
-                                                label={
-                                                    proteinsLegumesVegetables[3]
-                                                }
-                                                value={"5"}
-                                            />
-                                            {PickerItemDescription(
-                                                vegetablesAndSaladsList
-                                            )}
-                                            <Picker.Item
-                                                key={11}
-                                                label={
-                                                    proteinsLegumesVegetables[4]
-                                                }
-                                                value={"6"}
-                                            />
-                                            {PickerItemDescription(saucesList)}
-                                        </Picker>
-                                    ))}
+                                            <Text style={styles.closeSelectorText}>Fechar</Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                )}
                                 <TextInput
                                     onPress={() =>
                                         setShowPicker((prev) => ({
@@ -754,5 +708,127 @@ const styles = StyleSheet.create({
         width: "100%",
         maxWidth: 600, // limite superior
         marginHorizontal: "auto", // centraliza na web (usando style prop em web pura)
+    },
+    // Estilos para o novo seletor de categorias
+    categorySelector: {
+        backgroundColor: '#f8f9fa',
+        borderRadius: 12,
+        padding: 16,
+        marginBottom: 16,
+        borderWidth: 1,
+        borderColor: '#e9ecef',
+    },
+    selectorTitle: {
+        fontSize: 16,
+        fontWeight: '600',
+        marginBottom: 12,
+        color: '#333',
+        textAlign: 'center',
+    },
+    categoryGrid: {
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        marginBottom: 16,
+    },
+    categoryCard: {
+        flex: 1,
+        alignItems: 'center',
+        padding: 16,
+        margin: 4,
+        borderRadius: 12,
+        borderWidth: 2,
+        backgroundColor: '#fff',
+    },
+    categoryIcon: {
+        fontSize: 24,
+        marginBottom: 8,
+    },
+    categoryName: {
+        fontSize: 12,
+        fontWeight: '600',
+        textAlign: 'center',
+    },
+    breadcrumb: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 12,
+        paddingBottom: 8,
+        borderBottomWidth: 1,
+        borderBottomColor: '#e9ecef',
+    },
+    breadcrumbText: {
+        color: '#007AFF',
+        fontSize: 14,
+        fontWeight: '500',
+    },
+    breadcrumbSeparator: {
+        color: '#666',
+        fontSize: 14,
+    },
+    breadcrumbCurrent: {
+        color: '#333',
+        fontSize: 14,
+        fontWeight: '600',
+    },
+    subcategoryList: {
+        marginBottom: 16,
+    },
+    subcategoryItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 12,
+        marginVertical: 2,
+        backgroundColor: '#fff',
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#e9ecef',
+    },
+    subcategoryIcon: {
+        fontSize: 20,
+        marginRight: 12,
+    },
+    subcategoryName: {
+        flex: 1,
+        fontSize: 14,
+        fontWeight: '500',
+        color: '#333',
+    },
+    itemsList: {
+        marginBottom: 16,
+    },
+    itemButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: 10,
+        marginVertical: 1,
+        backgroundColor: '#fff',
+        borderRadius: 6,
+        borderWidth: 1,
+        borderColor: '#e9ecef',
+    },
+    itemSelected: {
+        backgroundColor: '#007AFF',
+        borderColor: '#007AFF',
+    },
+    itemText: {
+        fontSize: 14,
+        color: '#333',
+    },
+    itemTextSelected: {
+        color: '#fff',
+        fontWeight: '500',
+    },
+    closeSelector: {
+        alignSelf: 'center',
+        paddingVertical: 8,
+        paddingHorizontal: 16,
+        backgroundColor: '#6c757d',
+        borderRadius: 6,
+    },
+    closeSelectorText: {
+        color: '#fff',
+        fontSize: 14,
+        fontWeight: '500',
     },
 });
