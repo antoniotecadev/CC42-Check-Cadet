@@ -50,6 +50,9 @@ export default function CursusScreen() {
         campus_name: null,
     });
 
+    // IDs prioritários
+    const priorityIds = [21, 66, 9, 3];
+
     const borderColor = colorScheme === "light" ? "#f0f0f0" : "#333";
 
     useEffect(() => {
@@ -59,7 +62,9 @@ export default function CursusScreen() {
             const cursusId = await getItem("cursus_id");
             const campusName = await getItem("campus_name");
             const isStaff = await getItem("staff");
-            console.warn(`userId: ${userId}\ncampusId: ${campusId}\ncursusId: ${cursusId}\ncampusName: ${campusName}\nisStaff: ${isStaff}`);
+            console.warn(
+                `userId: ${userId}\ncampusId: ${campusId}\ncursusId: ${cursusId}\ncampusName: ${campusName}\nisStaff: ${isStaff}`
+            );
             if (campusId && userId) {
                 setUser({
                     id: userId,
@@ -81,9 +86,9 @@ export default function CursusScreen() {
         pageSize = 100
     ) => {
         let res;
-        if (user.isStaff) {
+        if (!user.isStaff) {
             res = await api.get("/v2/cursus", {
-                params: { "page[number]": pageNumber, "page[size]": pageSize },
+                params: { "page[number]": pageNumber, "page[size]": pageSize, "filter[id]": priorityIds.join(',') },
             });
         } else {
             const response = await api.get(`/v2/cursus/${user.cursus_id}`);
@@ -106,9 +111,6 @@ export default function CursusScreen() {
                 cursu.name.toLowerCase().includes(search.toLowerCase()) ||
                 String(cursu.id).includes(search)
         ) || [];
-
-    // IDs prioritários
-    const priorityIds = [21, 66, 9, 3];
 
     // Ordena os cursus: prioritários primeiro, depois os demais
     const sortedFiltered = React.useMemo(() => {
@@ -169,13 +171,33 @@ export default function CursusScreen() {
                         style={{ marginTop: 32 }}
                     />
                 ) : isError ? (
-                    <ThemedText lightColor="#888" style={styles.notFound}>
-                        Erro ao carregar cursus.
-                    </ThemedText>
+                    <>
+                        <ThemedText lightColor="#888" style={styles.notFound}>
+                            Erro ao carregar cursus.
+                        </ThemedText>
+                        <ThemedText
+                            onPress={onRefresh}
+                            type="link"
+                            lightColor="#888"
+                            style={styles.notFound}
+                        >
+                            Tentar novamente
+                        </ThemedText>
+                    </>
                 ) : filtered.length === 0 ? (
-                    <ThemedText lightColor="#888" style={styles.notFound}>
-                        Nenhum cursus encontrado.
-                    </ThemedText>
+                    <>
+                        <ThemedText lightColor="#888" style={styles.notFound}>
+                            Nenhum cursus encontrado.
+                        </ThemedText>
+                        <ThemedText
+                            onPress={onRefresh}
+                            type="link"
+                            lightColor="#888"
+                            style={styles.notFound}
+                        >
+                            Tentar novamente
+                        </ThemedText>
+                    </>
                 ) : (
                     <FlashList
                         data={sortedFiltered}
@@ -213,7 +235,12 @@ export default function CursusScreen() {
                                     >
                                         {item.name}
                                     </ThemedText>
-                                    <Text style={styles.id}>ID: {item.id} - Criado em: {new Date(item.created_at).toLocaleDateString()}</Text>
+                                    <Text style={styles.id}>
+                                        ID: {item.id} - Criado em:{" "}
+                                        {new Date(
+                                            item.created_at
+                                        ).toLocaleDateString()}
+                                    </Text>
                                 </View>
                             </TouchableOpacity>
                         )}
