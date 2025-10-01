@@ -157,6 +157,7 @@ export default function CommentBox({
                                     }}
                                     onFocus={() => !saved && setShowAnonymousOption(true)}
                                     placeholder="Escreva seu comentário"
+                                    placeholderTextColor={"#ccc"}
                                     style={[
                                         integrated
                                             ? styles.inputIntegrated
@@ -265,6 +266,7 @@ export default function CommentBox({
                                         }}
                                         onFocus={() => !saved && setShowAnonymousOption(true)}
                                         placeholder="Escreva seu comentário"
+                                        placeholderTextColor={"#ccc"}
                                         style={[
                                             integrated
                                                 ? styles.inputIntegrated
