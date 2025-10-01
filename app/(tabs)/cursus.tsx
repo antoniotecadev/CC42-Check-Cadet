@@ -86,7 +86,7 @@ export default function CursusScreen() {
         pageSize = 100
     ) => {
         let res;
-        if (!user.isStaff) {
+        if (user.isStaff) {
             res = await api.get("/v2/cursus", {
                 params: { "page[number]": pageNumber, "page[size]": pageSize, "filter[id]": priorityIds.join(',') },
             });
