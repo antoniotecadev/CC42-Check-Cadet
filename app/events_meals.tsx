@@ -471,6 +471,70 @@ export default function EventUsersScreen() {
                         returnKeyType="search"
                         clearButtonMode="while-editing"
                     />
+                    
+                    {/* Chips na mesma linha do search */}
+                    <View style={styles.chipInlineRow}>
+                        <View style={[styles.chip, styles.chipPresent]}>
+                            <MaterialCommunityIcons
+                                name="account-check"
+                                size={16}
+                                color={colorscheme}
+                                style={{ marginRight: 2 }}
+                            />
+                            <Text style={[styles.chipText, { color: colorscheme, fontSize: 12 }]}>
+                                {numberPresenceORSubscribed}
+                            </Text>
+                        </View>
+                        <View style={[styles.chip, styles.chipAbsent]}>
+                            <MaterialCommunityIcons
+                                name="account-remove"
+                                size={16}
+                                color={colorscheme}
+                                style={{ marginRight: 2 }}
+                            />
+                            <Text style={[styles.chipText, { color: colorscheme, fontSize: 12 }]}>
+                                {numberAbsentsORUnSubscribed}
+                            </Text>
+                        </View>
+                        {mealId && (
+                            <>
+                                <View style={[styles.chip, styles.chipReceived]}>
+                                    <MaterialCommunityIcons
+                                        name="account-check"
+                                        size={16}
+                                        color={colorscheme}
+                                        style={{ marginRight: 2 }}
+                                    />
+                                    <Text
+                                        style={[
+                                            styles.chipText,
+                                            { color: colorscheme, fontSize: 12 },
+                                        ]}
+                                    >
+                                        {user.quantityReceived ?? 0}
+                                    </Text>
+                                </View>
+                                <View style={[styles.chip, styles.chipNotReceived]}>
+                                    <MaterialCommunityIcons
+                                        name="account-remove"
+                                        size={16}
+                                        color={colorscheme}
+                                        style={{ marginRight: 2 }}
+                                    />
+                                    <Text
+                                        style={[
+                                            styles.chipText,
+                                            { color: colorscheme, fontSize: 12 },
+                                        ]}
+                                    >
+                                        {Number(quantity) -
+                                            (user.quantityReceived ?? 0)}
+                                    </Text>
+                                </View>
+                            </>
+                        )}
+                    </View>
+
                     {staff && isWeb && (
                         <View style={styles.webMenuWrapper}>
                             <TouchableOpacity
@@ -486,68 +550,6 @@ export default function EventUsersScreen() {
                         </View>
                     )}
                     {/* filter menu moved to end to ensure overlay */}
-                </View>
-                {/* Chips de presentes e ausentes - agora absolutos no topo direito */}
-                <View style={styles.chipAbsoluteColumn}>
-                    <View style={[styles.chip, styles.chipPresent]}>
-                        <MaterialCommunityIcons
-                            name="account-check"
-                            size={18}
-                            color={colorscheme}
-                            style={{ marginRight: 4 }}
-                        />
-                        <Text style={[styles.chipText, { color: colorscheme }]}>
-                            {numberPresenceORSubscribed}
-                        </Text>
-                    </View>
-                    <View style={[styles.chip, styles.chipAbsent]}>
-                        <MaterialCommunityIcons
-                            name="account-remove"
-                            size={18}
-                            color={colorscheme}
-                            style={{ marginRight: 4 }}
-                        />
-                        <Text style={[styles.chipText, { color: colorscheme }]}>
-                            {numberAbsentsORUnSubscribed}
-                        </Text>
-                    </View>
-                    {mealId && (
-                        <>
-                            <View style={[styles.chip, styles.chipReceived]}>
-                                <MaterialCommunityIcons
-                                    name="account-check"
-                                    size={18}
-                                    color={colorscheme}
-                                    style={{ marginRight: 4 }}
-                                />
-                                <Text
-                                    style={[
-                                        styles.chipText,
-                                        { color: colorscheme },
-                                    ]}
-                                >
-                                    {user.quantityReceived ?? 0}
-                                </Text>
-                            </View>
-                            <View style={[styles.chip, styles.chipNotReceived]}>
-                                <MaterialCommunityIcons
-                                    name="account-remove"
-                                    size={18}
-                                    color={colorscheme}
-                                    style={{ marginRight: 4 }}
-                                />
-                                <Text
-                                    style={[
-                                        styles.chipText,
-                                        { color: colorscheme },
-                                    ]}
-                                >
-                                    {Number(quantity) -
-                                        (user.quantityReceived ?? 0)}
-                                </Text>
-                            </View>
-                        </>
-                    )}
                 </View>
                 <FlashList
                     data={userFilter}
@@ -836,6 +838,13 @@ const styles = StyleSheet.create({
         marginTop: 16,
         marginRight: 16,
         gap: 12,
+    },
+    chipInlineRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 6,
+        marginTop: 12,
+        justifyContent: "center",
     },
     chip: {
         flexDirection: "row",
