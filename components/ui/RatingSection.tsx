@@ -161,8 +161,8 @@ export default function RatingSection({
                 <View style={[localStyles.notPresentCard, { backgroundColor: color }]}>
                     <Text style={localStyles.notPresentText}>
                         {type === "events" 
-                            ? "📋 Você precisa estar presente no evento para avaliar" 
-                            : "🍽️ Você precisa estar subscrito na refeição para avaliar"}
+                            ? "📋 Você precisa estar presente no evento para avaliar e comentar" 
+                            : "🍽️ Você precisa estar subscrito na refeição para avaliar e comentar"}
                     </Text>
                 </View>
             )}
