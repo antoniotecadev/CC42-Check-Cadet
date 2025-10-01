@@ -86,11 +86,12 @@ export default function CreateMealModal({
     const [mealValue, setMealValue] = useState<string>("");
     const [image, setImage] = useState<string | null>(null);
     const [showCameraWeb, setShowCameraWeb] = useState<boolean>(false);
-    
+
     // Novo sistema de seleção em etapas
     const [selectedCategory, setSelectedCategory] = useState<string>("");
     const [selectedSubcategory, setSelectedSubcategory] = useState<string>("");
-    const [showCategorySelector, setShowCategorySelector] = useState<boolean>(false);
+    const [showCategorySelector, setShowCategorySelector] =
+        useState<boolean>(false);
 
     const { color } = useColorCoalition();
     const { showError, showInfo } = useAlert();
@@ -100,31 +101,59 @@ export default function CreateMealModal({
     // Estrutura organizada de categorias
     const categories = {
         carbohydrates: {
-            id: 'carbohydrates',
-            name: 'CARBOIDRATOS',
-            icon: '🍚',
-            color: '#4A90E2',
+            id: "carbohydrates",
+            name: "CARBOIDRATOS",
+            icon: "🍚",
+            color: "#4A90E2",
             subcategories: {
-                rice: { name: carbohydrates[0], icon: '🍚', items: riceList },
-                pasta: { name: carbohydrates[1], icon: '🍝', items: pastaList },
-                funge: { name: carbohydrates[2], icon: '🥣', items: fungeList },
-                potato: { name: carbohydrates[3], icon: '🥔', items: potatoList },
-                bread: { name: carbohydrates[4], icon: '🍞', items: breadsList }
-            }
+                rice: { name: carbohydrates[0], icon: "🍚", items: riceList },
+                pasta: { name: carbohydrates[1], icon: "🍝", items: pastaList },
+                funge: { name: carbohydrates[2], icon: "🥣", items: fungeList },
+                potato: {
+                    name: carbohydrates[3],
+                    icon: "🥔",
+                    items: potatoList,
+                },
+                bread: {
+                    name: carbohydrates[4],
+                    icon: "🍞",
+                    items: breadsList,
+                },
+            },
         },
         proteins: {
-            id: 'proteins',
-            name: 'PROTEÍNAS, VEGETAIS E LEGUMINOSAS',
-            icon: '🥩',
-            color: '#E74C3C',
+            id: "proteins",
+            name: "PROTEÍNAS, VEGETAIS E LEGUMINOSAS",
+            icon: "🥩",
+            color: "#E74C3C",
             subcategories: {
-                legumes: { name: proteinsLegumesVegetables[0], icon: '🫘', items: leguminousList },
-                meats: { name: proteinsLegumesVegetables[1], icon: '🥩', items: meatsList },
-                eggs: { name: proteinsLegumesVegetables[2], icon: '🥚', items: eggsList },
-                vegetables: { name: proteinsLegumesVegetables[3], icon: '🥬', items: vegetablesAndSaladsList },
-                sauces: { name: proteinsLegumesVegetables[4], icon: '🍯', items: saucesList }
-            }
-        }
+                legumes: {
+                    name: proteinsLegumesVegetables[0],
+                    icon: "🫘",
+                    items: leguminousList,
+                },
+                meats: {
+                    name: proteinsLegumesVegetables[1],
+                    icon: "🥩",
+                    items: meatsList,
+                },
+                eggs: {
+                    name: proteinsLegumesVegetables[2],
+                    icon: "🥚",
+                    items: eggsList,
+                },
+                vegetables: {
+                    name: proteinsLegumesVegetables[3],
+                    icon: "🥬",
+                    items: vegetablesAndSaladsList,
+                },
+                sauces: {
+                    name: proteinsLegumesVegetables[4],
+                    icon: "🍯",
+                    items: saucesList,
+                },
+            },
+        },
     };
 
     const addIngredient = (ingredient: string) => {
@@ -138,15 +167,18 @@ export default function CreateMealModal({
 
     // Helper functions para acessar categories de forma type-safe
     const getSelectedCategory = (): Category | null => {
-        return selectedCategory && categories[selectedCategory as keyof typeof categories] 
-            ? categories[selectedCategory as keyof typeof categories] 
+        return selectedCategory &&
+            categories[selectedCategory as keyof typeof categories]
+            ? categories[selectedCategory as keyof typeof categories]
             : null;
     };
 
     const getSelectedSubcategory = (): SubcategoryItem | null => {
         const category = getSelectedCategory();
-        return category && selectedSubcategory && category.subcategories[selectedSubcategory] 
-            ? category.subcategories[selectedSubcategory] 
+        return category &&
+            selectedSubcategory &&
+            category.subcategories[selectedSubcategory]
+            ? category.subcategories[selectedSubcategory]
             : null;
     };
 
@@ -283,7 +315,9 @@ export default function CreateMealModal({
             setType(initialMeal.type || "");
             setTags([...tags, initialMeal.description]);
             setQuantity(
-                initialMeal.quantityNotReceived ? String(initialMeal.quantityNotReceived) : "0"
+                initialMeal.quantityNotReceived
+                    ? String(initialMeal.quantityNotReceived)
+                    : "0"
             );
             setImage(initialMeal.pathImage || null);
         } else if (!visible) {
@@ -434,20 +468,48 @@ export default function CreateMealModal({
                                         </Picker>
                                     ))}
                                 <TouchableOpacity
-                                    onPress={() => setShowCategorySelector(!showCategorySelector)}
+                                    onPress={() =>
+                                        setShowCategorySelector(
+                                            !showCategorySelector
+                                        )
+                                    }
                                     style={[
                                         styles.input,
-                                        { borderColor: color, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+                                        {
+                                            borderColor: color,
+                                            flexDirection: "row",
+                                            alignItems: "center",
+                                            justifyContent: "space-between",
+                                        },
                                     ]}
                                 >
-                                    <Text style={{ color: tags.length > 0 ? '#333' : '#999' }}>
-                                        {tags.length > 0 ? 'Ingredientes selecionados' : 'Adicionar ingredientes'}
+                                    <Text
+                                        style={{
+                                            color:
+                                                tags.length > 0
+                                                    ? "#333"
+                                                    : "#999",
+                                        }}
+                                    >
+                                        {tags.length > 0
+                                            ? "Ingredientes selecionados"
+                                            : "Adicionar ingredientes"}
                                     </Text>
-                                    <Ionicons name="chevron-down" size={20} color="#666" />
+                                    <Ionicons
+                                        name="chevron-down"
+                                        size={20}
+                                        color="#666"
+                                    />
                                 </TouchableOpacity>
-                                
+
                                 {/* Chips dos ingredientes selecionados */}
-                                <View style={{ flexDirection: "row", flexWrap: "wrap", marginBottom: 10 }}>
+                                <View
+                                    style={{
+                                        flexDirection: "row",
+                                        flexWrap: "wrap",
+                                        marginBottom: 10,
+                                    }}
+                                >
                                     {tags.map((tag) => (
                                         <Chip
                                             key={tag}
@@ -463,16 +525,47 @@ export default function CreateMealModal({
                                         {!selectedCategory ? (
                                             // Etapa 1: Selecionar categoria principal
                                             <View>
-                                                <Text style={styles.selectorTitle}>Escolha uma categoria:</Text>
-                                                <View style={styles.categoryGrid}>
-                                                    {Object.values(categories).map((category) => (
+                                                <Text
+                                                    style={styles.selectorTitle}
+                                                >
+                                                    Escolha uma categoria:
+                                                </Text>
+                                                <View
+                                                    style={styles.categoryGrid}
+                                                >
+                                                    {Object.values(
+                                                        categories
+                                                    ).map((category) => (
                                                         <TouchableOpacity
                                                             key={category.id}
-                                                            style={[styles.categoryCard, { borderColor: category.color }]}
-                                                            onPress={() => setSelectedCategory(category.id)}
+                                                            style={[
+                                                                styles.categoryCard,
+                                                                {
+                                                                    borderColor:
+                                                                        category.color,
+                                                                },
+                                                            ]}
+                                                            onPress={() =>
+                                                                setSelectedCategory(
+                                                                    category.id
+                                                                )
+                                                            }
                                                         >
-                                                            <Text style={styles.categoryIcon}>{category.icon}</Text>
-                                                            <Text style={[styles.categoryName, { color: category.color }]}>
+                                                            <Text
+                                                                style={
+                                                                    styles.categoryIcon
+                                                                }
+                                                            >
+                                                                {category.icon}
+                                                            </Text>
+                                                            <Text
+                                                                style={[
+                                                                    styles.categoryName,
+                                                                    {
+                                                                        color: category.color,
+                                                                    },
+                                                                ]}
+                                                            >
                                                                 {category.name}
                                                             </Text>
                                                         </TouchableOpacity>
@@ -483,69 +576,202 @@ export default function CreateMealModal({
                                             // Etapa 2: Selecionar subcategoria
                                             <View>
                                                 <View style={styles.breadcrumb}>
-                                                    <TouchableOpacity onPress={() => setSelectedCategory("")}>
-                                                        <Text style={styles.breadcrumbText}>
-                                                            {categories[selectedCategory as keyof typeof categories].icon} {categories[selectedCategory as keyof typeof categories].name}
+                                                    <TouchableOpacity
+                                                        onPress={() =>
+                                                            setSelectedCategory(
+                                                                ""
+                                                            )
+                                                        }
+                                                    >
+                                                        <Text
+                                                            style={
+                                                                styles.breadcrumbText
+                                                            }
+                                                        >
+                                                            {
+                                                                categories[
+                                                                    selectedCategory as keyof typeof categories
+                                                                ].icon
+                                                            }{" "}
+                                                            {
+                                                                categories[
+                                                                    selectedCategory as keyof typeof categories
+                                                                ].name
+                                                            }
                                                         </Text>
                                                     </TouchableOpacity>
-                                                    <Text style={styles.breadcrumbSeparator}>  </Text>
-                                                    <Text style={styles.breadcrumbCurrent}>Escolha o tipo:</Text>
                                                 </View>
-                                                <View style={styles.subcategoryList}>
-                                                    {Object.entries(categories[selectedCategory as keyof typeof categories].subcategories).map(([key, subcategory]) => (
-                                                        <TouchableOpacity
-                                                            key={key}
-                                                            style={styles.subcategoryItem}
-                                                            onPress={() => setSelectedSubcategory(key)}
-                                                        >
-                                                            <Text style={styles.subcategoryIcon}>{subcategory.icon}</Text>
-                                                            <Text style={styles.subcategoryName}>{subcategory.name}</Text>
-                                                            <Ionicons name="chevron-forward" size={16} color="#666" />
-                                                        </TouchableOpacity>
-                                                    ))}
+                                                <Text
+                                                    style={
+                                                        styles.breadcrumbCurrent
+                                                    }
+                                                >
+                                                    Escolha o tipo:
+                                                </Text>
+                                                <View
+                                                    style={
+                                                        styles.subcategoryList
+                                                    }
+                                                >
+                                                    {Object.entries(
+                                                        categories[
+                                                            selectedCategory as keyof typeof categories
+                                                        ].subcategories
+                                                    ).map(
+                                                        ([
+                                                            key,
+                                                            subcategory,
+                                                        ]) => (
+                                                            <TouchableOpacity
+                                                                key={key}
+                                                                style={
+                                                                    styles.subcategoryItem
+                                                                }
+                                                                onPress={() =>
+                                                                    setSelectedSubcategory(
+                                                                        key
+                                                                    )
+                                                                }
+                                                            >
+                                                                <Text
+                                                                    style={
+                                                                        styles.subcategoryIcon
+                                                                    }
+                                                                >
+                                                                    {
+                                                                        subcategory.icon
+                                                                    }
+                                                                </Text>
+                                                                <Text
+                                                                    style={
+                                                                        styles.subcategoryName
+                                                                    }
+                                                                >
+                                                                    {
+                                                                        subcategory.name
+                                                                    }
+                                                                </Text>
+                                                                <Ionicons
+                                                                    name="chevron-forward"
+                                                                    size={16}
+                                                                    color="#666"
+                                                                />
+                                                            </TouchableOpacity>
+                                                        )
+                                                    )}
                                                 </View>
                                             </View>
                                         ) : (
                                             // Etapa 3: Selecionar item específico
                                             <View>
                                                 <View style={styles.breadcrumb}>
-                                                    <TouchableOpacity onPress={() => setSelectedCategory("")}>
-                                                        <Text style={styles.breadcrumbText}>{getSelectedCategory()?.icon}</Text>
-                                                    </TouchableOpacity>
-                                                    <Text style={styles.breadcrumbSeparator}> {'>'}  </Text>
-                                                    <TouchableOpacity onPress={() => setSelectedSubcategory("")}>
-                                                        <Text style={styles.breadcrumbText}>
-                                                            {getSelectedSubcategory()?.name}
+                                                    <TouchableOpacity
+                                                        onPress={() =>
+                                                            setSelectedCategory(
+                                                                ""
+                                                            )
+                                                        }
+                                                    >
+                                                        <Text
+                                                            style={
+                                                                styles.breadcrumbText
+                                                            }
+                                                        >
+                                                            {
+                                                                getSelectedCategory()
+                                                                    ?.icon
+                                                            }
                                                         </Text>
                                                     </TouchableOpacity>
-                                                    <Text style={styles.breadcrumbSeparator}> {'>'}  </Text>
-                                                    <Text style={styles.breadcrumbCurrent}>Selecione:</Text>
+                                                    <Text
+                                                        style={
+                                                            styles.breadcrumbSeparator
+                                                        }
+                                                    >
+                                                        {" "}
+                                                        {">"}{" "}
+                                                    </Text>
+                                                    <TouchableOpacity
+                                                        onPress={() =>
+                                                            setSelectedSubcategory(
+                                                                ""
+                                                            )
+                                                        }
+                                                    >
+                                                        <Text
+                                                            style={
+                                                                styles.breadcrumbText
+                                                            }
+                                                        >
+                                                            {
+                                                                getSelectedSubcategory()
+                                                                    ?.name
+                                                            }
+                                                        </Text>
+                                                    </TouchableOpacity>
+                                                    <Text
+                                                        style={
+                                                            styles.breadcrumbSeparator
+                                                        }
+                                                    >
+                                                        {" "}
+                                                        {">"}{" "}
+                                                    </Text>
+                                                    <Text
+                                                        style={
+                                                            styles.breadcrumbCurrent
+                                                        }
+                                                    >
+                                                        Selecione:
+                                                    </Text>
                                                 </View>
                                                 <View style={styles.itemsList}>
-                                                    {getSelectedSubcategory()?.items?.map((item) => (
-                                                        <TouchableOpacity
-                                                            key={item}
-                                                            style={[
-                                                                styles.itemButton,
-                                                                tags.includes(item) && styles.itemSelected
-                                                            ]}
-                                                            onPress={() => addIngredient(item)}
-                                                        >
-                                                            <Text style={[
-                                                                styles.itemText,
-                                                                tags.includes(item) && styles.itemTextSelected
-                                                            ]}>
-                                                                {item}
-                                                            </Text>
-                                                            {tags.includes(item) && (
-                                                                <Ionicons name="checkmark" size={16} color="#fff" />
-                                                            )}
-                                                        </TouchableOpacity>
-                                                    )) || null}
+                                                    {getSelectedSubcategory()?.items?.map(
+                                                        (item) => (
+                                                            <TouchableOpacity
+                                                                key={item}
+                                                                style={[
+                                                                    styles.itemButton,
+                                                                    tags.includes(
+                                                                        item
+                                                                    ) &&
+                                                                        styles.itemSelected,
+                                                                ]}
+                                                                onPress={() =>
+                                                                    addIngredient(
+                                                                        item
+                                                                    )
+                                                                }
+                                                            >
+                                                                <Text
+                                                                    style={[
+                                                                        styles.itemText,
+                                                                        tags.includes(
+                                                                            item
+                                                                        ) &&
+                                                                            styles.itemTextSelected,
+                                                                    ]}
+                                                                >
+                                                                    {item}
+                                                                </Text>
+                                                                {tags.includes(
+                                                                    item
+                                                                ) && (
+                                                                    <Ionicons
+                                                                        name="checkmark"
+                                                                        size={
+                                                                            16
+                                                                        }
+                                                                        color="#fff"
+                                                                    />
+                                                                )}
+                                                            </TouchableOpacity>
+                                                        )
+                                                    ) || null}
                                                 </View>
                                             </View>
                                         )}
-                                        
+
                                         {/* Botão fechar */}
                                         <TouchableOpacity
                                             style={styles.closeSelector}
@@ -555,7 +781,11 @@ export default function CreateMealModal({
                                                 setSelectedSubcategory("");
                                             }}
                                         >
-                                            <Text style={styles.closeSelectorText}>Fechar</Text>
+                                            <Text
+                                                style={styles.closeSelectorText}
+                                            >
+                                                Fechar
+                                            </Text>
                                         </TouchableOpacity>
                                     </View>
                                 )}
@@ -655,13 +885,13 @@ const styles = StyleSheet.create({
         marginBottom: 8,
     },
     photoBtn: {
-    flex: 1,
-    marginHorizontal: 4,
-    padding: 8,
-    borderRadius: 8,
-    alignItems: "center",
-    justifyContent: "center",
-    minHeight: 40,
+        flex: 1,
+        marginHorizontal: 4,
+        padding: 8,
+        borderRadius: 8,
+        alignItems: "center",
+        justifyContent: "center",
+        minHeight: 40,
     },
     photoBtnText: {
         color: "#fff",
@@ -711,33 +941,33 @@ const styles = StyleSheet.create({
     },
     // Estilos para o novo seletor de categorias
     categorySelector: {
-        backgroundColor: '#f8f9fa',
+        backgroundColor: "#f8f9fa",
         borderRadius: 12,
         padding: 16,
         marginBottom: 16,
         borderWidth: 1,
-        borderColor: '#e9ecef',
+        borderColor: "#e9ecef",
     },
     selectorTitle: {
         fontSize: 16,
-        fontWeight: '600',
+        fontWeight: "600",
         marginBottom: 12,
-        color: '#333',
-        textAlign: 'center',
+        color: "#333",
+        textAlign: "center",
     },
     categoryGrid: {
-        flexDirection: 'row',
-        justifyContent: 'space-around',
+        flexDirection: "row",
+        justifyContent: "space-around",
         marginBottom: 16,
     },
     categoryCard: {
         flex: 1,
-        alignItems: 'center',
+        alignItems: "center",
         padding: 16,
         margin: 4,
         borderRadius: 12,
         borderWidth: 2,
-        backgroundColor: '#fff',
+        backgroundColor: "#fff",
     },
     categoryIcon: {
         fontSize: 24,
@@ -745,43 +975,44 @@ const styles = StyleSheet.create({
     },
     categoryName: {
         fontSize: 12,
-        fontWeight: '600',
-        textAlign: 'center',
+        fontWeight: "600",
+        textAlign: "center",
     },
     breadcrumb: {
-        flexDirection: 'row',
-        alignItems: 'center',
+        flexDirection: "row",
+        alignItems: "center",
         marginBottom: 12,
         paddingBottom: 8,
         borderBottomWidth: 1,
-        borderBottomColor: '#e9ecef',
+        borderBottomColor: "#e9ecef",
     },
     breadcrumbText: {
-        color: '#007AFF',
+        color: "#007AFF",
         fontSize: 14,
-        fontWeight: '500',
+        fontWeight: "500",
     },
     breadcrumbSeparator: {
-        color: '#666',
+        color: "#666",
         fontSize: 14,
     },
     breadcrumbCurrent: {
-        color: '#333',
+        color: "#333",
         fontSize: 14,
-        fontWeight: '600',
+        fontWeight: "600",
+        marginBottom: 8,
     },
     subcategoryList: {
         marginBottom: 16,
     },
     subcategoryItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
+        flexDirection: "row",
+        alignItems: "center",
         padding: 12,
         marginVertical: 2,
-        backgroundColor: '#fff',
+        backgroundColor: "#fff",
         borderRadius: 8,
         borderWidth: 1,
-        borderColor: '#e9ecef',
+        borderColor: "#e9ecef",
     },
     subcategoryIcon: {
         fontSize: 20,
@@ -790,45 +1021,45 @@ const styles = StyleSheet.create({
     subcategoryName: {
         flex: 1,
         fontSize: 14,
-        fontWeight: '500',
-        color: '#333',
+        fontWeight: "500",
+        color: "#333",
     },
     itemsList: {
         marginBottom: 16,
     },
     itemButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
         padding: 10,
         marginVertical: 1,
-        backgroundColor: '#fff',
+        backgroundColor: "#fff",
         borderRadius: 6,
         borderWidth: 1,
-        borderColor: '#e9ecef',
+        borderColor: "#e9ecef",
     },
     itemSelected: {
-        backgroundColor: '#007AFF',
-        borderColor: '#007AFF',
+        backgroundColor: "#007AFF",
+        borderColor: "#007AFF",
     },
     itemText: {
         fontSize: 14,
-        color: '#333',
+        color: "#333",
     },
     itemTextSelected: {
-        color: '#fff',
-        fontWeight: '500',
+        color: "#fff",
+        fontWeight: "500",
     },
     closeSelector: {
-        alignSelf: 'center',
+        alignSelf: "center",
         paddingVertical: 8,
         paddingHorizontal: 16,
-        backgroundColor: '#6c757d',
+        backgroundColor: "#6c757d",
         borderRadius: 6,
     },
     closeSelectorText: {
-        color: '#fff',
+        color: "#fff",
         fontSize: 14,
-        fontWeight: '500',
+        fontWeight: "500",
     },
 });
