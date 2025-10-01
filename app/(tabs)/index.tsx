@@ -258,6 +258,7 @@ export default function HomeScreen() {
                 await removeItem("staff");
                 await removeItem("user_id");
                 await removeItem("campus_id");
+                await removeItem("cursus_id");
                 await removeItem("campus_name");
                 if (Platform.OS === "ios")
                     await removePushToken(

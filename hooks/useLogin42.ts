@@ -221,6 +221,7 @@ export function useLogin42() {
                 "campus_name",
                 `${userWithCoalition.campus?.[0]?.name?.trim()}`
             );
+            await setItem("cursus_id", `${userWithCoalition.projects_users?.[0]?.cursus_ids?.[0] ?? 0}`);
             if (Platform.OS === "ios") {
                 registerPushToken(
                     userWithCoalition.id,

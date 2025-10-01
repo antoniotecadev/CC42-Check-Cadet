@@ -24,19 +24,8 @@ import {
 interface Cursu {
     id: number;
     name: string;
+    created_at: string;
 }
-
-// Função para buscar cursus
-const fetchCursus = async (
-    api: AxiosInstance,
-    pageNumber = 1,
-    pageSize = 100
-) => {
-    const res = await api.get("/v2/cursus", {
-        params: { "page[number]": pageNumber, "page[size]": pageSize },
-    });
-    return res.data as Cursu[];
-};
 
 export default function CursusScreen() {
     const { getItem } = useItemStorage();
@@ -45,30 +34,66 @@ export default function CursusScreen() {
     const { color } = useColorCoalition();
     const [search, setSearch] = useState("");
     const [refreshing, setRefreshing] = useState(false);
-    const [userId, setUserId] = useState<string | null>(null);
-    const [campusId, setCampusId] = useState<string | null>(null);
-    const [campusName, setCampusName] = useState<string | null>(null);
+    const [user, setUser] = useState<
+        | any
+        | {
+              id: string;
+              campus_id: string;
+              cursus_id: string | null;
+              campus_name: string | null;
+              isStaff: boolean;
+          }
+    >({
+        id: null,
+        campus_id: null,
+        cursus_id: null,
+        campus_name: null,
+    });
 
     const borderColor = colorScheme === "light" ? "#f0f0f0" : "#333";
 
     useEffect(() => {
-        const fetchCampusId = async () => {
+        const fetchDataUser = async () => {
             const userId = await getItem("user_id");
             const campusId = await getItem("campus_id");
+            const cursusId = await getItem("cursus_id");
             const campusName = await getItem("campus_name");
+            const isStaff = await getItem("staff");
+            console.warn(`userId: ${userId}\ncampusId: ${campusId}\ncursusId: ${cursusId}\ncampusName: ${campusName}\nisStaff: ${isStaff}`);
             if (campusId && userId) {
-                setUserId(userId);
-                setCampusId(campusId);
-                setCampusName(campusName);
+                setUser({
+                    id: userId,
+                    campus_id: campusId,
+                    cursus_id: cursusId,
+                    campus_name: campusName,
+                    isStaff: isStaff === "true",
+                });
             } else {
                 console.warn("User ID | Campus ID não encontrado");
             }
         };
-        fetchCampusId();
+        fetchDataUser();
     }, [getItem]);
 
+    const fetchCursus = async (
+        api: AxiosInstance,
+        pageNumber = 1,
+        pageSize = 100
+    ) => {
+        let res;
+        if (user.isStaff) {
+            res = await api.get("/v2/cursus", {
+                params: { "page[number]": pageNumber, "page[size]": pageSize },
+            });
+        } else {
+            const response = await api.get(`/v2/cursus/${user.cursus_id}`);
+            res = { data: [response.data] };
+        }
+        return res.data as Cursu[];
+    };
+
     const { data, isLoading, isError, refetch, isFetching } = useQuery({
-        queryKey: ["cursus"],
+        queryKey: ["cursus", user.cursus_id, user.isStaff],
         queryFn: () => fetchCursus(api),
         enabled: !!api,
         staleTime: 1000 * 60 * 60 * 24, // Dados ficam "frescos" por 24 horas
@@ -83,7 +108,7 @@ export default function CursusScreen() {
         ) || [];
 
     // IDs prioritários
-    const priorityIds = [21, 66, 9];
+    const priorityIds = [21, 66, 9, 3];
 
     // Ordena os cursus: prioritários primeiro, depois os demais
     const sortedFiltered = React.useMemo(() => {
@@ -127,7 +152,9 @@ export default function CursusScreen() {
                     <TextInput
                         style={[styles.input, { borderColor }]}
                         placeholder="Pesquisar cursus..."
-                        placeholderTextColor={colorScheme === "light" ? "#888" : "#666"}
+                        placeholderTextColor={
+                            colorScheme === "light" ? "#888" : "#666"
+                        }
                         value={search}
                         onChangeText={setSearch}
                     />
@@ -160,9 +187,9 @@ export default function CursusScreen() {
                                     router.push({
                                         pathname: "/meals",
                                         params: {
-                                            userId: userId,
-                                            campusId: campusId,
-                                            campusName: campusName,
+                                            userId: user.id,
+                                            campusId: user.campus_id,
+                                            campusName: user.campus_name,
                                             cursusId: item.id,
                                             cursusName: item.name,
                                         },
@@ -186,7 +213,7 @@ export default function CursusScreen() {
                                     >
                                         {item.name}
                                     </ThemedText>
-                                    {/* <Text style={styles.id}>ID: {item.id}</Text> */}
+                                    <Text style={styles.id}>ID: {item.id} - Criado em: {new Date(item.created_at).toLocaleDateString()}</Text>
                                 </View>
                             </TouchableOpacity>
                         )}
