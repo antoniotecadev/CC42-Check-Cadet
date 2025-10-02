@@ -53,7 +53,7 @@ export function generateAttendanceHtml({
                 <div class="title">${title}</div>
                 <div class="subtitle">${
                     title === "Lista de Assinaturas"
-                        ? `Assinado: ${numberPresenceORSubscribed} | Não Assinado: ${numberAbsentsORUnSubscribed}`
+                        ? `1ª via subscritos: ${numberPresenceORSubscribed} | 1ª via não subscritos: ${numberAbsentsORUnSubscribed} | 2ª via subscritos: ${userFilter.filter(u => u.hasSecondPortion).length} | 2ª via não subscritos: ${userFilter.filter(u => !u.hasSecondPortion).length}`
                         : `Check-in Feito: ${numberPresenceORSubscribed} | Check-in Não Feito: ${numberAbsentsORUnSubscribed} | Check-out Feito: ${numberCheckout} | Check-out Não Feito: ${numberNoCheckout}`
                 }</div>
                 <div class="subtitle">${description || ""} - ${date || ""}</div>
@@ -65,7 +65,7 @@ export function generateAttendanceHtml({
                     <th>Login</th>
                     ${
                         title === "Lista de Assinaturas"
-                            ? "<th>Assinatura</th>"
+                            ? "<th>Primeira via</th><th>Segunda via</th>"
                             : "<th>Check-in</th><th>Check-out</th>"
                     }
                 </tr>
@@ -79,11 +79,14 @@ export function generateAttendanceHtml({
                         ${
                             title === "Lista de Assinaturas"
                                 ? `<td class="${
-                                      u.isSubscribed ? "present" : "absent"
+                                      u.hasFirstPortion ? "present" : "absent"
                                   }">${
-                                      u.isSubscribed
-                                          ? "Assinado"
-                                          : "Não Assinado"
+                                      u.hasFirstPortion ? "Subscrito" : "Não subscrito"
+                                  }</td>
+                                  <td class="${
+                                      u.hasSecondPortion ? "present" : "absent"
+                                  }">${
+                                      u.hasSecondPortion ? "Subscrito" : "Não subscrito"
                                   }</td>`
                                 : `<td class="${
                                       u.hasCheckin ? "present" : "absent"
@@ -113,7 +116,7 @@ export function generateAttendanceHtml({
                         <th>Login</th>
                         ${
                             title === "Lista de Assinaturas"
-                                ? "<th>Assinatura</th>"
+                                ? "<th>Primeira via</th><th>Segunda via</th>"
                                 : "<th>Check-in</th><th>Check-out</th>"
                         }
                     </tr>
@@ -127,11 +130,14 @@ export function generateAttendanceHtml({
                            ${
                                title === "Lista de Assinaturas"
                                    ? `<td class="${
-                                         u.isSubscribed ? "present" : "absent"
+                                         u.hasFirstPortion ? "present" : "absent"
                                      }">${
-                                         u.isSubscribed
-                                             ? "Assinado"
-                                             : "Não Assinado"
+                                         u.hasFirstPortion ? "Subscrito" : "Não subscrito"
+                                     }</td>
+                                     <td class="${
+                                         u.hasSecondPortion ? "present" : "absent"
+                                     }">${
+                                         u.hasSecondPortion ? "Subscrito" : "Não subscrito"
                                      }</td>`
                                    : `<td class="${
                                          u.hasCheckin ? "present" : "absent"

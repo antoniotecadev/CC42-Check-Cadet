@@ -230,7 +230,7 @@ export default function EventUsersScreen() {
         const header =
             type === EVENTS
                 ? `Nº;Nome Completo;Login;Check-in;Check-out\n`
-                : `Nº;Nome Completo;Login;Assinatura\n`;
+                : `Nº;Nome Completo;Login;Primeira via;Segunda via\n`;
 
         const rows = userFilter
             .map((u, i) => {
@@ -240,8 +240,8 @@ export default function EventUsersScreen() {
                     };${u.hasCheckout ? "Presente" : "Ausente"}`;
                 } else {
                     return `${i + 1};"${u.displayname}";${u.login};${
-                        u.isSubscribed ? "Assinado" : "Não assinado"
-                    }`;
+                        u.hasFirstPortion ? "Subscrito" : "Não subscrito"
+                    };${u.hasSecondPortion ? "Subscrito" : "Não subscrito"}`;
                 }
             })
             .join("\n");
