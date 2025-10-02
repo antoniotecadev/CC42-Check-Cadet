@@ -96,6 +96,25 @@ export default function EventUsersScreen() {
         });
     };
 
+    // Função para enriquecer dados de refeições com informações de primeira/segunda via
+    const enrichMealData = (users: UserPresence[]) => {
+        if (type === EVENTS || !userResult.ids) {
+            return users;
+        }
+
+        return users.map(user => {
+            const userId = String(user.id);
+            const hasFirstPortion = userResult.ids?.includes(userId) || false;
+            const hasSecondPortion = userResult.ids?.includes(`-${userId}`) || false;
+            
+            return {
+                ...user,
+                hasFirstPortion,
+                hasSecondPortion,
+            };
+        });
+    };
+
     const {
         data,
         isLoading,
@@ -289,9 +308,11 @@ export default function EventUsersScreen() {
         filterSecondPortion = false;
         let base = userPresenceSubscribed;
 
-        // Enriquecer dados para eventos
+        // Enriquecer dados para eventos e refeições
         if (type === EVENTS) {
             base = enrichEventData(base);
+        } else {
+            base = enrichMealData(base);
         }
 
         switch (filter) {
@@ -742,6 +763,8 @@ export default function EventUsersScreen() {
                             isSecondPortion={filterSecondPortion}
                             hasCheckin={item.hasCheckin}
                             hasCheckout={item.hasCheckout}
+                            hasFirstPortion={item.hasFirstPortion}
+                            hasSecondPortion={item.hasSecondPortion}
                         />
                     )}
                     // onEndReached={() => { // option - if use remove function React.useEffectin line 72

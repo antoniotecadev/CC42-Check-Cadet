@@ -180,6 +180,8 @@ export interface UserPresence {
     isSubscribed: boolean;
     hasCheckin?: boolean;
     hasCheckout?: boolean;
+    hasFirstPortion?: boolean;
+    hasSecondPortion?: boolean;
 }
 
 export interface UserSubscription {

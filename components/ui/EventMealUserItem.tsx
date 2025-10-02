@@ -12,9 +12,10 @@ interface EventMealUserItemProps {
     isPresent?: boolean;
     isSusbscribed?: boolean;
     isSecondPortion?: boolean;
-    // Novas propriedades para eventos
     hasCheckin?: boolean;
     hasCheckout?: boolean;
+    hasFirstPortion?: boolean;
+    hasSecondPortion?: boolean;
 }
 
 const blurhash =
@@ -32,6 +33,8 @@ export const EventMealUserItem: React.FC<EventMealUserItemProps> = ({
     isSecondPortion,
     hasCheckin,
     hasCheckout,
+    hasFirstPortion,
+    hasSecondPortion,
 }) => {
     return (
         <TouchableOpacity
@@ -52,7 +55,7 @@ export const EventMealUserItem: React.FC<EventMealUserItemProps> = ({
             <View style={styles.infoContainer}>
                 <View style={styles.row}>
                     <Text style={styles.login}>{login}</Text>
-                    {type !== "events" && (
+                    {type !== "events" && type !== "meals" && (
                         <Text
                             style={[
                                 styles.present,
@@ -94,6 +97,34 @@ export const EventMealUserItem: React.FC<EventMealUserItemProps> = ({
                                 ]}
                             >
                                 {hasCheckout ? "Presente" : "Ausente"}
+                            </Text>
+                        </View>
+                    </View>
+                )}
+
+                {/* Informações específicas para refeições */}
+                {type === "meals" && (
+                    <View style={styles.eventStatusContainer}>
+                        <View style={styles.statusRow}>
+                            <Text style={styles.statusLabel}>Primeira via:</Text>
+                            <Text
+                                style={[
+                                    styles.statusValue,
+                                    hasFirstPortion ? styles.presentYes : styles.presentNo,
+                                ]}
+                            >
+                                {hasFirstPortion ? "Subscrito" : "Não subscrito"}
+                            </Text>
+                        </View>
+                        <View style={styles.statusRow}>
+                            <Text style={styles.statusLabel}>Segunda via:</Text>
+                            <Text
+                                style={[
+                                    styles.statusValue,
+                                    hasSecondPortion ? styles.presentYes : styles.presentNo,
+                                ]}
+                            >
+                                {hasSecondPortion ? "Subscrito" : "Não subscrito"}
                             </Text>
                         </View>
                     </View>
