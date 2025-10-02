@@ -114,10 +114,11 @@ export async function markAttendance({
     cursusId,
     campusId,
     imageSource,
+    eventAction,
     setLoading,
     showModal,
     onResumeCamera,
-}: BarcodeResultParams) {
+}: BarcodeResultParams & { eventAction?: "checkin" | "checkout" }) {
     try {
         setLoading(true);
 
@@ -127,59 +128,127 @@ export async function markAttendance({
             `campus/${campusId}/cursus/${cursusId}/events/${eventId}/participants/${userId}`
         );
 
-        // Verifica se já marcou presença
+        // Verifica o estado atual da presença
         const snapshot = await get(participantsRef);
-        if (snapshot.exists()) {
+        const existingData = snapshot.exists() ? snapshot.val() : null;
+        
+        if (eventAction === "checkin") {
+            // Check-in logic
+            if (existingData && existingData.checkin) {
+                setLoading(false);
+                showModal({
+                    title: "Aviso!",
+                    message: `${displayName}\nJá fez check-in neste evento.`,
+                    color: "#FDD835",
+                    imageSource: { uri: imageSource },
+                    onClose: onResumeCamera,
+                });
+                return;
+            }
+
+            // Marca check-in
+            const participantData = {
+                ...existingData,
+                checkin: Date.now(),
+                registeredBy,
+            };
+
+            const eventUpdates = {
+                [`cursus/${cursusId}/events/${eventId}/participants/${userId}`]:
+                    participantData,
+            };
+
+            const campusRef = ref(database, `campus/${campusId}`);
+            await update(campusRef, eventUpdates);
+
+            if (userStaffId) {
+                // Atualiza a presença temporária para o usuário
+                const infoTmpRef = ref(
+                    database,
+                    `campus/${campusId}/cursus/${cursusId}/infoTmpUserEventMeal/${userStaffId}`
+                );
+                await set(infoTmpRef, {
+                    displayName,
+                    urlImageUser: imageSource,
+                });
+            }
+
             setLoading(false);
             showModal({
-                title: "Aviso!",
-                message: `${displayName}\nA presença já foi marcada neste evento.`,
-                color: "#FDD835",
+                title: "Sucesso!",
+                message: `${displayName}\nCheck-in realizado com sucesso!`,
+                color: "#4CAF50",
                 imageSource: { uri: imageSource },
                 onClose: onResumeCamera,
             });
-            return;
-        }
+            
+        } else {
+            // Check-out logic
+            if (!existingData || !existingData.checkin) {
+                setLoading(false);
+                showModal({
+                    title: "Aviso!",
+                    message: `${displayName}\nPrecisa fazer check-in primeiro.`,
+                    color: "#FF5722",
+                    imageSource: { uri: imageSource },
+                    onClose: onResumeCamera,
+                });
+                return;
+            }
 
-        // Marca presença
-        const participantData = {
-            [userId]: true,
-            registeredBy,
-        };
+            if (existingData.checkout) {
+                setLoading(false);
+                showModal({
+                    title: "Aviso!",
+                    message: `${displayName}\nJá fez check-out neste evento.`,
+                    color: "#FDD835",
+                    imageSource: { uri: imageSource },
+                    onClose: onResumeCamera,
+                });
+                return;
+            }
 
-        const eventUpdates = {
-            [`cursus/${cursusId}/events/${eventId}/participants/${userId}`]:
-                participantData,
-        };
+            // Marca check-out
+            const participantData = {
+                ...existingData,
+                checkout: Date.now(),
+                registeredBy,
+            };
 
-        const campusRef = ref(database, `campus/${campusId}`);
-        await update(campusRef, eventUpdates);
+            const eventUpdates = {
+                [`cursus/${cursusId}/events/${eventId}/participants/${userId}`]:
+                    participantData,
+            };
 
-        if (userStaffId) {
-            // Atualiza a presença temporária para o usuário
-            const infoTmpRef = ref(
-                database,
-                `campus/${campusId}/cursus/${cursusId}/infoTmpUserEventMeal/${userStaffId}`
-            );
-            await set(infoTmpRef, {
-                displayName,
-                urlImageUser: imageSource,
+            const campusRef = ref(database, `campus/${campusId}`);
+            await update(campusRef, eventUpdates);
+
+            if (userStaffId) {
+                // Atualiza a presença temporária para o usuário
+                const infoTmpRef = ref(
+                    database,
+                    `campus/${campusId}/cursus/${cursusId}/infoTmpUserEventMeal/${userStaffId}`
+                );
+                await set(infoTmpRef, {
+                    displayName,
+                    urlImageUser: imageSource,
+                });
+            }
+
+            setLoading(false);
+            showModal({
+                title: "Sucesso!",
+                message: `${displayName}\nCheck-out realizado com sucesso!`,
+                color: "#4CAF50",
+                imageSource: { uri: imageSource },
+                onClose: onResumeCamera,
             });
         }
-
-        setLoading(false);
-        showModal({
-            title: "Sucesso!",
-            message: `${displayName}\nPresença marcada com sucesso!`,
-            color: "#4CAF50",
-            imageSource: { uri: imageSource },
-            onClose: onResumeCamera,
-        });
     } catch (e: any) {
         setLoading(false);
         showModal({
             title: "Erro!",
-            message: `Erro ao marcar presença: ${e.message}`,
+            message: `Erro ao fazer check: ${e.message}`,
             color: "#E53935",
             imageSource: { uri: imageSource },
             onClose: onResumeCamera,

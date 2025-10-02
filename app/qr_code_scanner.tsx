@@ -46,6 +46,7 @@ export default function QrCodeScanner() {
 
     const [mealQuantity, setMealQuantity] = useState<number>(1);
     const [mealPortion, setMealPortion] = useState<"first" | "second">("first");
+    const [eventAction, setEventAction] = useState<"checkin" | "checkout">("checkin");
 
     const scannedRef = useRef(false);
     const router = useRouter();
@@ -61,6 +62,7 @@ export default function QrCodeScanner() {
         await handleQrCode({
             mealQuantity,
             mealPortion,
+            eventAction,
             barcodeResult: barcode,
             eventId: eventId,
             mealId: mealId,
@@ -136,8 +138,41 @@ export default function QrCodeScanner() {
             {/* Overlay acima da camera */}
             <View style={[StyleSheet.absoluteFillObject, styles.overlay]}>
                 <Text style={styles.text}>Aponte para o QR Code</Text>
+                
+                {/* Event action radio group (show only for event flows) */}
+                {eventId && !mealId && (
+                    <View style={styles.radioGroup}>
+                        <TouchableOpacity
+                            style={styles.radioButton}
+                            onPress={() => setEventAction("checkin")}
+                        >
+                            <View
+                                style={
+                                    eventAction === "checkin"
+                                        ? styles.radioSelected
+                                        : styles.radioUnselected
+                                }
+                            />
+                            <Text style={styles.radioText}>Check In</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={styles.radioButton}
+                            onPress={() => setEventAction("checkout")}
+                        >
+                            <View
+                                style={
+                                    eventAction === "checkout"
+                                        ? styles.radioSelected
+                                        : styles.radioUnselected
+                                }
+                            />
+                            <Text style={styles.radioText}>Check Out</Text>
+                        </TouchableOpacity>
+                    </View>
+                )}
+                
                 {/* Meal portion radio group (show only for meal flows) */}
-                {mealId && (
+                {mealId && !eventId && (
                     <View style={styles.radioGroup}>
                         <TouchableOpacity
                             style={styles.radioButton}

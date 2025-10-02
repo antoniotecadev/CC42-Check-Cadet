@@ -5,6 +5,7 @@ import { decrypt } from "./AESUtil";
 export interface BarcodeResultParams {
     mealQuantity?: number;
     mealPortion?: "first" | "second";
+    eventAction?: "checkin" | "checkout";
     barcodeResult?: string;
     eventId?: string;
     mealId?: string;
@@ -30,6 +31,7 @@ export interface BarcodeResultParams {
 export async function handleQrCode({
     mealQuantity,
     mealPortion,
+    eventAction,
     barcodeResult,
     eventId,
     mealId,
@@ -58,6 +60,7 @@ export async function handleQrCode({
                 cursusId,
                 campusId,
                 imageSource,
+                eventAction: "checkin",
                 setLoading,
                 showModal,
                 onResumeCamera,
@@ -90,6 +93,7 @@ export async function handleQrCode({
                 cursusId: userCursusId,
                 campusId: userCampusId,
                 imageSource: userImageUrl,
+                eventAction: eventAction,
                 setLoading,
                 showModal,
                 onResumeCamera,
