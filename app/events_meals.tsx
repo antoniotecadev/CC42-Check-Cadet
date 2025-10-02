@@ -1102,10 +1102,10 @@ const styles = StyleSheet.create({
         backgroundColor: "#FDD835",
     },
     chipSecondPortion: {
-        backgroundColor: "#9C27B0",
+        backgroundColor: "#27b099ff",
     },
     chipCheckout: {
-        backgroundColor: "#9C27B0", // Roxo para check-out feito
+        backgroundColor: "#27b099ff", // Roxo para check-out feito
     },
     chipNoCheckout: {
         backgroundColor: "#FF9800", // Laranja para check-out não feito
