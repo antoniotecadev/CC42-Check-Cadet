@@ -636,7 +636,7 @@ export default function EventUsersScreen() {
                                     style={[styles.chip, styles.chipReceived]}
                                 >
                                     <MaterialCommunityIcons
-                                        name="account-check"
+                                        name="food"
                                         size={16}
                                         color={colorscheme}
                                         style={{ marginRight: 2 }}
@@ -660,7 +660,7 @@ export default function EventUsersScreen() {
                                     ]}
                                 >
                                     <MaterialCommunityIcons
-                                        name="account-remove"
+                                        name="food-off"
                                         size={16}
                                         color={colorscheme}
                                         style={{ marginRight: 2 }}
