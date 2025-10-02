@@ -207,23 +207,28 @@ export default function EventUsersScreen() {
 
     async function handleExportExcel() {
         // Monta os dados CSV
-        const header = `Nº;Nome Completo;Login; ${
-            type === EVENTS ? "Presença" : "Assinatura"
-        }\n`;
-        const rows = userPresenceSubscribed
+        const header = type === EVENTS 
+            ? `Nº;Nome Completo;Login;Check-in;Check-out\n`
+            : `Nº;Nome Completo;Login;Assinatura\n`;
+        
+        const rows = userFilter
             .map(
-                (u, i) =>
-                    `${i + 1};"${u.displayname}";${u.login};${
-                        type === EVENTS
-                            ? u.isPresent
-                                ? "Presente"
-                                : "Ausente"
-                            : u.isSubscribed
-                            ? "Assinado"
-                            : "Não assinado"
-                    }`
+                (u, i) => {
+                    if (type === EVENTS) {
+                        return `${i + 1};"${u.displayname}";${u.login};${
+                            u.hasCheckin ? "Presente" : "Ausente"
+                        };${
+                            u.hasCheckout ? "Presente" : "Ausente"
+                        }`;
+                    } else {
+                        return `${i + 1};"${u.displayname}";${u.login};${
+                            u.isSubscribed ? "Assinado" : "Não assinado"
+                        }`;
+                    }
+                }
             )
             .join("\n");
+        
         // Adiciona BOM UTF-8 para compatibilidade com Excel
         const csv = String.fromCharCode(0xfeff) + header + rows;
         const fileName = `lista_presenca_${
