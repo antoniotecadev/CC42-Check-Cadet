@@ -8,6 +8,8 @@ export function generateAttendanceHtml({
     date,
     numberPresenceORSubscribed = 0,
     numberAbsentsORUnSubscribed = 0,
+    numberCheckout = 0,
+    numberNoCheckout = 0,
     userFilter,
 }: {
     title: string;
@@ -16,6 +18,8 @@ export function generateAttendanceHtml({
     date: string;
     numberPresenceORSubscribed?: number;
     numberAbsentsORUnSubscribed?: number;
+    numberCheckout?: number;
+    numberNoCheckout?: number;
     userFilter: UserPresence[];
 }) {
     // Divide os usuários em páginas de 28 linhas
@@ -50,7 +54,7 @@ export function generateAttendanceHtml({
                 <div class="subtitle">${
                     title === "Lista de Assinaturas"
                         ? `Assinado: ${numberPresenceORSubscribed} | Não Assinado: ${numberAbsentsORUnSubscribed}`
-                        : `Presente: ${numberPresenceORSubscribed} | Ausente: ${numberAbsentsORUnSubscribed}`
+                        : `Check-in Feito: ${numberPresenceORSubscribed} | Check-in Não Feito: ${numberAbsentsORUnSubscribed} | Check-out Feito: ${numberCheckout} | Check-out Não Feito: ${numberNoCheckout}`
                 }</div>
                 <div class="subtitle">${description || ""} - ${date || ""}</div>
             </div>
@@ -59,11 +63,11 @@ export function generateAttendanceHtml({
                     <th>#</th>
                     <th>Nome Completo</th>
                     <th>Login</th>
-                    <th>${
+                    ${
                         title === "Lista de Assinaturas"
-                            ? "Assinatura"
-                            : "Presença"
-                    }</th>
+                            ? "<th>Assinatura</th>"
+                            : "<th>Check-in</th><th>Check-out</th>"
+                    }
                 </tr>
                 ${pages[0]
                     .map(
@@ -82,9 +86,14 @@ export function generateAttendanceHtml({
                                           : "Não Assinado"
                                   }</td>`
                                 : `<td class="${
-                                      u.isPresent ? "present" : "absent"
+                                      u.hasCheckin ? "present" : "absent"
                                   }">${
-                                      u.isPresent ? "Presente" : "Ausente"
+                                      u.hasCheckin ? "Presente" : "Ausente"
+                                  }</td>
+                                  <td class="${
+                                      u.hasCheckout ? "present" : "absent"
+                                  }">${
+                                      u.hasCheckout ? "Presente" : "Ausente"
                                   }</td>`
                         }
                     </tr>
@@ -102,11 +111,11 @@ export function generateAttendanceHtml({
                         <th>#</th>
                         <th>Nome Completo</th>
                         <th>Login</th>
-                        <th>${
-                            title === "Lista de Presença"
-                                ? "Presença"
-                                : "Assinatura"
-                        }</th>
+                        ${
+                            title === "Lista de Assinaturas"
+                                ? "<th>Assinatura</th>"
+                                : "<th>Check-in</th><th>Check-out</th>"
+                        }
                     </tr>
                     ${page
                         .map(
@@ -125,9 +134,14 @@ export function generateAttendanceHtml({
                                              : "Não Assinado"
                                      }</td>`
                                    : `<td class="${
-                                         u.isPresent ? "present" : "absent"
+                                         u.hasCheckin ? "present" : "absent"
                                      }">${
-                                         u.isPresent ? "Presente" : "Ausente"
+                                         u.hasCheckin ? "Presente" : "Ausente"
+                                     }</td>
+                                     <td class="${
+                                         u.hasCheckout ? "present" : "absent"
+                                     }">${
+                                         u.hasCheckout ? "Presente" : "Ausente"
                                      }</td>`
                            }
                         </tr>

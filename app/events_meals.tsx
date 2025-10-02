@@ -342,6 +342,8 @@ export default function EventUsersScreen() {
             date,
             numberPresenceORSubscribed,
             numberAbsentsORUnSubscribed,
+            numberCheckout,
+            numberNoCheckout,
             userFilter,
         });
         if (isWeb) {
