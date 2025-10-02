@@ -68,7 +68,35 @@ export default function EventUsersScreen() {
     }>();
     const typeId = type === EVENTS ? eventId : mealId;
     const endPoint = type === EVENTS ? "participants" : "subscriptions";
-    const user = useUser(campusId, cursusId, type, typeId, endPoint);
+    const userResult = useUser(
+        campusId,
+        cursusId,
+        type,
+        typeId,
+        endPoint
+    );
+    
+    // Para acessar os IDs baseado no tipo:
+    const participantIds = type === EVENTS 
+        ? userResult.eventParticipants?.map(participant => participant.id) || []
+        : userResult.ids || [];
+
+    // Função para enriquecer dados de eventos com informações de check-in/check-out
+    const enrichEventData = (users: UserPresence[]) => {
+        if (type !== EVENTS || !userResult.eventParticipants) {
+            return users;
+        }
+
+        return users.map(user => {
+            const participant = userResult.eventParticipants?.find(p => p.id === String(user.id));
+            return {
+                ...user,
+                hasCheckin: !!participant, // Se existe no array, fez check-in
+                hasCheckout: !!(participant?.checkout), // Se tem checkout, fez check-out
+            };
+        });
+    };
+    
     const {
         data,
         isLoading,
@@ -112,7 +140,7 @@ export default function EventUsersScreen() {
         numberUnSubscribed: number = 0;
 
     if (type === EVENTS) {
-        userAttendanceList = optimizeUsers(users, user.ids, "events");
+        userAttendanceList = optimizeUsers(users, participantIds, "events");
         // Contagem de presentes e ausentes
         const counts = userAttendanceList.reduce(
             (acc, u) => {
@@ -125,7 +153,7 @@ export default function EventUsersScreen() {
         numberPresents = counts.isPresent;
         numberAbsents = counts.isAbsents;
     } else {
-        userSubscriptionsList = optimizeUsers(users, user.ids, "meals");
+        userSubscriptionsList = optimizeUsers(users, participantIds, "meals");
 
         const counts = userSubscriptionsList.reduce(
             (acc, u) => {
@@ -236,31 +264,37 @@ export default function EventUsersScreen() {
     const userFilter = useMemo(() => {
         filterSecondPortion = false;
         let base = userPresenceSubscribed;
+        
+        // Enriquecer dados para eventos
+        if (type === EVENTS) {
+            base = enrichEventData(base);
+        }
+        
         switch (filter) {
             case "Filtrar presentes":
-                base = userPresenceSubscribed.filter((u) => u.isPresent);
+                base = base.filter((u) => u.isPresent);
                 break;
             case "Filtrar ausentes":
-                base = userPresenceSubscribed.filter((u) => !u.isPresent);
+                base = base.filter((u) => !u.isPresent);
                 break;
             case "Filtrar subscritos":
-                base = userPresenceSubscribed.filter((u) => u.isSubscribed);
+                base = base.filter((u) => u.isSubscribed);
                 break;
             case "Filtrar segunda via":
-                // user.ids contains the raw subscription keys from Firebase
+                // participantIds contains the raw subscription keys from Firebase
                 // subscriptions for second portion are stored with a leading '-'
-                const secondIds = new Set((user?.ids || []).map(String));
-                base = userPresenceSubscribed.filter((u) =>
+                const secondIds = new Set((participantIds || []).map(String));
+                base = base.filter((u) =>
                     secondIds.has(`-${String(u.id)}`)
                 );
                 filterSecondPortion = true;
                 break;
             case "Filtrar não subscritos":
-                base = userPresenceSubscribed.filter((u) => !u.isSubscribed);
+                base = base.filter((u) => !u.isSubscribed);
                 break;
             case "Filtrar todos":
             default:
-                base = userPresenceSubscribed;
+                base = base;
         }
 
         // apply text search on displayname or login (case-insensitive)
@@ -271,7 +305,7 @@ export default function EventUsersScreen() {
             const login = (u.login || "").toLowerCase();
             return name.includes(q) || login.includes(q);
         });
-    }, [filter, userPresenceSubscribed, debouncedQuery]);
+    }, [filter, userPresenceSubscribed, debouncedQuery, type, userResult.eventParticipants]);
 
     async function handlePrintPdf() {
         const html = generateAttendanceHtml({
@@ -471,7 +505,7 @@ export default function EventUsersScreen() {
                         returnKeyType="search"
                         clearButtonMode="while-editing"
                     />
-                    
+
                     {/* Chips na mesma linha do search */}
                     <View style={styles.chipInlineRow}>
                         <View style={[styles.chip, styles.chipPresent]}>
@@ -481,7 +515,12 @@ export default function EventUsersScreen() {
                                 color={colorscheme}
                                 style={{ marginRight: 2 }}
                             />
-                            <Text style={[styles.chipText, { color: colorscheme, fontSize: 12 }]}>
+                            <Text
+                                style={[
+                                    styles.chipText,
+                                    { color: colorscheme, fontSize: 12 },
+                                ]}
+                            >
                                 {numberPresenceORSubscribed}
                             </Text>
                         </View>
@@ -492,13 +531,20 @@ export default function EventUsersScreen() {
                                 color={colorscheme}
                                 style={{ marginRight: 2 }}
                             />
-                            <Text style={[styles.chipText, { color: colorscheme, fontSize: 12 }]}>
+                            <Text
+                                style={[
+                                    styles.chipText,
+                                    { color: colorscheme, fontSize: 12 },
+                                ]}
+                            >
                                 {numberAbsentsORUnSubscribed}
                             </Text>
                         </View>
                         {mealId && (
                             <>
-                                <View style={[styles.chip, styles.chipReceived]}>
+                                <View
+                                    style={[styles.chip, styles.chipReceived]}
+                                >
                                     <MaterialCommunityIcons
                                         name="account-check"
                                         size={16}
@@ -508,13 +554,21 @@ export default function EventUsersScreen() {
                                     <Text
                                         style={[
                                             styles.chipText,
-                                            { color: colorscheme, fontSize: 12 },
+                                            {
+                                                color: colorscheme,
+                                                fontSize: 12,
+                                            },
                                         ]}
                                     >
-                                        {user.quantityReceived ?? 0}
+                                        {userResult.quantityReceived ?? 0}
                                     </Text>
                                 </View>
-                                <View style={[styles.chip, styles.chipNotReceived]}>
+                                <View
+                                    style={[
+                                        styles.chip,
+                                        styles.chipNotReceived,
+                                    ]}
+                                >
                                     <MaterialCommunityIcons
                                         name="account-remove"
                                         size={16}
@@ -524,11 +578,14 @@ export default function EventUsersScreen() {
                                     <Text
                                         style={[
                                             styles.chipText,
-                                            { color: colorscheme, fontSize: 12 },
+                                            {
+                                                color: colorscheme,
+                                                fontSize: 12,
+                                            },
                                         ]}
                                     >
                                         {Number(quantity) -
-                                            (user.quantityReceived ?? 0)}
+                                            (userResult.quantityReceived ?? 0)}
                                     </Text>
                                 </View>
                             </>
@@ -565,6 +622,8 @@ export default function EventUsersScreen() {
                             isPresent={item.isPresent}
                             isSusbscribed={item.isSubscribed}
                             isSecondPortion={filterSecondPortion}
+                            hasCheckin={item.hasCheckin}
+                            hasCheckout={item.hasCheckout}
                         />
                     )}
                     // onEndReached={() => { // option - if use remove function React.useEffectin line 72

@@ -173,6 +173,8 @@ export interface UserPresence {
     image?: string;
     isPresent: boolean;
     isSubscribed: boolean;
+    hasCheckin?: boolean;
+    hasCheckout?: boolean;
 }
 
 export interface UserSubscription {

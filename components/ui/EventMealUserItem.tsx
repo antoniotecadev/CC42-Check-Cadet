@@ -12,6 +12,9 @@ interface EventMealUserItemProps {
     isPresent?: boolean;
     isSusbscribed?: boolean;
     isSecondPortion?: boolean;
+    // Novas propriedades para eventos
+    hasCheckin?: boolean;
+    hasCheckout?: boolean;
 }
 
 const blurhash =
@@ -27,6 +30,8 @@ export const EventMealUserItem: React.FC<EventMealUserItemProps> = ({
     isPresent,
     isSusbscribed,
     isSecondPortion,
+    hasCheckin,
+    hasCheckout,
 }) => {
     return (
         <TouchableOpacity
@@ -47,26 +52,52 @@ export const EventMealUserItem: React.FC<EventMealUserItemProps> = ({
             <View style={styles.infoContainer}>
                 <View style={styles.row}>
                     <Text style={styles.login}>{login}</Text>
-                    <Text
-                        style={[
-                            styles.present,
-                            isPresent || isSusbscribed
-                                ? styles.presentYes
-                                : styles.presentNo,
-                        ]}
-                    >
-                        {type === "events"
-                            ? isPresent
-                                ? "Presente"
-                                : "Ausente"
-                            : isSecondPortion
-                            ? "Segunda via"
-                            : isSusbscribed
-                            ? "Subscrito"
-                            : "Não subscrito"}
-                    </Text>
+                    {type !== "events" && (
+                        <Text
+                            style={[
+                                styles.present,
+                                isPresent || isSusbscribed
+                                    ? styles.presentYes
+                                    : styles.presentNo,
+                            ]}
+                        >
+                            {isSecondPortion
+                                ? "Segunda via"
+                                : isSusbscribed
+                                ? "Subscrito"
+                                : "Não subscrito"}
+                        </Text>
+                    )}
                 </View>
                 <Text style={styles.displayName}>{displayName}</Text>
+                
+                {/* Informações específicas para eventos */}
+                {type === "events" && (
+                    <View style={styles.eventStatusContainer}>
+                        <View style={styles.statusRow}>
+                            <Text style={styles.statusLabel}>Check-in:</Text>
+                            <Text
+                                style={[
+                                    styles.statusValue,
+                                    hasCheckin ? styles.presentYes : styles.presentNo,
+                                ]}
+                            >
+                                {hasCheckin ? "Presente" : "Ausente"}
+                            </Text>
+                        </View>
+                        <View style={styles.statusRow}>
+                            <Text style={styles.statusLabel}>Check-out:</Text>
+                            <Text
+                                style={[
+                                    styles.statusValue,
+                                    hasCheckout ? styles.presentYes : styles.presentNo,
+                                ]}
+                            >
+                                {hasCheckout ? "Presente" : "Ausente"}
+                            </Text>
+                        </View>
+                    </View>
+                )}
             </View>
         </TouchableOpacity>
     );
@@ -122,6 +153,27 @@ const styles = StyleSheet.create({
         fontSize: 12,
         color: "#888",
         marginTop: 4,
+    },
+    eventStatusContainer: {
+        marginTop: 8,
+        paddingTop: 8,
+        borderTopWidth: 1,
+        borderTopColor: "#eee",
+    },
+    statusRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: 4,
+    },
+    statusLabel: {
+        fontSize: 12,
+        color: "#666",
+        fontWeight: "500",
+    },
+    statusValue: {
+        fontSize: 12,
+        fontWeight: "bold",
     },
 });
 
