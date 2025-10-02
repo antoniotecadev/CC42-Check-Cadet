@@ -12,7 +12,7 @@ export function generateAttendanceHtml({
     numberNoCheckout = 0,
     userFilter,
 }: {
-    title: string;
+    title: "Lista de Presença" | "Lista de Assinaturas";
     logoBase64: string;
     description: string;
     date: string;

@@ -190,7 +190,7 @@ export default function EventUsersScreen() {
     const title =
         type === EVENTS
             ? ["Lista de Presença", eventName]
-            : ["Lista de Subscrições", mealName];
+            : ["Lista de Assinaturas", mealName];
     const numberPresenceORSubscribed: number =
         type === EVENTS ? numberPresents : numberSubscribed;
     const numberAbsentsORUnSubscribed =
@@ -341,7 +341,7 @@ export default function EventUsersScreen() {
 
     async function handlePrintPdf() {
         const html = generateAttendanceHtml({
-            title: title[0],
+            title: title[0] as "Lista de Presença" | "Lista de Assinaturas",
             logoBase64: base64Image ?? "",
             description: title[1],
             date,
