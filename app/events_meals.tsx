@@ -255,11 +255,13 @@ export default function EventUsersScreen() {
 
     type Filter =
         | "Filtrar todos"
-        | "Filtrar presentes"
-        | "Filtrar ausentes"
+        | "Filtrar check-in feito"
+        | "Filtrar check-in não feito"
         | "Filtrar subscritos"
         | "Filtrar não subscritos"
-        | "Filtrar segunda via";
+        | "Filtrar segunda via"
+        | "Filtrar check-out feito"
+        | "Filtrar check-out não feito";
 
     const [filter, setFilter] = useState<Filter>("Filtrar todos");
 
@@ -290,14 +292,20 @@ export default function EventUsersScreen() {
         }
         
         switch (filter) {
-            case "Filtrar presentes":
+            case "Filtrar check-in feito":
                 base = base.filter((u) => u.isPresent);
                 break;
-            case "Filtrar ausentes":
+            case "Filtrar check-in não feito":
                 base = base.filter((u) => !u.isPresent);
                 break;
             case "Filtrar subscritos":
                 base = base.filter((u) => u.isSubscribed);
+                break;
+            case "Filtrar check-out feito":
+                base = base.filter((u) => u.hasCheckout);
+                break;
+            case "Filtrar check-out não feito":
+                base = base.filter((u) => u.hasCheckin && !u.hasCheckout);
                 break;
             case "Filtrar segunda via":
                 // participantIds contains the raw subscription keys from Firebase
@@ -384,35 +392,38 @@ export default function EventUsersScreen() {
             {
                 options: [
                     type === EVENTS
-                        ? "Filtrar presentes"
+                        ? "Filtrar check-in feito"
                         : "Filtrar subscritos",
                     type === EVENTS
-                        ? "Filtrar ausentes"
+                        ? "Filtrar check-in não feito"
                         : "Filtrar não subscritos",
-                    // add second portion filter only for meals
-                    ...(type === EVENTS ? [] : ["Filtrar segunda via"]),
+                    // Filtros específicos para eventos
+                    ...(type === EVENTS 
+                        ? ["Filtrar check-out feito", "Filtrar check-out não feito"] 
+                        : ["Filtrar segunda via"]),
                     "Filtrar todos",
                     "Cancelar",
                 ],
-                cancelButtonIndex: type === EVENTS ? 3 : 4,
+                cancelButtonIndex: type === EVENTS ? 5 : 4,
                 userInterfaceStyle: "dark",
             },
             (selectedIndex) => {
                 if (selectedIndex === 0)
                     type === EVENTS
-                        ? setFilter("Filtrar presentes")
+                        ? setFilter("Filtrar check-in feito")
                         : setFilter("Filtrar subscritos");
                 if (selectedIndex === 1)
                     type === EVENTS
-                        ? setFilter("Filtrar ausentes")
+                        ? setFilter("Filtrar check-in não feito")
                         : setFilter("Filtrar não subscritos");
-                if (type !== EVENTS && selectedIndex === 2)
-                    setFilter("Filtrar segunda via");
-                if (
-                    (type === EVENTS && selectedIndex === 2) ||
-                    (type !== EVENTS && selectedIndex === 3)
-                )
-                    setFilter("Filtrar todos");
+                if (type === EVENTS) {
+                    if (selectedIndex === 2) setFilter("Filtrar check-out feito");
+                    if (selectedIndex === 3) setFilter("Filtrar check-out não feito");
+                    if (selectedIndex === 4) setFilter("Filtrar todos");
+                } else {
+                    if (selectedIndex === 2) setFilter("Filtrar segunda via");
+                    if (selectedIndex === 3) setFilter("Filtrar todos");
+                }
             }
         );
     };
@@ -771,7 +782,7 @@ export default function EventUsersScreen() {
                                 setShowWebFilterMenu(false);
                                 setFilter(
                                     type === EVENTS
-                                        ? "Filtrar presentes"
+                                        ? "Filtrar check-in feito"
                                         : "Filtrar subscritos"
                                 );
                             }}
@@ -779,7 +790,7 @@ export default function EventUsersScreen() {
                         >
                             <ThemedText>
                                 {type === EVENTS
-                                    ? "Filtrar presentes"
+                                    ? "Filtrar check-in feito"
                                     : "Filtrar subscritos"}
                             </ThemedText>
                         </TouchableOpacity>
@@ -788,7 +799,7 @@ export default function EventUsersScreen() {
                                 setShowWebFilterMenu(false);
                                 setFilter(
                                     type === EVENTS
-                                        ? "Filtrar ausentes"
+                                        ? "Filtrar check-in não feito"
                                         : "Filtrar não subscritos"
                                 );
                             }}
@@ -796,10 +807,35 @@ export default function EventUsersScreen() {
                         >
                             <ThemedText>
                                 {type === EVENTS
-                                    ? "Filtrar ausentes"
+                                    ? "Filtrar check-in não feito"
                                     : "Filtrar não subscritos"}
                             </ThemedText>
                         </TouchableOpacity>
+                        
+                        {/* Filtros específicos para eventos - Check-out */}
+                        {type === EVENTS && (
+                            <>
+                                <TouchableOpacity
+                                    onPress={() => {
+                                        setShowWebFilterMenu(false);
+                                        setFilter("Filtrar check-out feito");
+                                    }}
+                                    style={styles.webMenuItem}
+                                >
+                                    <ThemedText>Filtrar check-out feito</ThemedText>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    onPress={() => {
+                                        setShowWebFilterMenu(false);
+                                        setFilter("Filtrar check-out não feito");
+                                    }}
+                                    style={styles.webMenuItem}
+                                >
+                                    <ThemedText>Filtrar check-out não feito</ThemedText>
+                                </TouchableOpacity>
+                            </>
+                        )}
+                        
                         {/* Apenas Segunda via - show only for meals on web as well */}
                         {type !== EVENTS && (
                             <TouchableOpacity
