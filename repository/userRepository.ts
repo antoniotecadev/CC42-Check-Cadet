@@ -24,7 +24,7 @@ export function sendComment(
 
     const commentData = {
         comment: comment,
-        isAnonymous: anonymous
+        isAnonymous: anonymous,
     };
 
     // Return the promise so callers can await and handle errors
@@ -46,28 +46,28 @@ export async function getComment(
         database,
         `campus/${campusId}/cursus/${cursusId}/${type}/${typeId}/comments/${userId}`
     );
-    
+
     const snapshot = await get(commentRef);
     if (snapshot.exists()) {
         const data = snapshot.val();
-        
+
         // Handle both old format (string) and new format (object)
-        if (typeof data === 'string') {
+        if (typeof data === "string") {
             return {
                 comment: data,
-                isAnonymous: false
+                isAnonymous: false,
             };
-        } else if (data && typeof data === 'object') {
+        } else if (data && typeof data === "object") {
             return {
                 comment: data.comment || null,
-                isAnonymous: data.isAnonymous || false
+                isAnonymous: data.isAnonymous || false,
             };
         }
     }
-    
+
     return {
         comment: null,
-        isAnonymous: false
+        isAnonymous: false,
     };
 }
 
@@ -91,7 +91,12 @@ export async function userIsPresentOrSubscribed({
         }/${userId}`
     );
     const snapshot = await get(participantsRef);
-    return snapshot.exists();
+    const existingData = snapshot.exists();
+    if (type === "events" && existingData) {
+        const data = snapshot.val();
+        return !!data.checkin && !!data.checkout; // Retorna true se houver check-in e check-out
+    }
+    return existingData;
 }
 
 export function rate(
@@ -154,7 +159,7 @@ export async function sendRatingAndComment(
         );
         const commentData = {
             comment: comment.trim(),
-            isAnonymous: anonymous
+            isAnonymous: anonymous,
         };
         promises.push(set(commentRef, commentData));
     }
@@ -191,9 +196,10 @@ export function useUsersPaginated(
     let res;
     const { api } = useApiInterceptors();
     return useInfiniteQuery({
-        queryKey: type === "events" 
-            ? ["event-users", eventId] 
-            : ["cursus-users", cursusId, campusId],
+        queryKey:
+            type === "events"
+                ? ["event-users", eventId]
+                : ["cursus-users", cursusId, campusId],
         queryFn: async ({ pageParam = 1 }) => {
             // Função que busca os usuários
             type === "events"
@@ -225,7 +231,7 @@ export function optimizeUsers(
 ): UserPresence[] {
     // Transforma lista de IDs em Set para buscas rápidas
     const idSet = new Set(ids.map(String));
-    const key = type === "meals" ? 'isSubscribed' : 'isPresent';
+    const key = type === "meals" ? "isSubscribed" : "isPresent";
 
     // Usa reduce para filtrar e mapear ao mesmo tempo
     return users.reduce<UserPresence[]>((acc, user) => {
