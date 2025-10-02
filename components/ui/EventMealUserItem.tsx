@@ -16,6 +16,7 @@ interface EventMealUserItemProps {
     hasCheckout?: boolean;
     hasFirstPortion?: boolean;
     hasSecondPortion?: boolean;
+    receivedSecondPortion?: boolean;
 }
 
 const blurhash =
@@ -35,6 +36,7 @@ export const EventMealUserItem: React.FC<EventMealUserItemProps> = ({
     hasCheckout,
     hasFirstPortion,
     hasSecondPortion,
+    receivedSecondPortion,
 }) => {
     return (
         <TouchableOpacity
@@ -73,7 +75,7 @@ export const EventMealUserItem: React.FC<EventMealUserItemProps> = ({
                     )}
                 </View>
                 <Text style={styles.displayName}>{displayName}</Text>
-                
+
                 {/* Informações específicas para eventos */}
                 {type === "events" && (
                     <View style={styles.eventStatusContainer}>
@@ -82,7 +84,9 @@ export const EventMealUserItem: React.FC<EventMealUserItemProps> = ({
                             <Text
                                 style={[
                                     styles.statusValue,
-                                    hasCheckin ? styles.presentYes : styles.presentNo,
+                                    hasCheckin
+                                        ? styles.presentYes
+                                        : styles.presentNo,
                                 ]}
                             >
                                 {hasCheckin ? "Presente" : "Ausente"}
@@ -93,7 +97,9 @@ export const EventMealUserItem: React.FC<EventMealUserItemProps> = ({
                             <Text
                                 style={[
                                     styles.statusValue,
-                                    hasCheckout ? styles.presentYes : styles.presentNo,
+                                    hasCheckout
+                                        ? styles.presentYes
+                                        : styles.presentNo,
                                 ]}
                             >
                                 {hasCheckout ? "Presente" : "Ausente"}
@@ -106,25 +112,48 @@ export const EventMealUserItem: React.FC<EventMealUserItemProps> = ({
                 {type === "meals" && (
                     <View style={styles.eventStatusContainer}>
                         <View style={styles.statusRow}>
-                            <Text style={styles.statusLabel}>Primeira via:</Text>
+                            <Text style={styles.statusLabel}>
+                                Primeira via:
+                            </Text>
                             <Text
                                 style={[
                                     styles.statusValue,
-                                    hasFirstPortion ? styles.presentYes : styles.presentNo,
+                                    hasFirstPortion
+                                        ? styles.presentYes
+                                        : styles.presentNo,
                                 ]}
                             >
-                                {hasFirstPortion ? "Subscrito" : "Não subscrito"}
+                                {hasFirstPortion
+                                    ? "Subscrito"
+                                    : "Não subscrito"}
                             </Text>
                         </View>
                         <View style={styles.statusRow}>
                             <Text style={styles.statusLabel}>Segunda via:</Text>
+                            {hasSecondPortion && (
+                                <Text
+                                    style={
+                                        receivedSecondPortion
+                                            ? styles.receivedYes
+                                            : styles.receivedNo
+                                    }
+                                >
+                                    {receivedSecondPortion
+                                        ? "Recebido"
+                                        : "Não recebido"}
+                                </Text>
+                            )}
                             <Text
                                 style={[
                                     styles.statusValue,
-                                    hasSecondPortion ? styles.presentYes : styles.presentNo,
+                                    hasSecondPortion
+                                        ? styles.presentYes
+                                        : styles.presentNo,
                                 ]}
                             >
-                                {hasSecondPortion ? "Subscrito" : "Não subscrito"}
+                                {hasSecondPortion
+                                    ? "Subscrito"
+                                    : "Não subscrito"}
                             </Text>
                         </View>
                     </View>
@@ -178,6 +207,12 @@ const styles = StyleSheet.create({
         color: "#2ecc40",
     },
     presentNo: {
+        color: "#e74c3c",
+    },
+    receivedYes: {
+        color: "#2c92f1ff",
+    },
+    receivedNo: {
         color: "#e74c3c",
     },
     displayName: {

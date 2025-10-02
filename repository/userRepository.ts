@@ -182,6 +182,7 @@ export interface UserPresence {
     hasCheckout?: boolean;
     hasFirstPortion?: boolean;
     hasSecondPortion?: boolean;
+    receivedSecondPortion?: boolean;
 }
 
 export interface UserSubscription {

@@ -14,6 +14,7 @@ export function useUser(
     const [eventParticipants, setEventParticipants] = useState<
         Array<{ id: string; checkout?: string }>
     >([]);
+    const [statusMap, setStatusMap] = useState<Record<string, boolean>>({});
 
     useEffect(() => {
         if (!campusId || !cursusId || !typeId) return;
@@ -40,12 +41,15 @@ export function useUser(
             } else {
                 // Para refeições: mantém lógica original
                 const ids: string[] = [];
+                const statusMap: Record<string, boolean> = {};
                 let quantityReceivedUser: number = 0;
                 snapshot.forEach((child) => {
                     ids.push(child.key!);
+                    statusMap[child.key!] = Boolean(child.val().status);
                     quantityReceivedUser += child.val().quantity || 0;
                 });
                 setIds(ids);
+                setStatusMap(statusMap);
                 setQuantityReceived(quantityReceivedUser);
             }
         });
@@ -54,5 +58,5 @@ export function useUser(
 
     return type === "events"
         ? { eventParticipants }
-        : { ids, quantityReceived };
+        : { ids, statusMap, quantityReceived };
 }

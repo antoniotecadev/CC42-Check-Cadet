@@ -106,11 +106,13 @@ export default function EventUsersScreen() {
             const userId = String(user.id);
             const hasFirstPortion = userResult.ids?.includes(userId) || false;
             const hasSecondPortion = userResult.ids?.includes(`-${userId}`) || false;
+            const receivedSecondPortion = userResult.statusMap[`-${userId}`] || false;
             
             return {
                 ...user,
                 hasFirstPortion,
                 hasSecondPortion,
+                receivedSecondPortion,
             };
         });
     };
@@ -765,6 +767,7 @@ export default function EventUsersScreen() {
                             hasCheckout={item.hasCheckout}
                             hasFirstPortion={item.hasFirstPortion}
                             hasSecondPortion={item.hasSecondPortion}
+                            receivedSecondPortion={item.receivedSecondPortion}
                         />
                     )}
                     // onEndReached={() => { // option - if use remove function React.useEffectin line 72
