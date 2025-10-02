@@ -521,16 +521,21 @@ export default function CreateMealModal({
 
                                 {/* Seletor de categorias em etapas */}
                                 {showCategorySelector && (
-                                    <View style={styles.categorySelector}>
+                                    <ThemedView
+                                        style={[
+                                            styles.categorySelector,
+                                            { borderColor: color },
+                                        ]}
+                                    >
                                         {!selectedCategory ? (
                                             // Etapa 1: Selecionar categoria principal
                                             <View>
                                                 <Text
                                                     style={styles.selectorTitle}
                                                 >
-                                                    Escolha uma categoria:
+                                                    Escolha uma categoria
                                                 </Text>
-                                                <View
+                                                <ThemedView
                                                     style={styles.categoryGrid}
                                                 >
                                                     {Object.values(
@@ -570,7 +575,7 @@ export default function CreateMealModal({
                                                             </Text>
                                                         </TouchableOpacity>
                                                     ))}
-                                                </View>
+                                                </ThemedView>
                                             </View>
                                         ) : !selectedSubcategory ? (
                                             // Etapa 2: Selecionar subcategoria
@@ -624,9 +629,13 @@ export default function CreateMealModal({
                                                         ]) => (
                                                             <TouchableOpacity
                                                                 key={key}
-                                                                style={
-                                                                    styles.subcategoryItem
-                                                                }
+                                                                style={[
+                                                                    styles.subcategoryItem,
+                                                                    {
+                                                                        borderColor:
+                                                                            color,
+                                                                    },
+                                                                ]}
                                                                 onPress={() =>
                                                                     setSelectedSubcategory(
                                                                         key
@@ -642,7 +651,7 @@ export default function CreateMealModal({
                                                                         subcategory.icon
                                                                     }
                                                                 </Text>
-                                                                <Text
+                                                                <ThemedText
                                                                     style={
                                                                         styles.subcategoryName
                                                                     }
@@ -650,7 +659,7 @@ export default function CreateMealModal({
                                                                     {
                                                                         subcategory.name
                                                                     }
-                                                                </Text>
+                                                                </ThemedText>
                                                                 <Ionicons
                                                                     name="chevron-forward"
                                                                     size={16}
@@ -664,7 +673,9 @@ export default function CreateMealModal({
                                         ) : (
                                             // Etapa 3: Selecionar item específico
                                             <View>
-                                                <View style={styles.breadcrumb}>
+                                                <ThemedView
+                                                    style={styles.breadcrumb}
+                                                >
                                                     <TouchableOpacity
                                                         onPress={() =>
                                                             setSelectedCategory(
@@ -698,7 +709,7 @@ export default function CreateMealModal({
                                                             )
                                                         }
                                                     >
-                                                        <Text
+                                                        <ThemedText
                                                             style={
                                                                 styles.breadcrumbText
                                                             }
@@ -707,24 +718,16 @@ export default function CreateMealModal({
                                                                 getSelectedSubcategory()
                                                                     ?.name
                                                             }
-                                                        </Text>
+                                                        </ThemedText>
                                                     </TouchableOpacity>
-                                                    <Text
-                                                        style={
-                                                            styles.breadcrumbSeparator
-                                                        }
-                                                    >
-                                                        {" "}
-                                                        {">"}{" "}
-                                                    </Text>
-                                                    <Text
-                                                        style={
-                                                            styles.breadcrumbCurrent
-                                                        }
-                                                    >
-                                                        Selecione:
-                                                    </Text>
-                                                </View>
+                                                </ThemedView>
+                                                <ThemedText
+                                                    style={
+                                                        styles.breadcrumbCurrent
+                                                    }
+                                                >
+                                                    Selecione:
+                                                </ThemedText>
                                                 <View style={styles.itemsList}>
                                                     {getSelectedSubcategory()?.items?.map(
                                                         (item) => (
@@ -736,6 +739,10 @@ export default function CreateMealModal({
                                                                         item
                                                                     ) &&
                                                                         styles.itemSelected,
+                                                                    {
+                                                                        borderColor:
+                                                                            color,
+                                                                    },
                                                                 ]}
                                                                 onPress={() =>
                                                                     addIngredient(
@@ -743,7 +750,7 @@ export default function CreateMealModal({
                                                                     )
                                                                 }
                                                             >
-                                                                <Text
+                                                                <ThemedText
                                                                     style={[
                                                                         styles.itemText,
                                                                         tags.includes(
@@ -753,7 +760,7 @@ export default function CreateMealModal({
                                                                     ]}
                                                                 >
                                                                     {item}
-                                                                </Text>
+                                                                </ThemedText>
                                                                 {tags.includes(
                                                                     item
                                                                 ) && (
@@ -787,7 +794,7 @@ export default function CreateMealModal({
                                                 Fechar
                                             </Text>
                                         </TouchableOpacity>
-                                    </View>
+                                    </ThemedView>
                                 )}
                                 <TextInput
                                     onPress={() =>
@@ -941,18 +948,16 @@ const styles = StyleSheet.create({
     },
     // Estilos para o novo seletor de categorias
     categorySelector: {
-        backgroundColor: "#f8f9fa",
         borderRadius: 12,
         padding: 16,
         marginBottom: 16,
         borderWidth: 1,
-        borderColor: "#e9ecef",
     },
     selectorTitle: {
         fontSize: 16,
         fontWeight: "600",
         marginBottom: 12,
-        color: "#333",
+        color: "#666",
         textAlign: "center",
     },
     categoryGrid: {
@@ -967,7 +972,6 @@ const styles = StyleSheet.create({
         margin: 4,
         borderRadius: 12,
         borderWidth: 2,
-        backgroundColor: "#fff",
     },
     categoryIcon: {
         fontSize: 24,
@@ -984,7 +988,7 @@ const styles = StyleSheet.create({
         marginBottom: 12,
         paddingBottom: 8,
         borderBottomWidth: 1,
-        borderBottomColor: "#e9ecef",
+        borderBottomColor: "#666",
     },
     breadcrumbText: {
         color: "#007AFF",
@@ -996,7 +1000,7 @@ const styles = StyleSheet.create({
         fontSize: 14,
     },
     breadcrumbCurrent: {
-        color: "#333",
+        color: "#666",
         fontSize: 14,
         fontWeight: "600",
         marginBottom: 8,
@@ -1009,10 +1013,8 @@ const styles = StyleSheet.create({
         alignItems: "center",
         padding: 12,
         marginVertical: 2,
-        backgroundColor: "#fff",
         borderRadius: 8,
         borderWidth: 1,
-        borderColor: "#e9ecef",
     },
     subcategoryIcon: {
         fontSize: 20,
@@ -1022,7 +1024,6 @@ const styles = StyleSheet.create({
         flex: 1,
         fontSize: 14,
         fontWeight: "500",
-        color: "#333",
     },
     itemsList: {
         marginBottom: 16,
@@ -1032,11 +1033,9 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "space-between",
         padding: 10,
-        marginVertical: 1,
-        backgroundColor: "#fff",
+        marginVertical: 2,
         borderRadius: 6,
         borderWidth: 1,
-        borderColor: "#e9ecef",
     },
     itemSelected: {
         backgroundColor: "#007AFF",
@@ -1044,7 +1043,6 @@ const styles = StyleSheet.create({
     },
     itemText: {
         fontSize: 14,
-        color: "#333",
     },
     itemTextSelected: {
         color: "#fff",
