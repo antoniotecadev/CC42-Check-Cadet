@@ -73,6 +73,16 @@ export async function subscription({
                 });
                 return;
             }
+        } else if (mealPortion === "second") {
+            setLoading(false);
+            showModal({
+                title: "Aviso!",
+                message: `${displayName}\n Não está inscrito para segunda via`,
+                color: "#FDD835",
+                imageSource: { uri: imageSource },
+                onClose: onResumeCamera,
+            });
+            return;
         }
 
         // Monta updates para todas as refeições
