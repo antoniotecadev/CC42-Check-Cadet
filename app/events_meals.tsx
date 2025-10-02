@@ -68,18 +68,15 @@ export default function EventUsersScreen() {
     }>();
     const typeId = type === EVENTS ? eventId : mealId;
     const endPoint = type === EVENTS ? "participants" : "subscriptions";
-    const userResult = useUser(
-        campusId,
-        cursusId,
-        type,
-        typeId,
-        endPoint
-    );
-    
+    const userResult = useUser(campusId, cursusId, type, typeId, endPoint);
+
     // Para acessar os IDs baseado no tipo:
-    const participantIds = type === EVENTS 
-        ? userResult.eventParticipants?.map(participant => participant.id) || []
-        : userResult.ids || [];
+    const participantIds =
+        type === EVENTS
+            ? userResult.eventParticipants?.map(
+                  (participant) => participant.id
+              ) || []
+            : userResult.ids || [];
 
     // Função para enriquecer dados de eventos com informações de check-in/check-out
     const enrichEventData = (users: UserPresence[]) => {
@@ -87,16 +84,18 @@ export default function EventUsersScreen() {
             return users;
         }
 
-        return users.map(user => {
-            const participant = userResult.eventParticipants?.find(p => p.id === String(user.id));
+        return users.map((user) => {
+            const participant = userResult.eventParticipants?.find(
+                (p) => p.id === String(user.id)
+            );
             return {
                 ...user,
                 hasCheckin: !!participant, // Se existe no array, fez check-in
-                hasCheckout: !!(participant?.checkout), // Se tem checkout, fez check-out
+                hasCheckout: !!participant?.checkout, // Se tem checkout, fez check-out
             };
         });
     };
-    
+
     const {
         data,
         isLoading,
@@ -207,28 +206,25 @@ export default function EventUsersScreen() {
 
     async function handleExportExcel() {
         // Monta os dados CSV
-        const header = type === EVENTS 
-            ? `Nº;Nome Completo;Login;Check-in;Check-out\n`
-            : `Nº;Nome Completo;Login;Assinatura\n`;
-        
+        const header =
+            type === EVENTS
+                ? `Nº;Nome Completo;Login;Check-in;Check-out\n`
+                : `Nº;Nome Completo;Login;Assinatura\n`;
+
         const rows = userFilter
-            .map(
-                (u, i) => {
-                    if (type === EVENTS) {
-                        return `${i + 1};"${u.displayname}";${u.login};${
-                            u.hasCheckin ? "Presente" : "Ausente"
-                        };${
-                            u.hasCheckout ? "Presente" : "Ausente"
-                        }`;
-                    } else {
-                        return `${i + 1};"${u.displayname}";${u.login};${
-                            u.isSubscribed ? "Assinado" : "Não assinado"
-                        }`;
-                    }
+            .map((u, i) => {
+                if (type === EVENTS) {
+                    return `${i + 1};"${u.displayname}";${u.login};${
+                        u.hasCheckin ? "Presente" : "Ausente"
+                    };${u.hasCheckout ? "Presente" : "Ausente"}`;
+                } else {
+                    return `${i + 1};"${u.displayname}";${u.login};${
+                        u.isSubscribed ? "Assinado" : "Não assinado"
+                    }`;
                 }
-            )
+            })
             .join("\n");
-        
+
         // Adiciona BOM UTF-8 para compatibilidade com Excel
         const csv = String.fromCharCode(0xfeff) + header + rows;
         const fileName = `lista_presenca_${
@@ -287,15 +283,17 @@ export default function EventUsersScreen() {
     }, [searchQuery]);
 
     let filterSecondPortion: boolean = false;
+    const idsSet = new Set((participantIds || []).map(String));
+
     const userFilter = useMemo(() => {
         filterSecondPortion = false;
         let base = userPresenceSubscribed;
-        
+
         // Enriquecer dados para eventos
         if (type === EVENTS) {
             base = enrichEventData(base);
         }
-        
+
         switch (filter) {
             case "Filtrar check-in feito":
                 base = base.filter((u) => u.isPresent);
@@ -313,12 +311,7 @@ export default function EventUsersScreen() {
                 base = base.filter((u) => u.hasCheckin && !u.hasCheckout);
                 break;
             case "Filtrar segunda via":
-                // participantIds contains the raw subscription keys from Firebase
-                // subscriptions for second portion are stored with a leading '-'
-                const secondIds = new Set((participantIds || []).map(String));
-                base = base.filter((u) =>
-                    secondIds.has(`-${String(u.id)}`)
-                );
+                base = base.filter((u) => idsSet.has(`-${String(u.id)}`));
                 filterSecondPortion = true;
                 break;
             case "Filtrar não subscritos":
@@ -337,7 +330,13 @@ export default function EventUsersScreen() {
             const login = (u.login || "").toLowerCase();
             return name.includes(q) || login.includes(q);
         });
-    }, [filter, userPresenceSubscribed, debouncedQuery, type, userResult.eventParticipants]);
+    }, [
+        filter,
+        userPresenceSubscribed,
+        debouncedQuery,
+        type,
+        userResult.eventParticipants,
+    ]);
 
     async function handlePrintPdf() {
         const html = generateAttendanceHtml({
@@ -405,8 +404,11 @@ export default function EventUsersScreen() {
                         ? "Filtrar check-in não feito"
                         : "Filtrar não subscritos",
                     // Filtros específicos para eventos
-                    ...(type === EVENTS 
-                        ? ["Filtrar check-out feito", "Filtrar check-out não feito"] 
+                    ...(type === EVENTS
+                        ? [
+                              "Filtrar check-out feito",
+                              "Filtrar check-out não feito",
+                          ]
                         : ["Filtrar segunda via"]),
                     "Filtrar todos",
                     "Cancelar",
@@ -424,8 +426,10 @@ export default function EventUsersScreen() {
                         ? setFilter("Filtrar check-in não feito")
                         : setFilter("Filtrar não subscritos");
                 if (type === EVENTS) {
-                    if (selectedIndex === 2) setFilter("Filtrar check-out feito");
-                    if (selectedIndex === 3) setFilter("Filtrar check-out não feito");
+                    if (selectedIndex === 2)
+                        setFilter("Filtrar check-out feito");
+                    if (selectedIndex === 3)
+                        setFilter("Filtrar check-out não feito");
                     if (selectedIndex === 4) setFilter("Filtrar todos");
                 } else {
                     if (selectedIndex === 2) setFilter("Filtrar segunda via");
@@ -577,11 +581,13 @@ export default function EventUsersScreen() {
                                 {numberAbsentsORUnSubscribed}
                             </Text>
                         </View>
-                        
+
                         {/* Chips específicos para eventos - Check-out */}
                         {eventId && (
                             <>
-                                <View style={[styles.chip, styles.chipCheckout]}>
+                                <View
+                                    style={[styles.chip, styles.chipCheckout]}
+                                >
                                     <MaterialCommunityIcons
                                         name="logout"
                                         size={16}
@@ -600,7 +606,9 @@ export default function EventUsersScreen() {
                                         {numberCheckout}
                                     </Text>
                                 </View>
-                                <View style={[styles.chip, styles.chipNoCheckout]}>
+                                <View
+                                    style={[styles.chip, styles.chipNoCheckout]}
+                                >
                                     <MaterialCommunityIcons
                                         name="logout-variant"
                                         size={16}
@@ -621,7 +629,7 @@ export default function EventUsersScreen() {
                                 </View>
                             </>
                         )}
-                        
+
                         {mealId && (
                             <>
                                 <View
@@ -668,6 +676,34 @@ export default function EventUsersScreen() {
                                     >
                                         {Number(quantity) -
                                             (userResult.quantityReceived ?? 0)}
+                                    </Text>
+                                </View>
+                                <View
+                                    style={[
+                                        styles.chip,
+                                        styles.chipSecondPortion,
+                                    ]}
+                                >
+                                    <MaterialCommunityIcons
+                                        name="account-multiple"
+                                        size={16}
+                                        color={colorscheme}
+                                        style={{ marginRight: 2 }}
+                                    />
+                                    <Text
+                                        style={[
+                                            styles.chipText,
+                                            {
+                                                color: colorscheme,
+                                                fontSize: 12,
+                                            },
+                                        ]}
+                                    >
+                                        {
+                                            Array.from(idsSet).filter((id) =>
+                                                id.startsWith("-")
+                                            ).length
+                                        }
                                     </Text>
                                 </View>
                             </>
@@ -818,7 +854,7 @@ export default function EventUsersScreen() {
                                     : "Filtrar não subscritos"}
                             </ThemedText>
                         </TouchableOpacity>
-                        
+
                         {/* Filtros específicos para eventos - Check-out */}
                         {type === EVENTS && (
                             <>
@@ -829,20 +865,26 @@ export default function EventUsersScreen() {
                                     }}
                                     style={styles.webMenuItem}
                                 >
-                                    <ThemedText>Filtrar check-out feito</ThemedText>
+                                    <ThemedText>
+                                        Filtrar check-out feito
+                                    </ThemedText>
                                 </TouchableOpacity>
                                 <TouchableOpacity
                                     onPress={() => {
                                         setShowWebFilterMenu(false);
-                                        setFilter("Filtrar check-out não feito");
+                                        setFilter(
+                                            "Filtrar check-out não feito"
+                                        );
                                     }}
                                     style={styles.webMenuItem}
                                 >
-                                    <ThemedText>Filtrar check-out não feito</ThemedText>
+                                    <ThemedText>
+                                        Filtrar check-out não feito
+                                    </ThemedText>
                                 </TouchableOpacity>
                             </>
                         )}
-                        
+
                         {/* Apenas Segunda via - show only for meals on web as well */}
                         {type !== EVENTS && (
                             <TouchableOpacity
@@ -1032,6 +1074,9 @@ const styles = StyleSheet.create({
     },
     chipNotReceived: {
         backgroundColor: "#FDD835",
+    },
+    chipSecondPortion: {
+        backgroundColor: "#9C27B0",
     },
     chipCheckout: {
         backgroundColor: "#9C27B0", // Roxo para check-out feito
