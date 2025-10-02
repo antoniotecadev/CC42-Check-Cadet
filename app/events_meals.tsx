@@ -137,7 +137,9 @@ export default function EventUsersScreen() {
     let numberPresents: number = 0,
         numberAbsents: number = 0,
         numberSubscribed: number = 0,
-        numberUnSubscribed: number = 0;
+        numberUnSubscribed: number = 0,
+        numberCheckout: number = 0,
+        numberNoCheckout: number = 0;
 
     if (type === EVENTS) {
         userAttendanceList = optimizeUsers(users, participantIds, "events");
@@ -152,6 +154,23 @@ export default function EventUsersScreen() {
         );
         numberPresents = counts.isPresent;
         numberAbsents = counts.isAbsents;
+
+        // Contagem de check-out baseada nos dados do Firebase
+        if (userResult.eventParticipants) {
+            const checkoutCounts = userResult.eventParticipants.reduce(
+                (acc, participant) => {
+                    if (participant.checkout) {
+                        acc.checkout++;
+                    } else {
+                        acc.noCheckout++;
+                    }
+                    return acc;
+                },
+                { checkout: 0, noCheckout: 0 }
+            );
+            numberCheckout = checkoutCounts.checkout;
+            numberNoCheckout = checkoutCounts.noCheckout;
+        }
     } else {
         userSubscriptionsList = optimizeUsers(users, participantIds, "meals");
 
@@ -540,6 +559,51 @@ export default function EventUsersScreen() {
                                 {numberAbsentsORUnSubscribed}
                             </Text>
                         </View>
+                        
+                        {/* Chips específicos para eventos - Check-out */}
+                        {eventId && (
+                            <>
+                                <View style={[styles.chip, styles.chipCheckout]}>
+                                    <MaterialCommunityIcons
+                                        name="logout"
+                                        size={16}
+                                        color={colorscheme}
+                                        style={{ marginRight: 2 }}
+                                    />
+                                    <Text
+                                        style={[
+                                            styles.chipText,
+                                            {
+                                                color: colorscheme,
+                                                fontSize: 12,
+                                            },
+                                        ]}
+                                    >
+                                        {numberCheckout}
+                                    </Text>
+                                </View>
+                                <View style={[styles.chip, styles.chipNoCheckout]}>
+                                    <MaterialCommunityIcons
+                                        name="logout-variant"
+                                        size={16}
+                                        color={colorscheme}
+                                        style={{ marginRight: 2 }}
+                                    />
+                                    <Text
+                                        style={[
+                                            styles.chipText,
+                                            {
+                                                color: colorscheme,
+                                                fontSize: 12,
+                                            },
+                                        ]}
+                                    >
+                                        {numberNoCheckout}
+                                    </Text>
+                                </View>
+                            </>
+                        )}
+                        
                         {mealId && (
                             <>
                                 <View
@@ -925,6 +989,12 @@ const styles = StyleSheet.create({
     },
     chipNotReceived: {
         backgroundColor: "#FDD835",
+    },
+    chipCheckout: {
+        backgroundColor: "#9C27B0", // Roxo para check-out feito
+    },
+    chipNoCheckout: {
+        backgroundColor: "#FF9800", // Laranja para check-out não feito
     },
     chipText: {
         fontWeight: "bold",
