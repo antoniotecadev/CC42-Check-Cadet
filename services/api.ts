@@ -11,7 +11,7 @@ export default function useApiInterceptors() {
 
     const isWeb = Platform.OS === "web";
     const baseURL = isWeb
-        ? "https://check-cadet.vercel.app/api/42-proxy?path="
+        ? "https://check-cadet.vercel.app/api/42-proxy"
         : process.env.EXPO_PUBLIC_API_URL;
 
     const api = axios.create({
@@ -24,6 +24,28 @@ export default function useApiInterceptors() {
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
+        
+        // Handle web proxy URL construction
+        if (isWeb && config.url) {
+            // Extract path and query parameters
+            const [path, queryString] = config.url.split('?');
+            
+            // Create new URL with path parameter and preserve other parameters
+            const proxyUrl = new URL(config.baseURL!);
+            proxyUrl.searchParams.set('path', path);
+            
+            // Add original query parameters if they exist
+            if (queryString) {
+                const originalParams = new URLSearchParams(queryString);
+                originalParams.forEach((value, key) => {
+                    proxyUrl.searchParams.set(key, value);
+                });
+            }
+            
+            config.url = proxyUrl.toString();
+            config.baseURL = ''; // Clear baseURL to use full URL
+        }
+        
         return config;
     });
 
