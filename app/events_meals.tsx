@@ -103,12 +103,14 @@ export default function EventUsersScreen() {
             return users;
         }
 
-        return users.map(user => {
+        return users.map((user) => {
             const userId = String(user.id);
             const hasFirstPortion = userResult.ids?.includes(userId) || false;
-            const hasSecondPortion = userResult.ids?.includes(`-${userId}`) || false;
-            const receivedSecondPortion = userResult.statusMap[`-${userId}`] || false;
-            
+            const hasSecondPortion =
+                userResult.ids?.includes(`-${userId}`) || false;
+            const receivedSecondPortion =
+                userResult.statusMap[`-${userId}`] || false;
+
             return {
                 ...user,
                 hasFirstPortion,
@@ -210,8 +212,8 @@ export default function EventUsersScreen() {
     const date = type === EVENTS ? eventDate : mealCreatedDate;
     const title =
         type === EVENTS
-            ? [t('events.attendanceList'), eventName]
-            : [t('events.subscriptionList'), mealName];
+            ? [t("events.attendanceList"), eventName]
+            : [t("events.subscriptionList"), mealName];
     const numberPresenceORSubscribed: number =
         type === EVENTS ? numberPresents : numberSubscribed;
     const numberAbsentsORUnSubscribed =
@@ -230,19 +232,29 @@ export default function EventUsersScreen() {
         // Monta os dados CSV
         const header =
             type === EVENTS
-                ? `Nº;${t('events.fullName')};Login;Check-in;Check-out\n`
-                : `Nº;${t('events.fullName')};Login;${t('events.firstPortion')};${t('events.secondPortion')}\n`;
+                ? `Nº;${t("events.fullName")};Login;Check-in;Check-out\n`
+                : `Nº;${t("events.fullName")};Login;${t(
+                      "events.firstPortion"
+                  )};${t("events.secondPortion")}\n`;
 
         const rows = userFilter
             .map((u, i) => {
                 if (type === EVENTS) {
                     return `${i + 1};"${u.displayname}";${u.login};${
-                        u.hasCheckin ? t('events.present') : t('events.absent')
-                    };${u.hasCheckout ? t('events.present') : t('events.absent')}`;
+                        u.hasCheckin ? t("events.present") : t("events.absent")
+                    };${
+                        u.hasCheckout ? t("events.present") : t("events.absent")
+                    }`;
                 } else {
                     return `${i + 1};"${u.displayname}";${u.login};${
-                        u.hasFirstPortion ? t('events.subscribed') : t('events.notSubscribed')
-                    };${u.hasSecondPortion ? t('events.subscribed') : t('events.notSubscribed')}`;
+                        u.hasFirstPortion
+                            ? t("events.subscribed")
+                            : t("events.notSubscribed")
+                    };${
+                        u.hasSecondPortion
+                            ? t("events.subscribed")
+                            : t("events.notSubscribed")
+                    }`;
                 }
             })
             .join("\n");
@@ -271,7 +283,7 @@ export default function EventUsersScreen() {
             });
             await Sharing.shareAsync(fileUri, {
                 mimeType: "text/csv",
-                dialogTitle: t('events.exportExcel'),
+                dialogTitle: t("events.exportExcel"),
             });
         }
     }
@@ -382,7 +394,7 @@ export default function EventUsersScreen() {
                 base64: false,
             });
             await Sharing.shareAsync(uri, {
-                dialogTitle: `${t('events.printShare')} ${title}`,
+                dialogTitle: `${t("events.printShare")} ${title}`,
                 UTI: ".pdf",
                 mimeType: "application/pdf",
             });
@@ -397,10 +409,10 @@ export default function EventUsersScreen() {
         ActionSheetIOS.showActionSheetWithOptions(
             {
                 options: [
-                    t('common.filter'),
-                    t('events.printShare'),
-                    t('events.exportExcel'),
-                    t('common.cancel'),
+                    t("common.filter"),
+                    t("events.printShare"),
+                    t("events.exportExcel"),
+                    t("common.cancel"),
                 ],
                 cancelButtonIndex: 3,
                 userInterfaceStyle: "dark",
@@ -422,20 +434,20 @@ export default function EventUsersScreen() {
             {
                 options: [
                     type === EVENTS
-                        ? t('events.filterCheckinDone')
-                        : t('events.filterSubscribed'),
+                        ? t("events.filterCheckinDone")
+                        : t("events.filterSubscribed"),
                     type === EVENTS
-                        ? t('events.filterCheckinNotDone')
-                        : t('events.filterNotSubscribed'),
+                        ? t("events.filterCheckinNotDone")
+                        : t("events.filterNotSubscribed"),
                     // Filtros específicos para eventos
                     ...(type === EVENTS
                         ? [
-                              t('events.filterCheckoutDone'),
-                              t('events.filterCheckoutNotDone'),
+                              t("events.filterCheckoutDone"),
+                              t("events.filterCheckoutNotDone"),
                           ]
-                        : [t('events.filterSecondPortion')]),
-                    t('events.filterAll'),
-                    t('common.cancel'),
+                        : [t("events.filterSecondPortion")]),
+                    t("events.filterAll"),
+                    t("common.cancel"),
                 ],
                 cancelButtonIndex: type === EVENTS ? 5 : 4,
                 userInterfaceStyle: "dark",
@@ -450,10 +462,8 @@ export default function EventUsersScreen() {
                         ? setFilter("filterCheckinNotDone")
                         : setFilter("filterNotSubscribed");
                 if (type === EVENTS) {
-                    if (selectedIndex === 2)
-                        setFilter("filterCheckoutDone");
-                    if (selectedIndex === 3)
-                        setFilter("filterCheckoutNotDone");
+                    if (selectedIndex === 2) setFilter("filterCheckoutDone");
+                    if (selectedIndex === 3) setFilter("filterCheckoutNotDone");
                     if (selectedIndex === 4) setFilter("filterAll");
                 } else {
                     if (selectedIndex === 2) setFilter("filterSecondPortion");
@@ -524,9 +534,9 @@ export default function EventUsersScreen() {
     if (isError) {
         return (
             <View style={styles.centered}>
-                <ThemedText>{t('events.errorLoadingStudents')}</ThemedText>
+                <ThemedText>{t("events.errorLoadingStudents")}</ThemedText>
                 <TouchableOpacity onPress={onRefresh}>
-                    <Text style={styles.retry}>{t('common.retry')}</Text>
+                    <Text style={styles.retry}>{t("common.retry")}</Text>
                 </TouchableOpacity>
             </View>
         );
@@ -553,7 +563,7 @@ export default function EventUsersScreen() {
                     ]}
                 >
                     <TextInput
-                        placeholder={t('events.searchPlaceholder')}
+                        placeholder={t("events.searchPlaceholder")}
                         placeholderTextColor={
                             colorScheme === "dark" ? "#aaa" : "#666"
                         }
@@ -572,7 +582,12 @@ export default function EventUsersScreen() {
                     />
 
                     {/* Chips na mesma linha do search */}
-                    <View style={styles.chipInlineRow}>
+                    <View
+                        style={[
+                            styles.chipInlineRow,
+                            isWeb ? { marginTop: 0 } : { marginTop: 12 },
+                        ]}
+                    >
                         <View style={[styles.chip, styles.chipPresent]}>
                             <MaterialCommunityIcons
                                 name="account-check"
@@ -805,7 +820,7 @@ export default function EventUsersScreen() {
                             }}
                             style={styles.webMenuItem}
                         >
-                            <ThemedText>{t('common.filter')}</ThemedText>
+                            <ThemedText>{t("common.filter")}</ThemedText>
                         </TouchableOpacity>
                         <TouchableOpacity
                             onPress={() => {
@@ -814,7 +829,7 @@ export default function EventUsersScreen() {
                             }}
                             style={styles.webMenuItem}
                         >
-                            <ThemedText>{t('events.printShare')}</ThemedText>
+                            <ThemedText>{t("events.printShare")}</ThemedText>
                         </TouchableOpacity>
                         <TouchableOpacity
                             onPress={() => {
@@ -823,13 +838,13 @@ export default function EventUsersScreen() {
                             }}
                             style={styles.webMenuItem}
                         >
-                            <ThemedText>{t('events.exportExcel')}</ThemedText>
+                            <ThemedText>{t("events.exportExcel")}</ThemedText>
                         </TouchableOpacity>
                         <TouchableOpacity
                             onPress={() => setShowWebMenu(false)}
                             style={styles.webMenuItem}
                         >
-                            <ThemedText>{t('common.cancel')}</ThemedText>
+                            <ThemedText>{t("common.cancel")}</ThemedText>
                         </TouchableOpacity>
                     </View>
                 )}
@@ -860,8 +875,8 @@ export default function EventUsersScreen() {
                         >
                             <ThemedText>
                                 {type === EVENTS
-                                    ? t('events.filterCheckinDone')
-                                    : t('events.filterSubscribed')}
+                                    ? t("events.filterCheckinDone")
+                                    : t("events.filterSubscribed")}
                             </ThemedText>
                         </TouchableOpacity>
                         <TouchableOpacity
@@ -877,8 +892,8 @@ export default function EventUsersScreen() {
                         >
                             <ThemedText>
                                 {type === EVENTS
-                                    ? t('events.filterCheckinNotDone')
-                                    : t('events.filterNotSubscribed')}
+                                    ? t("events.filterCheckinNotDone")
+                                    : t("events.filterNotSubscribed")}
                             </ThemedText>
                         </TouchableOpacity>
 
@@ -893,7 +908,7 @@ export default function EventUsersScreen() {
                                     style={styles.webMenuItem}
                                 >
                                     <ThemedText>
-                                        {t('events.filterCheckoutDone')}
+                                        {t("events.filterCheckoutDone")}
                                     </ThemedText>
                                 </TouchableOpacity>
                                 <TouchableOpacity
@@ -904,7 +919,7 @@ export default function EventUsersScreen() {
                                     style={styles.webMenuItem}
                                 >
                                     <ThemedText>
-                                        {t('events.filterCheckoutNotDone')}
+                                        {t("events.filterCheckoutNotDone")}
                                     </ThemedText>
                                 </TouchableOpacity>
                             </>
@@ -919,7 +934,9 @@ export default function EventUsersScreen() {
                                 }}
                                 style={styles.webMenuItem}
                             >
-                                <ThemedText>{t('events.filterSecondPortion')}</ThemedText>
+                                <ThemedText>
+                                    {t("events.filterSecondPortion")}
+                                </ThemedText>
                             </TouchableOpacity>
                         )}
                         <TouchableOpacity
@@ -929,13 +946,13 @@ export default function EventUsersScreen() {
                             }}
                             style={styles.webMenuItem}
                         >
-                            <ThemedText>{t('events.filterAll')}</ThemedText>
+                            <ThemedText>{t("events.filterAll")}</ThemedText>
                         </TouchableOpacity>
                         <TouchableOpacity
                             onPress={() => setShowWebFilterMenu(false)}
                             style={styles.webMenuItem}
                         >
-                            <ThemedText>{t('common.cancel')}</ThemedText>
+                            <ThemedText>{t("common.cancel")}</ThemedText>
                         </TouchableOpacity>
                     </View>
                 )}
@@ -1076,7 +1093,6 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         gap: 6,
-        marginTop: 12,
         justifyContent: "center",
     },
     chip: {
