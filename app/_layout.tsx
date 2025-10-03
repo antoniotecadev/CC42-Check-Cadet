@@ -21,7 +21,6 @@ import React, { useEffect } from "react";
 
 import useItemStorage from "@/hooks/storage/useItemStorage";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Buffer } from "buffer";
 import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
@@ -30,6 +29,25 @@ import { Platform } from "react-native";
 global.Buffer = Buffer;
 
 const queryClient = new QueryClient({});
+
+// Componente para DevTools que só carrega quando necessário
+const DevTools = () => {
+    const [DevToolsComponent, setDevToolsComponent] = React.useState<React.ComponentType<any> | null>(null);
+    
+    React.useEffect(() => {
+        if (__DEV__ && Platform.OS === "web") {
+            import("@tanstack/react-query-devtools").then((module) => {
+                setDevToolsComponent(() => module.ReactQueryDevtools);
+            }).catch(() => {
+                // Ignora erros de import silenciosamente
+            });
+        }
+    }, []);
+    
+    if (!DevToolsComponent) return null;
+    
+    return <DevToolsComponent initialIsOpen={false} />;
+};
 
 Notifications.setNotificationHandler({
     handleNotification: async () => ({
@@ -42,8 +60,6 @@ Notifications.setNotificationHandler({
 
 export default function RootLayout() {
     const { getItem } = useItemStorage();
-    // Show React Query DevTools in development only on web
-    const showDevtools = __DEV__ && Platform.OS === "web";
     const colorScheme = useColorScheme();
     const [loaded] = useFonts({
         SpaceMono: require("@/assets/fonts/SpaceMono-Regular.ttf"),
@@ -200,7 +216,7 @@ export default function RootLayout() {
                     <StatusBar style="auto" />
                 </ColorCoalitionProvider>
             </ThemeProvider>
-            {showDevtools ? <ReactQueryDevtools initialIsOpen={false} /> : null}
+            <DevTools />
         </LanguageProvider>
         </QueryClientProvider>
     );
