@@ -81,7 +81,7 @@ export const EventMealUserItem: React.FC<EventMealUserItemProps> = ({
                 {type === "events" && (
                     <View style={styles.eventStatusContainer}>
                         <View style={styles.statusRow}>
-                            <Text style={styles.statusLabel}>{t('events.checkin')}:</Text>
+                            <Text style={styles.statusLabel}>{t('events.checkIn')}:</Text>
                             <Text
                                 style={[
                                     styles.statusValue,
@@ -94,7 +94,7 @@ export const EventMealUserItem: React.FC<EventMealUserItemProps> = ({
                             </Text>
                         </View>
                         <View style={styles.statusRow}>
-                            <Text style={styles.statusLabel}>{t('events.checkout')}:</Text>
+                            <Text style={styles.statusLabel}>{t('events.checkOut')}:</Text>
                             <Text
                                 style={[
                                     styles.statusValue,
