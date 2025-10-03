@@ -33,13 +33,13 @@ export default function WebMenuModalCursus({
                             style={styles.option}
                             onPress={() => {
                                 onClose();
-                                if (opt.value !== 3) onSelect(opt.value);
+                                if (opt.value !== 4) onSelect(opt.value);
                             }}
                         >
                             <ThemedText
                                 style={[
                                     styles.text,
-                                    opt.value === 3 && { color: "#E53935" },
+                                    opt.value === 4 && { color: "#E53935" },
                                 ]}
                             >
                                 {opt.label}
