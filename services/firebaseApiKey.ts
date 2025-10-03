@@ -1,5 +1,6 @@
 import { database } from "@/firebaseConfig";
 import useAlert from "@/hooks/useAlert";
+import { t } from "@/i18n";
 import { get, ref } from "firebase/database";
 
 export async function fetchApiKeyFromDatabase(
@@ -14,11 +15,11 @@ export async function fetchApiKeyFromDatabase(
         if (snapshot.exists()) {
             return snapshot.val();
         } else {
-            throw new Error("Chave da API não encontrada");
+            throw new Error(t('common.apiKeyNotFound'));
         }
     } catch (error: any) {
         if (isSPlash) return null;
-        showError("Chave de API", error.message);
+        showError(t('common.apiKey'), error.message);
         return null;
     }
 }

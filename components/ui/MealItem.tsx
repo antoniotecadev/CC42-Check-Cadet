@@ -2,6 +2,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
+import { t } from "../../i18n";
 import { ThemedText } from "../ThemedText";
 
 interface MealItemProps {
@@ -51,7 +52,7 @@ const MealItem: React.FC<MealItemProps> = ({ item, color, borderColor }) => {
                         { color: item.isSubscribed ? "green" : "red" },
                     ]}
                 >
-                    {item.isSubscribed ? "Subscrito" : ""}
+                    {item.isSubscribed ? t('events.subscribed') : ""}
                 </Text>
             </View>
         </View>

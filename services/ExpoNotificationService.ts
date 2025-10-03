@@ -33,7 +33,7 @@ export async function sendExpoNotificationToGroup(
         image: payload.image,
     }));
 
-    // Envia as notificações em lotes de 100 (limite do Expo)
+    // Send notifications in batches of 100 (Expo limit)
     const batchSize = 100;
     for (let i = 0; i < messages.length; i += batchSize) {
         const batch = messages.slice(i, i + batchSize);

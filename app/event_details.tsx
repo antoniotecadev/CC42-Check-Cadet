@@ -3,6 +3,7 @@ import { ThemedView } from "@/components/ThemedView";
 import RatingSection from "@/components/ui/RatingSection";
 import useItemStorage from "@/hooks/storage/useItemStorage";
 import { useColorScheme } from "@/hooks/useColorScheme";
+import { t } from "@/i18n";
 import { encrypt } from "@/utility/AESUtil";
 import { getEventDuration, getTimeUntilEvent } from "@/utility/DateUtil";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
@@ -81,7 +82,7 @@ const EventDetailScreen = () => {
     };
 
     // Pega nome e data do evento dos params (ou defina fallback)
-    const eventName = event?.name || "Evento";
+    const eventName = event?.name || t('events.event');
     const eventDate = event?.begin_at
         ? new Date(event.begin_at).toLocaleDateString()
         : "";

@@ -15,6 +15,7 @@ import {
 } from "@/constants/mealOptions";
 import useAlert from "@/hooks/useAlert";
 import { useCreateMeal } from "@/hooks/useCreateMeal";
+import { t } from "@/i18n";
 import { optimizeImage } from "@/utility/ImageUtil";
 import { Ionicons } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
@@ -233,7 +234,7 @@ export default function CreateMealModal({
     async function handleSubmit() {
         const description = tags.toString();
         if (!name || !type || !description || !quantity) {
-            showInfo("Erro", "Preencha todos os campos obrigatórios.");
+            showInfo(t('common.error'), t('meals.fillAllRequiredFields'));
             return;
         }
         try {
@@ -292,7 +293,7 @@ export default function CreateMealModal({
             onClose();
             onCreated && onCreated();
         } catch (e: any) {
-            showError("Erro", e.message || "Erro ao salvar refeição");
+            showError(t('common.error'), e.message || t('meals.errorSavingMeal'));
         }
     }
 
@@ -341,7 +342,7 @@ export default function CreateMealModal({
                         ) : (
                             <ScrollView showsVerticalScrollIndicator={isWeb}>
                                 <ThemedText style={styles.title}>
-                                    Criar Refeição
+                                    {t('meals.createMeal')}
                                 </ThemedText>
                                 <TouchableOpacity
                                     style={styles.imagePicker}
@@ -354,7 +355,7 @@ export default function CreateMealModal({
                                         />
                                     ) : (
                                         <Text style={styles.imagePlaceholder}>
-                                            Selecionar Imagem
+                                            {t('meals.selectImage')}
                                         </Text>
                                     )}
                                 </TouchableOpacity>
@@ -365,7 +366,7 @@ export default function CreateMealModal({
                                             { backgroundColor: color },
                                         ]}
                                         onPress={takePhoto}
-                                        accessibilityLabel="Tirar Foto"
+                                        accessibilityLabel={t('meals.takePhoto')}
                                     >
                                         <Ionicons
                                             name={isWeb ? "camera" : "camera"}
@@ -379,7 +380,7 @@ export default function CreateMealModal({
                                             { backgroundColor: color },
                                         ]}
                                         onPress={pickImage}
-                                        accessibilityLabel="Abrir Galeria"
+                                        accessibilityLabel={t('meals.openGallery')}
                                     >
                                         <Ionicons
                                             name={isWeb ? "image" : "images"}
@@ -400,7 +401,7 @@ export default function CreateMealModal({
                                         styles.input,
                                         { borderColor: color },
                                     ]}
-                                    placeholder="Nome da Refeição"
+                                    placeholder={t('meals.mealName')}
                                     value={name}
                                     onChangeText={setName}
                                 />
@@ -417,7 +418,7 @@ export default function CreateMealModal({
                                         styles.input,
                                         { borderColor: color },
                                     ]}
-                                    placeholder="Tipo (ex: Pequeno almoço, almoço...)"
+                                    placeholder={t('meals.mealTypePlaceholder')}
                                     value={type}
                                     onChangeText={setType}
                                 />
@@ -492,8 +493,8 @@ export default function CreateMealModal({
                                         }}
                                     >
                                         {tags.length > 0
-                                            ? "Ingredientes selecionados"
-                                            : "Adicionar ingredientes"}
+                                            ? t('meals.ingredientsSelected')
+                                            : t('meals.addIngredients')}
                                     </Text>
                                     <Ionicons
                                         name="chevron-down"
@@ -533,7 +534,7 @@ export default function CreateMealModal({
                                                 <Text
                                                     style={styles.selectorTitle}
                                                 >
-                                                    Escolha uma categoria
+                                                    {t('meals.chooseCategory')}
                                                 </Text>
                                                 <ThemedView
                                                     style={styles.categoryGrid}
@@ -611,7 +612,7 @@ export default function CreateMealModal({
                                                         styles.breadcrumbCurrent
                                                     }
                                                 >
-                                                    Escolha o tipo:
+                                                    {t('meals.chooseType')}
                                                 </Text>
                                                 <View
                                                     style={
@@ -726,7 +727,7 @@ export default function CreateMealModal({
                                                         styles.breadcrumbCurrent
                                                     }
                                                 >
-                                                    Selecione:
+                                                    {t('meals.select')}
                                                 </ThemedText>
                                                 <View style={styles.itemsList}>
                                                     {getSelectedSubcategory()?.items?.map(
@@ -791,7 +792,7 @@ export default function CreateMealModal({
                                             <Text
                                                 style={styles.closeSelectorText}
                                             >
-                                                Fechar
+                                                {t('common.close')}
                                             </Text>
                                         </TouchableOpacity>
                                     </ThemedView>
@@ -808,7 +809,7 @@ export default function CreateMealModal({
                                         styles.input,
                                         { borderColor: color },
                                     ]}
-                                    placeholder="Quantidade"
+                                    placeholder={t('meals.quantity')}
                                     value={quantity}
                                     onChangeText={setQuantity}
                                     keyboardType="numeric"
@@ -822,7 +823,7 @@ export default function CreateMealModal({
                                         }}
                                     >
                                         <Text style={styles.cancelText}>
-                                            Cancelar
+                                            {t('common.cancel')}
                                         </Text>
                                     </TouchableOpacity>
                                     <TouchableOpacity
@@ -834,7 +835,7 @@ export default function CreateMealModal({
                                         disabled={loading}
                                     >
                                         <Text style={styles.saveText}>
-                                            {loading ? "Salvando..." : "Salvar"}
+                                            {loading ? t('common.saving') : t('common.save')}
                                         </Text>
                                     </TouchableOpacity>
                                 </View>

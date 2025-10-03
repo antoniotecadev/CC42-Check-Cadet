@@ -1,4 +1,5 @@
 import { database } from "@/firebaseConfig";
+import { t } from "@/i18n";
 import { BarcodeResultParams } from "@/utility/QRCodeUtil";
 import {
     DataSnapshot,
@@ -33,7 +34,7 @@ export async function subscription({
     try {
         setLoading(true);
 
-        // Se mealId não for passado, pega o primeiro da lista
+        // If mealId is not passed, get the first from the list
         const mealIds = mealId
             ? [mealId]
             : (listMealQrCode || []).map((m) => m.id);
@@ -41,8 +42,8 @@ export async function subscription({
         if (!mealIds.length) {
             setLoading(false);
             showModal({
-                title: "Erro!",
-                message: "Nenhuma refeição selecionada.",
+                title: t('common.error'),
+                message: t('meals.noMealSelected'),
                 color: "#E53935",
                 imageSource: { uri: imageSource },
                 onClose: onResumeCamera,
@@ -50,7 +51,7 @@ export async function subscription({
             return;
         }
 
-        // Verifica se já assinou a primeira refeição
+        // Check if already signed up for the first meal
         const subscriptionsRef = ref(
             database,
             `campus/${campusId}/cursus/${cursusId}/meals/${mealIds[0]}/subscriptions/${uid}`
@@ -63,10 +64,10 @@ export async function subscription({
             if (isAlreadyReceived) {
                 setLoading(false);
                 showModal({
-                    title: "Aviso!",
-                    message: `${displayName}\nJá subscreveu 😉 ${
-                        mealPortion === "first" ? "Primeira" : "Segunda"
-                    } via.`,
+                    title: t('common.warning'),
+                    message: `${displayName}\n${t('meals.alreadySubscribed')} ${
+                        mealPortion === "first" ? t('meals.firstPortion') : t('meals.secondPortion')
+                    }.`,
                     color: "#FDD835",
                     imageSource: { uri: imageSource },
                     onClose: onResumeCamera,
@@ -76,8 +77,8 @@ export async function subscription({
         } else if (mealPortion === "second") {
             setLoading(false);
             showModal({
-                title: "Aviso!",
-                message: `${displayName}\n Não está inscrito para segunda via`,
+                title: t('common.warning'),
+                message: `${displayName}\n${t('meals.notSubscribedSecondPortion')}`,
                 color: "#FDD835",
                 imageSource: { uri: imageSource },
                 onClose: onResumeCamera,
@@ -85,7 +86,7 @@ export async function subscription({
             return;
         }
 
-        // Monta updates para todas as refeições
+        // Build updates for all meals
         const updates: Record<string, any> = {};
         const updatesStatus: Record<string, any> = {
             status: true,
@@ -114,8 +115,8 @@ export async function subscription({
 
         setLoading(false);
         showModal({
-            title: "Sucesso!",
-            message: `${displayName}\nSubscrição realizada com sucesso!`,
+            title: t('common.success'),
+            message: `${displayName}\n${t('meals.subscriptionSuccessful')}`,
             color: "#4CAF50",
             imageSource: { uri: imageSource },
             onClose: onResumeCamera,
@@ -123,8 +124,8 @@ export async function subscription({
     } catch (e: any) {
         setLoading(false);
         showModal({
-            title: "Erro!",
-            message: `Erro ao assinar refeição: ${e.message}`,
+            title: t('common.error'),
+            message: `${t('meals.errorSigningMeal')}: ${e.message}`,
             color: "#E53935",
             imageSource: { uri: imageSource },
             onClose: onResumeCamera,
@@ -199,8 +200,8 @@ export function observeSecondPortion(
                 quantity: null,
             });
             showAlert(
-                "Erro",
-                "Erro ao verificar inscrição na segunda via: " + e
+                t('common.error'),
+                t('meals.errorCheckingSecondPortionSubscription') + e
             );
         }
     };
@@ -220,8 +221,8 @@ export function observeSecondPortion(
             // fallback: detach by ref
             // firebase v9 doesn't expose off by ref; using onValue return is correct
             showAlert(
-                "Erro",
-                "Erro ao desactivar listener da segunda via: " + e
+                t('common.error'),
+                t('meals.errorDeactivatingSecondPortionListener') + e
             );
         }
     };
@@ -259,13 +260,13 @@ export async function subscribeSecondPortion(
             const quantitySecondPortion = second?.quantitySecondPortion;
 
             if (hasSecondPortion == null || quantitySecondPortion == null) {
-                message.push("Segunda via não disponível");
+                message.push(t('meals.secondPortionNotAvailable'));
                 return;
             }
 
             // if already subscribed
             if (subscriptions[`-${currentUserId}`]?.status != null) {
-                message.push("Já está inscrito na segunda via");
+                message.push(t('meals.alreadySubscribedSecondPortion'));
                 return;
             }
 
@@ -286,7 +287,7 @@ export async function subscribeSecondPortion(
 
                 return mutableData;
             } else {
-                message.push("Segunda via não disponível");
+                message.push(t('meals.secondPortionNotAvailable'));
                 return;
             }
         });

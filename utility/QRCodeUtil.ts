@@ -1,3 +1,4 @@
+import { t } from "@/i18n";
 import { markAttendance } from "@/repository/eventRepository";
 import { subscription } from "@/repository/mealRepository";
 import { decrypt } from "./AESUtil";
@@ -67,8 +68,8 @@ export async function handleQrCode({
             });
         } else {
             showModal({
-                title: "Aviso!",
-                message: "QR code inválido",
+                title: t('common.warning'),
+                message: t('qrcode.invalidQRCode'),
                 color: "#FDD835",
                 onClose: onResumeCamera,
             });
@@ -86,7 +87,7 @@ export async function handleQrCode({
             const userImageUrl = partsQrCode[5];
             markAttendance({
                 eventId,
-                userStaffId: undefined, // Não é necessário para na lista de presença
+                userStaffId: undefined, // Not required for attendance list
                 registeredBy: userStaffId,
                 userId: userStudentId,
                 displayName: userDisplayName,
@@ -100,8 +101,8 @@ export async function handleQrCode({
             });
         } else {
             showModal({
-                title: "Aviso!",
-                message: "QR code inválido",
+                title: t('common.warning'),
+                message: t('qrcode.invalidQRCode'),
                 color: "#FDD835",
                 onClose: onResumeCamera,
             });
@@ -129,8 +130,8 @@ export async function handleQrCode({
             });
         } else {
             showModal({
-                title: "Aviso!",
-                message: "QR code inválido",
+                title: t('common.warning'),
+                message: t('qrcode.invalidQRCode'),
                 color: "#FDD835",
                 onClose: onResumeCamera,
             });
@@ -150,7 +151,7 @@ export async function handleQrCode({
                 mealQuantity,
                 mealPortion,
                 mealId,
-                userStaffId: undefined, // Não é necessário na lista de assinaturas
+                userStaffId: undefined, // Not required for subscription list
                 registeredBy: userStaffId,
                 userId: userStudentId,
                 displayName: userDisplayName,
@@ -163,8 +164,8 @@ export async function handleQrCode({
             });
         } else {
             showModal({
-                title: "Aviso!",
-                message: "QR code inválido",
+                title: t('common.warning'),
+                message: t('qrcode.invalidQRCode'),
                 color: "#FDD835",
                 onClose: onResumeCamera,
             });
@@ -191,16 +192,16 @@ export async function handleQrCode({
             });
         } else {
             showModal({
-                title: "Aviso!",
-                message: "QR code inválido",
+                title: t('common.warning'),
+                message: t('qrcode.invalidQRCode'),
                 color: "#FDD835",
                 onClose: onResumeCamera,
             });
         }
     } else {
         showModal({
-            title: "Aviso!",
-            message: "QR code inválido",
+            title: t('common.warning'),
+            message: t('qrcode.invalidQRCode'),
             color: "#FDD835",
             onClose: onResumeCamera,
         });

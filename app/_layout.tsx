@@ -16,6 +16,7 @@ import {
 } from "@/components/ColorCoalitionContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { useColorScheme } from "@/hooks/useColorScheme";
+import { t } from "@/i18n";
 import React, { useEffect } from "react";
 
 import useItemStorage from "@/hooks/storage/useItemStorage";
@@ -144,17 +145,17 @@ export default function RootLayout() {
                                 name="qr_code"
                                 options={{
                                     headerShown: true,
-                                    title: "QR Code",
-                                    headerBackTitle: "Voltar", // iOS: texto do botão
-                                    headerBackVisible: true, // mostrar ou ocultar botão de voltar
+                                    title: t('navigation.qrCode'),
+                                    headerBackTitle: t('navigation.back'),
+                                    headerBackVisible: true,
                                 }}
                             />
                             <Stack.Screen
                             name="qr_code_scanner"
                             options={{
                                 headerShown: Platform.OS === "web",
-                                title: "Scanear QR Code",
-                                headerBackTitle: "Voltar",
+                                title: t('navigation.scanQrCode'),
+                                headerBackTitle: t('navigation.back'),
                                 headerBackVisible: true,
                             }}
                         />
@@ -162,8 +163,8 @@ export default function RootLayout() {
                             name="event_details"
                             options={{
                                 headerShown: true,
-                                title: "Detalhes",
-                                headerBackTitle: "Voltar",
+                                title: t('navigation.details'),
+                                headerBackTitle: t('navigation.back'),
                                 headerBackVisible: true,
                             }}
                         />
@@ -171,8 +172,8 @@ export default function RootLayout() {
                             name="meals"
                             options={{
                                 headerShown: true,
-                                title: "Refeições",
-                                headerBackTitle: "Voltar",
+                                title: t('navigation.meals'),
+                                headerBackTitle: t('navigation.back'),
                                 headerBackVisible: true,
                             }}
                         />
@@ -180,8 +181,8 @@ export default function RootLayout() {
                             name="messages"
                             options={{
                                 headerShown: true,
-                                title: "Mensagens",
-                                headerBackTitle: "Voltar",
+                                title: t('navigation.messages'),
+                                headerBackTitle: t('navigation.back'),
                                 headerBackVisible: true,
                             }}
                         />
@@ -189,8 +190,8 @@ export default function RootLayout() {
                             name="send_message"
                             options={{
                                 headerShown: true,
-                                title: "Mensagem",
-                                headerBackTitle: "Voltar",
+                                title: t('navigation.message'),
+                                headerBackTitle: t('navigation.back'),
                                 headerBackVisible: true,
                             }}
                         />

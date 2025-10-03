@@ -1,5 +1,6 @@
 import React from "react";
 import { Modal, StyleSheet, TouchableOpacity, View } from "react-native";
+import { t } from "../../i18n";
 import { ThemedText } from "../ThemedText";
 import { ThemedView } from "../ThemedView";
 
@@ -15,10 +16,11 @@ export default function WebMenuModalCursus({
     onSelect,
 }: WebMenuModalProps) {
     const options = [
-        { label: "42 Cursus", value: 0 },
-        { label: "C Piscine", value: 1 },
-        { label: "C-Piscine-Reloaded", value: 2 },
-        { label: "Cancelar", value: 3 },
+        { label: t('cursus.42cursus'), value: 0 },
+        { label: t('cursus.cpiscine'), value: 1 },
+        { label: t('cursus.cpiscineReloaded'), value: 2 },
+        { label: t('cursus.discoveryPiscine'), value: 3 },
+        { label: t('common.cancel'), value: 4 },
     ];
 
     return (

@@ -1,4 +1,5 @@
 import { showAlert } from "@/hooks/useAlert";
+import { t } from "@/i18n";
 import axios from "axios";
 import { sendExpoNotificationToGroup } from "./ExpoNotificationService";
 
@@ -86,7 +87,7 @@ class FCMessage {
         this.message = message;
     }
 }
-// ENVIAR NOTIFICAÇÃO FCM APARTIR DO CLIENT - APENAS PARA TEST
+// SEND FCM NOTIFICATION FROM CLIENT - TESTING ONLY
 // export const sendNotificationForTopicDirect = async (
 //     accessToken: string,
 //     meal: any,
@@ -250,7 +251,7 @@ const sendFCMNotification = async (fcmMessage: FCMessage) => {
 
         if (response.status === 200) {
             console.log("Notification sent:", response.data);
-            showAlert("Sucesso", "Notificação enviada com sucesso!");
+            showAlert(t('common.success'), t('notifications.notificationSentSuccessfully'));
         } else {
             console.error(
                 "Failed to send notification:",
@@ -258,8 +259,8 @@ const sendFCMNotification = async (fcmMessage: FCMessage) => {
                 response.data
             );
             showAlert(
-                "Erro",
-                `Erro ao enviar notificação: ${
+                t('common.error'),
+                `${t('notifications.errorSendingNotification')}: ${
                     response.status
                 } - ${JSON.stringify(response.data)}`
             );
@@ -270,7 +271,7 @@ const sendFCMNotification = async (fcmMessage: FCMessage) => {
             error.response ? error.response.data : error.message
         );
         showAlert(
-            "Erro na Requisição",
+            t('notifications.requestError'),
             `${
                 error.response
                     ? JSON.stringify(error.response.data)

@@ -4,6 +4,7 @@ import * as Linking from "expo-linking";
 import * as WebBrowser from "expo-web-browser";
 import { useState } from "react";
 import { Platform } from "react-native";
+import { t } from "../i18n";
 import useItemStorage from "./storage/useItemStorage";
 import useTokenStorage from "./storage/useTokenStorage";
 import useAlert from "./useAlert";
@@ -15,7 +16,7 @@ import axios from "axios";
 import { signInWithCustomToken } from "firebase/auth";
 import useUserStorage from "./storage/useUserStorage";
 
-/* OPTIONAL - CASO NÃO PRECISE ABRIR A JANELA POP UP NO MODO ANONIMO
+/* OPTIONAL - IF YOU DON'T NEED TO OPEN THE POP UP WINDOW IN ANONYMOUS MODE
 WebBrowser.maybeCompleteAuthSession();
 
 const CLIENT_ID = process.env.EXPO_PUBLIC_API_KEY ?? "";
@@ -37,7 +38,7 @@ export function useLogin42() {
         ? makeRedirectUri({
               path: "checkcadet42",
           }) // fixo para funcionar com 42 na web
-        : "cc42://checkcadet42"; // para Android/iOS (dev ou produção)
+        : "cc42://checkcadet42"; // for Android/iOS (dev or production)
 
     const [sucess, setSucess] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false);
@@ -67,7 +68,7 @@ export function useLogin42() {
                     discovery
                 );
                 if (!tokenResponse.accessToken) {
-                    throw new Error("Access token não recebido");
+                    throw new Error(t('auth.accessTokenNotReceived'));
                 }
                 let sucess: boolean = await saveToken({
                     accessToken: tokenResponse.accessToken,
@@ -75,20 +76,20 @@ export function useLogin42() {
                     expiresIn: tokenResponse.expiresIn || 0,
                 });
                 if (sucess) {
-                    sucess = await fetchUser(); // Busca os dados do usuário após salvar o token
+                    sucess = await fetchUser(); // Fetch user data after saving token
                     if (!sucess) {
-                        clearTokens(); // Limpa os tokens se falhar ao buscar usuário
-                        removeItem("user_id"); // Remove user_id se falhar
-                        removeItem("campus_id"); // Remove campus_id se falhar
+                        clearTokens(); // Clear tokens if user fetch fails
+                        removeItem("user_id"); // Remove user_id if failed
+                        removeItem("campus_id"); // Remove campus_id if failed
                         removeItem("campus_name");
                     }
                     setSucess(sucess);
                 } else {
                     setSucess(sucess);
-                    showError("Erro", "Erro ao salvar o token");
+                    showError(t('common.error'), t('auth.errorSavingToken'));
                 }
             } catch (err: any) {
-                showError("Erro", "Erro ao trocar código por token");
+                showError(t('common.error'), t('auth.errorExchangingCodeForToken'));
             } finally {
                 setLoading(false);
             }
@@ -111,7 +112,7 @@ export function useLogin42() {
         loading,
         request,
         sucess,
-        promptAsync, // chama isto no botão ou evento
+        promptAsync, // call this on button or event
     };
 }*/
 
@@ -146,7 +147,7 @@ export function useLogin42() {
                 authUrl,
                 redirectUri,
                 {
-                    // ✅ Força sessão privada no iOS
+                    // ✅ Force private session on iOS
                     preferEphemeralSession: Platform.OS === "ios",
                 }
             );
@@ -162,11 +163,11 @@ export function useLogin42() {
                     setSuccess(ok);
                     return;
                 }
-                showError("Erro", "Código de autorização não encontrado.");
+                showError(t('common.error'), t('auth.authorizationCodeNotFound'));
             }
         } catch (err: any) {
-            console.error("Erro na autenticação:", err);
-            showError("Erro na autenticação", err.message);
+            console.error("Authentication error:", err);
+            showError(t('auth.authenticationError'), err.message);
         } finally {
             setLoading(false);
         }
@@ -176,7 +177,7 @@ export function useLogin42() {
         code: string,
         redirectUri: string
     ): Promise<boolean> {
-        console.log("Trocando código por token... " + redirectUri);
+        console.log("Exchanging code for token... " + redirectUri);
         try {
             const response = await axios.post(
                 "https://check-cadet.vercel.app/api/loginWithIntra42Code",
@@ -190,13 +191,13 @@ export function useLogin42() {
                 response.data;
 
             if (!firebaseToken || !userWithCoalition) {
-                throw new Error("Resposta incompleta do servidor");
+                throw new Error(t('auth.incompleteServerResponse'));
             }
 
-            // 1. Login no Firebase
+            // 1. Firebase login
             await signInWithCustomToken(auth, firebaseToken);
 
-            // 2. Salvar dados localmente
+            // 2. Save data locally
             await saveUser(userWithCoalition);
             await saveToken({
                 accessToken: tokenResponse.access_token,
@@ -204,7 +205,7 @@ export function useLogin42() {
                 expiresIn: tokenResponse.expires_in || 0,
             });
 
-            // 3. Outros dados (ex: campus, cor)
+            // 3. Other data (e.g.: campus, color)
             const coalition = userWithCoalition.coalition;
             setColor(coalition?.color?.trim() || Colors.light_blue_900.default);
 
@@ -238,7 +239,7 @@ export function useLogin42() {
         }
     }
 
-    //  TROCA DO code COM access_token no CLIENTE - NÃO É SEGURO, SERVE PAENAS PARA TESTE
+    //  CODE EXCHANGE WITH access_token ON CLIENT - NOT SECURE, ONLY FOR TESTING
     // const handleTokenExchange = async (secret: string, code: string) => {
     //     try {
     //         const tokenResponse = await exchangeCodeAsync(
@@ -284,15 +285,15 @@ export function useLogin42() {
     return {
         loading,
         success,
-        promptAsync, // chame isso no botão de login
+        promptAsync, // call this on login button
     };
 }
 
 export async function revokeToken(token: string) {
     const clientId = process.env.EXPO_PUBLIC_API_KEY ?? "";
-    const clientSecret = "SEU_CLIENT_SECRET"; // se necessário
+    const clientSecret = "YOUR_CLIENT_SECRET"; // if necessary
 
-    // URL de revogação da 42 API
+    // 42 API revocation URL
     const revocationEndpoint =
         process.env.EXPO_PUBLIC_API_URL + "/oauth/revoke";
     try {

@@ -25,7 +25,7 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
                 const savedLanguage = await initializeLanguage();
                 setCurrentLanguage(savedLanguage);
             } catch (error) {
-                console.error('Erro ao inicializar idioma:', error);
+                console.error('Error initializing language:', error);
                 setCurrentLanguage('pt');
             } finally {
                 setIsLoading(false);

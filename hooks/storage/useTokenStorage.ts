@@ -2,6 +2,7 @@ import useItemStorage from "@/hooks/storage/useItemStorage";
 import { fetchApiKeyFromDatabase } from "@/services/firebaseApiKey";
 import axios from "axios";
 import { useCallback } from "react";
+import { t } from "../../i18n";
 import useAlert from "../useAlert";
 
 const ACCESS_TOKEN_KEY = "access_token";
@@ -17,7 +18,7 @@ export default function useTokenStorage() {
         async (token: {
             accessToken: string;
             refreshToken: string;
-            expiresIn: number; // segundos
+            expiresIn: number; // seconds
         }): Promise<boolean> => {
             try {
                 const expirationTime = (
@@ -31,7 +32,7 @@ export default function useTokenStorage() {
                 ]);
                 return true;
             } catch (e) {
-                showError("Erro", "Erro ao salvar token: " + e);
+                showError(t('common.error'), t('auth.errorSavingToken') + e);
                 return false;
             }
         },
@@ -68,14 +69,14 @@ export default function useTokenStorage() {
         if (!secret) return false;
         try {
             if (!refresh_token) {
-                showError("Erro", "Refresh token não encontrado.");
+                showError(t('common.error'), t('auth.refreshTokenNotFound'));
                 return false;
             }
 
             if (!API_42_URL || !API_42_CLIENT_ID) {
                 showError(
-                    "Erro",
-                    "EXPO_PUBLIC_API_URL ou EXPO_PUBLIC_API_42_CLIENT_ID não está definido."
+                    t('common.error'),
+                    t('auth.environmentVariablesNotDefined')
                 );
                 return false;
             }
@@ -98,11 +99,11 @@ export default function useTokenStorage() {
             const data = response.data;
 
             if (!data.access_token) {
-                showError("Erro", "Access token não recebido.");
+                showError(t('common.error'), t('auth.accessTokenNotReceived'));
                 return false;
             }
 
-            // Armazena os novos tokens
+            // Store new tokens
             let sucess: boolean = await saveToken({
                 accessToken: data.access_token,
                 refreshToken: data.refresh_token,
@@ -110,7 +111,7 @@ export default function useTokenStorage() {
             });
             return sucess;
         } catch (error: any) {
-            showError("Erro", "Erro ao fazer refresh do token");
+            showError(t('common.error'), t('auth.errorRefreshingToken'));
             return false;
         }
     }

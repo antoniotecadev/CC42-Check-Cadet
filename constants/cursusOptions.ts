@@ -1,5 +1,8 @@
+import { t } from "@/i18n";
+
 export const cursusType = [
-  '42 Cursus',
-  'C Piscine',
-  'C-Piscine-Reloaded',
+  t('cursus.42cursus'),
+  t('cursus.cpiscine'),
+  t('cursus.cpiscineReloaded'),
+  t('cursus.discoveryPiscine'),
 ];

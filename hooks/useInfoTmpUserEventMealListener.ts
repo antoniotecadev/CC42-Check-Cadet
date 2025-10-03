@@ -1,6 +1,7 @@
 import { off, onValue, ref } from "firebase/database";
 import { useEffect, useRef } from "react";
 import { database } from "../firebaseConfig"; // ajuste o caminho conforme seu projeto
+import { t } from "../i18n";
 
 export interface UseInfoTmpUserEventMealListenerProps {
     campusId: string;
@@ -45,10 +46,10 @@ export function useInfoTmpUserEventMealListener({
                         displayName +
                         "\n" +
                         (isEvent
-                            ? "Presença marcada com sucesso!"
-                            : "Assinatura realizada com sucesso!");
+                            ? t('notifications.attendanceMarkedSuccessfully')
+                            : t('notifications.subscriptionCompletedSuccessfully'));
                     showModal({
-                        title: "Sucesso",
+                        title: t('common.success'),
                         message,
                         color: "#4CAF50",
                         imageSource: urlImageUser
@@ -59,7 +60,7 @@ export function useInfoTmpUserEventMealListener({
             },
             (error) => {
                 showModal({
-                    title: "Erro",
+                    title: t('common.error'),
                     message: error.message,
                     color: "#E53935",
                 });

@@ -1,3 +1,4 @@
+import { t } from "@/i18n";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
@@ -45,9 +46,7 @@ export default function AboutModal({
                                 <Ionicons name="close" size={28} color="red" />
                             </TouchableOpacity>
                             <Text style={styles.description}>
-                                Check Cadet uma aplicação criada para facilitar a
-                                gestão de refeições e eventos no campus.{'\n'}
-                                Aproveite a experiência!
+                                {t('about.appDescription')}
                             </Text>
                             <Profile
                                 name="António Teca"
@@ -101,7 +100,7 @@ const Profile: React.FC<ProfileProps> = ({
                     )
                 }
             >
-                <Text style={styles.link}>{intra} (Intra 42)</Text>
+                <Text style={styles.link}>{intra} ({t('about.intra42')})</Text>
             </TouchableOpacity>
             <TouchableOpacity
                 onPress={() => Linking.openURL(`https://github.com/${gitHub}`)}
@@ -120,7 +119,7 @@ const Profile: React.FC<ProfileProps> = ({
                         Linking.openURL(`https://wa.me/${whatsapp.replace(/\+/g, "")}`)
                     }
                 >
-                    <Text style={styles.link}>WhatsApp: {whatsapp}</Text>
+                    <Text style={styles.link}>{t('about.whatsapp')}: {whatsapp}</Text>
                 </TouchableOpacity>
             ) : null}
         </>

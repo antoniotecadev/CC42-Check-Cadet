@@ -1,4 +1,5 @@
 import { Alert, Platform } from "react-native";
+import { t } from "../i18n";
 
 type Callback = () => void;
 
@@ -46,7 +47,7 @@ function useAlert() {
             confirmed ? onConfirm() : onCancel?.();
         } else {
             Alert.alert(title, message, [
-                { text: "Cancelar", style: "cancel", onPress: onCancel },
+                { text: t('common.cancel'), style: "cancel", onPress: onCancel },
                 { text: "OK", onPress: onConfirm },
             ]);
         }

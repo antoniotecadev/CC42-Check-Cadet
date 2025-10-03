@@ -1,6 +1,7 @@
 import { Image } from "expo-image";
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { t } from "../../i18n";
 
 interface EventMealUserItemProps {
     login: string;
@@ -67,20 +68,20 @@ export const EventMealUserItem: React.FC<EventMealUserItemProps> = ({
                             ]}
                         >
                             {isSecondPortion
-                                ? "Segunda via"
+                                ? t('meals.secondPortion')
                                 : isSusbscribed
-                                ? "Subscrito"
-                                : "Não subscrito"}
+                                ? t('events.subscribed')
+                                : t('events.notSubscribed')}
                         </Text>
                     )}
                 </View>
                 <Text style={styles.displayName}>{displayName}</Text>
 
-                {/* Informações específicas para eventos */}
+                {/* Event-specific information */}
                 {type === "events" && (
                     <View style={styles.eventStatusContainer}>
                         <View style={styles.statusRow}>
-                            <Text style={styles.statusLabel}>Check-in:</Text>
+                            <Text style={styles.statusLabel}>{t('events.checkin')}:</Text>
                             <Text
                                 style={[
                                     styles.statusValue,
@@ -89,11 +90,11 @@ export const EventMealUserItem: React.FC<EventMealUserItemProps> = ({
                                         : styles.presentNo,
                                 ]}
                             >
-                                {hasCheckin ? "Presente" : "Ausente"}
+                                {hasCheckin ? t('events.present') : t('events.absent')}
                             </Text>
                         </View>
                         <View style={styles.statusRow}>
-                            <Text style={styles.statusLabel}>Check-out:</Text>
+                            <Text style={styles.statusLabel}>{t('events.checkout')}:</Text>
                             <Text
                                 style={[
                                     styles.statusValue,
@@ -102,18 +103,18 @@ export const EventMealUserItem: React.FC<EventMealUserItemProps> = ({
                                         : styles.presentNo,
                                 ]}
                             >
-                                {hasCheckout ? "Presente" : "Ausente"}
+                                {hasCheckout ? t('events.present') : t('events.absent')}
                             </Text>
                         </View>
                     </View>
                 )}
 
-                {/* Informações específicas para refeições */}
+                {/* Meal-specific information */}
                 {type === "meals" && (
                     <View style={styles.eventStatusContainer}>
                         <View style={styles.statusRow}>
                             <Text style={styles.statusLabel}>
-                                Primeira via:
+                                {t('meals.firstPortion')}:
                             </Text>
                             <Text
                                 style={[
@@ -124,12 +125,12 @@ export const EventMealUserItem: React.FC<EventMealUserItemProps> = ({
                                 ]}
                             >
                                 {hasFirstPortion
-                                    ? "Subscrito"
-                                    : "Não subscrito"}
+                                    ? t('events.subscribed')
+                                    : t('events.notSubscribed')}
                             </Text>
                         </View>
                         <View style={styles.statusRow}>
-                            <Text style={styles.statusLabel}>Segunda via:</Text>
+                            <Text style={styles.statusLabel}>{t('meals.secondPortion')}:</Text>
                             {hasSecondPortion && (
                                 <Text
                                     style={
@@ -139,8 +140,8 @@ export const EventMealUserItem: React.FC<EventMealUserItemProps> = ({
                                     }
                                 >
                                     {receivedSecondPortion
-                                        ? "Recebido"
-                                        : "Não recebido"}
+                                        ? t('meals.received')
+                                        : t('meals.notReceived')}
                                 </Text>
                             )}
                             <Text
@@ -152,8 +153,8 @@ export const EventMealUserItem: React.FC<EventMealUserItemProps> = ({
                                 ]}
                             >
                                 {hasSecondPortion
-                                    ? "Subscrito"
-                                    : "Não subscrito"}
+                                    ? t('events.subscribed')
+                                    : t('events.notSubscribed')}
                             </Text>
                         </View>
                     </View>

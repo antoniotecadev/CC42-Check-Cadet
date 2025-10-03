@@ -7,6 +7,7 @@ import { HapticTab } from "@/components/HapticTab";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import TabBarBackground from "@/components/ui/TabBarBackground";
 import { useColorScheme } from "@/hooks/useColorScheme";
+import { t } from "@/i18n";
 import { MaterialIcons } from "@expo/vector-icons";
 
 
@@ -40,7 +41,7 @@ export default function TabLayout() {
             <Tabs.Screen
                 name="index"
                 options={{
-                    title: "Início",
+                    title: t('tabs.home'),
                     tabBarIcon: ({ color }) => (
                         <IconSymbol size={28} name="house.fill" color={color} />
                     ),
@@ -49,8 +50,8 @@ export default function TabLayout() {
             <Tabs.Screen
                 name="cursus"
                 options={{
-                    title: "Refeição",
-                    headerTitle: "Cursus",
+                    title: t('tabs.meals'),
+                    headerTitle: t('cursus.title'),
                     tabBarIcon: ({ color }) => (
                         <MaterialIcons
                             size={28}

@@ -1,3 +1,5 @@
+import { t } from "@/i18n";
+
 export function getEventDuration(begin_at: string, end_at: string): string {
     const start = new Date(begin_at);
     const end = new Date(end_at);
@@ -15,7 +17,7 @@ export function getTimeUntilEvent(begin_at: string): string {
     const now = new Date();
     const start = new Date(begin_at);
 
-    // Zera as horas para comparar apenas a data
+    // Reset hours to compare only the date
     const nowDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const startDate = new Date(
         start.getFullYear(),
@@ -27,10 +29,11 @@ export function getTimeUntilEvent(begin_at: string): string {
     const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
 
     if (diffDays > 0) {
-        return `Faltam ${diffDays} dia${diffDays > 1 ? "s" : ""}`;
+        const daysText = diffDays === 1 ? t('common.day') : t('common.days');
+        return `${t('common.remaining')} ${diffDays} ${daysText}`;
     } else if (diffDays === 0) {
-        return "Hoje";
+        return t('common.today');
     } else {
-        return "Terminado";
+        return t('common.finished');
     }
 }

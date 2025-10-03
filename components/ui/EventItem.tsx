@@ -1,3 +1,4 @@
+import { t } from "@/i18n";
 import { MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
@@ -38,7 +39,7 @@ const EventItem: React.FC<{ item: EventItemProps; color: string }> = ({
                     color="#fff"
                     style={{ marginRight: 4 }}
                 />
-                <Text style={styles.timeLabel}>Início:</Text>
+                <Text style={styles.timeLabel}>{t('events.start')}:</Text>
                 <Text style={styles.time}>
                     {new Date(item.begin_at).toLocaleString()}
                 </Text>
@@ -50,7 +51,7 @@ const EventItem: React.FC<{ item: EventItemProps; color: string }> = ({
                     color="#fff"
                     style={{ marginRight: 4 }}
                 />
-                <Text style={styles.timeLabel}>Fim:</Text>
+                <Text style={styles.timeLabel}>{t('events.end')}:</Text>
                 <Text style={styles.time}>
                     {new Date(item.end_at).toLocaleString()}
                 </Text>

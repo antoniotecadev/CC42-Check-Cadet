@@ -3,6 +3,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import useItemStorage from "@/hooks/storage/useItemStorage";
 import { useColorScheme } from "@/hooks/useColorScheme.web";
+import { t } from "@/i18n";
 import useApiInterceptors from "@/services/api";
 import { Ionicons } from "@expo/vector-icons";
 import { FlashList } from "@shopify/flash-list";
@@ -151,7 +152,7 @@ export default function CursusScreen() {
                 <View style={styles.header}>
                     <TextInput
                         style={[styles.input, { borderColor }]}
-                        placeholder="Pesquisar cursus..."
+                        placeholder={t('cursus.search')}
                         placeholderTextColor={
                             colorScheme === "light" ? "#888" : "#666"
                         }
@@ -171,7 +172,7 @@ export default function CursusScreen() {
                 ) : isError ? (
                     <>
                         <ThemedText lightColor="#888" style={styles.notFound}>
-                            Erro ao carregar cursus.
+                            {t('cursus.errorLoading')}
                         </ThemedText>
                         <ThemedText
                             onPress={onRefresh}
@@ -185,7 +186,7 @@ export default function CursusScreen() {
                 ) : filtered.length === 0 ? (
                     <>
                         <ThemedText lightColor="#888" style={styles.notFound}>
-                            Nenhum cursus encontrado.
+                            {t('cursus.notFound')}
                         </ThemedText>
                         <ThemedText
                             onPress={onRefresh}
@@ -234,7 +235,7 @@ export default function CursusScreen() {
                                         {item.name}
                                     </ThemedText>
                                     <Text style={styles.id}>
-                                        ID: {item.id} - Criado em:{" "}
+                                        ID: {item.id} - {t("cursus.createdAt")}:{" "}
                                         {new Date(
                                             item.created_at
                                         ).toLocaleDateString()}

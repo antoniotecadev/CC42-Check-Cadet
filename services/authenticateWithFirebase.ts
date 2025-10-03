@@ -1,5 +1,6 @@
 import { auth } from "@/firebaseConfig";
 import { showAlert } from "@/hooks/useAlert";
+import { t } from "@/i18n";
 
 // CASO PRECISE SE AUTENTICAR PARCIALMENTE AO FIREBASE NO BACK-END
 // import { signInWithCustomToken } from "firebase/auth";
@@ -68,7 +69,7 @@ export const handleLogoutFirebase = async () => {
     try {
         await auth.signOut();
     } catch (error) {
-        console.error("Erro ao sair:", error);
-        showAlert("Sign Out", "Erro ao sair.");
+        console.error("Error signing out:", error);
+        showAlert("Sign Out", t('auth.errorSigningOut'));
     }
 };

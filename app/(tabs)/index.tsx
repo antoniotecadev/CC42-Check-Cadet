@@ -21,9 +21,9 @@ import React, {
     useState,
 } from "react";
 
-import LatestMessageDialog from "@/components/LatestMessageDialog";
 import AboutModal from "@/components/ui/AboutModal";
 import EventItem from "@/components/ui/EventItem";
+import LatestMessageDialog from "@/components/ui/LatestMessageDialog";
 import WebMenuModal from "@/components/ui/WebMenuModal";
 import WebMenuModalCursus from "@/components/ui/WebMenuModalCursus";
 import { database } from "@/firebaseConfig";
@@ -149,7 +149,7 @@ export default function HomeScreen() {
                     try {
                         await set(tokenRef, token.data);
                     } catch (e: any) {
-                        showAlert("Erro", e.message);
+                        showAlert(t('common.error'), e.message);
                     }
                 }
             });
@@ -175,6 +175,7 @@ export default function HomeScreen() {
         if (selectedIndex === 0) handleViewMessages(21);
         if (selectedIndex === 1) handleViewMessages(9);
         if (selectedIndex === 2) handleViewMessages(66);
+        if (selectedIndex === 3) handleViewMessages(3);
     };
 
     const handleMenuPress = () => {
@@ -227,16 +228,17 @@ export default function HomeScreen() {
 
     const handleMenuCursus = () => {
         const options = [
-            "42Cursus",
-            "C Piscine",
-            "C-Piscine-Reloaded",
-            "Cancelar",
+            t('cursus.42cursus'),
+            t('cursus.cpiscine'),
+            t('cursus.cpiscineReloaded'),
+            t('cursus.discoveryPiscine'),
+            t("common.cancel"),
         ];
         if (Platform.OS === "ios") {
             ActionSheetIOS.showActionSheetWithOptions(
                 {
                     options,
-                    cancelButtonIndex: 3,
+                    cancelButtonIndex: 4,
                     userInterfaceStyle: "dark",
                 },
                 (selectedIndex) => {
@@ -496,8 +498,8 @@ function EventsList({
             >
                 <Text style={{ color: color, fontWeight: "bold" }}>
                     {showEventsPast
-                        ? "Ocultar eventos realizados"
-                        : "Ver eventos realizados "}
+                        ? t('home.hidePastEvents')
+                        : t('home.showPastEvents')}
                 </Text>
             </TouchableOpacity>
         );
@@ -523,13 +525,13 @@ function EventsList({
                     styles.alignText,
                 ]}
             >
-                Carregando eventos...
+                {t('home.loadingEvents')}
             </Text>
         );
     if (error)
         return (
             <Text style={[{ color: "red" }, styles.alignText]}>
-                Erro ao carregar eventos
+                {t('home.errorLoadingEvents')}
             </Text>
         );
 

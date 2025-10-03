@@ -8,6 +8,7 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
+import { t } from "../../i18n";
 import { useColorCoalition } from "../ColorCoalitionContext";
 import { ThemedText } from "../ThemedText";
 import { ThemedView } from "../ThemedView";
@@ -33,7 +34,7 @@ export default function NotifyMealModal({
     onNotify,
 }: Props) {
     const { color } = useColorCoalition();
-    const [option, setOption] = useState("Primeira via");
+    const [option, setOption] = useState(t('meals.firstPortion'));
 
     if (!meal) return null;
 
@@ -45,7 +46,7 @@ export default function NotifyMealModal({
                     <Text style={styles.message}>
                         {meal.name}
                         {"\n\n"}
-                        Quantidade: {meal.quantityNotReceived ?? 0}
+                        {t('meals.quantity')}: {meal.quantityNotReceived ?? 0}
                     </Text>
 
                     {Platform.OS === "web" ? (
@@ -54,8 +55,8 @@ export default function NotifyMealModal({
                             onChange={(e) => setOption(e.target.value)}
                             style={{ marginBottom: 12, padding: 8 }}
                         >
-                            <option value="Primeira via">Primeira via</option>
-                            <option value="Segunda via">Segunda via</option>
+                            <option value={t('meals.firstPortion')}>{t('meals.firstPortion')}</option>
+                            <option value={t('meals.secondPortion')}>{t('meals.secondPortion')}</option>
                         </select>
                     ) : (
                         <Picker
@@ -63,8 +64,8 @@ export default function NotifyMealModal({
                             onValueChange={(v) => setOption(String(v))}
                             style={styles.picker}
                         >
-                            <Picker.Item label="Primeira via" value="Primeira via" />
-                            <Picker.Item label="Segunda via" value="Segunda via" />
+                            <Picker.Item label={t('meals.firstPortion')} value={t('meals.firstPortion')} />
+                            <Picker.Item label={t('meals.secondPortion')} value={t('meals.secondPortion')} />
                         </Picker>
                     )}
 
@@ -73,7 +74,7 @@ export default function NotifyMealModal({
                             style={styles.cancelBtn}
                             onPress={onClose}
                         >
-                            <Text style={styles.cancelText}>Não</Text>
+                            <Text style={styles.cancelText}>{t('common.no')}</Text>
                         </TouchableOpacity>
 
                         <TouchableOpacity
@@ -83,7 +84,7 @@ export default function NotifyMealModal({
                                 onClose();
                             }}
                         >
-                            <Text style={styles.saveText}>Notificar</Text>
+                            <Text style={styles.saveText}>{t('meals.notify')}</Text>
                         </TouchableOpacity>
                     </View>
                 </ThemedView>
@@ -112,7 +113,7 @@ const styles = StyleSheet.create({
     },
     message: {
         marginBottom: 12,
-        color: "#333",
+        color: "#666",
     },
     picker: {
         marginBottom: 12,

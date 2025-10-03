@@ -1,5 +1,6 @@
 import { useColorCoalition } from "@/components/ColorCoalitionContext";
 import MessageModal from "@/components/ui/MessageModal";
+import { t } from "@/i18n";
 import { handleQrCode } from "@/utility/QRCodeUtil";
 import { useAudioPlayer } from "expo-audio";
 import { CameraType, CameraView, useCameraPermissions } from "expo-camera";
@@ -83,7 +84,7 @@ export default function QrCodeScanner() {
                 });
             },
             onResumeCamera: () => {
-                if (modalData.title === "Sucesso") {
+                if (modalData.title === t('common.success')) {
                     router.back();
                 } else {
                     player.seekTo(0); // Reinicia o som
@@ -102,13 +103,13 @@ export default function QrCodeScanner() {
         return (
             <View style={[styles.container, { justifyContent: "center" }]}>
                 <Text style={styles.message}>
-                    Precisamos da sua permissão para acessar a câmera
+                    {t('qrcode.cameraPermissionMessage')}
                 </Text>
                 <TouchableOpacity
                     onPress={requestPermission}
                     style={styles.button}
                 >
-                    <Text style={styles.text}>Permitir</Text>
+                    <Text style={styles.text}>{t('qrcode.allow')}</Text>
                 </TouchableOpacity>
             </View>
         );
@@ -124,7 +125,7 @@ export default function QrCodeScanner() {
                 imageSource={
                     modalData.imageSource ?? require("@/assets/images/icon.png")
                 }
-                buttonText="OK"
+                buttonText={t('common.confirm')}
                 onClose={() => modalData.onClose()}
             />
             <CameraView
@@ -137,7 +138,7 @@ export default function QrCodeScanner() {
             />
             {/* Overlay acima da camera */}
             <View style={[StyleSheet.absoluteFillObject, styles.overlay]}>
-                <Text style={styles.text}>Aponte para o QR Code</Text>
+                <Text style={styles.text}>{t('qrcode.pointToQRCode')}</Text>
                 
                 {/* Event action radio group (show only for event flows) */}
                 {eventId && !mealId && (
@@ -153,7 +154,7 @@ export default function QrCodeScanner() {
                                         : styles.radioUnselected
                                 }
                             />
-                            <Text style={styles.radioText}>Check In</Text>
+                            <Text style={styles.radioText}>{t('qrcode.checkIn')}</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                             style={styles.radioButton}
@@ -166,7 +167,7 @@ export default function QrCodeScanner() {
                                         : styles.radioUnselected
                                 }
                             />
-                            <Text style={styles.radioText}>Check Out</Text>
+                            <Text style={styles.radioText}>{t('qrcode.checkOut')}</Text>
                         </TouchableOpacity>
                     </View>
                 )}
@@ -185,7 +186,7 @@ export default function QrCodeScanner() {
                                         : styles.radioUnselected
                                 }
                             />
-                            <Text style={styles.radioText}>Primeira via</Text>
+                            <Text style={styles.radioText}>{t('qrcode.firstPortion')}</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                             style={styles.radioButton}
@@ -198,7 +199,7 @@ export default function QrCodeScanner() {
                                         : styles.radioUnselected
                                 }
                             />
-                            <Text style={styles.radioText}>Segunda via</Text>
+                            <Text style={styles.radioText}>{t('qrcode.secondPortion')}</Text>
                         </TouchableOpacity>
                     </View>
                 )}
@@ -209,7 +210,7 @@ export default function QrCodeScanner() {
                     {/* Quantity controls for meals (above the close button) */}
                     {mealId && (
                         <View style={styles.quantityContainer}>
-                            <Text style={styles.quantityLabel}>Quantidade</Text>
+                            <Text style={styles.quantityLabel}>{t('meals.quantity')}</Text>
                             <View style={styles.quantityRow}>
                                 <TouchableOpacity
                                     onPress={() =>
@@ -242,7 +243,7 @@ export default function QrCodeScanner() {
                     {loading && (
                         <ActivityIndicator size="large" color={color} />
                     )}
-                    <Text style={styles.closeText}>Fechar</Text>
+                    <Text style={styles.closeText}>{t('common.close')}</Text>
                 </TouchableOpacity>
             </View>
         </View>

@@ -6,6 +6,7 @@ import * as Crypto from "expo-crypto";
 import { push, ref, remove, set, update } from "firebase/database";
 import { useState } from "react";
 import { Platform } from "react-native";
+import { t } from "../i18n";
 import { showAlert } from "./useAlert";
 
 interface MealData {
@@ -43,20 +44,20 @@ interface UpdateMealImageParams {
 }
 
 /**
- * Gera a assinatura do Cloudinary no cliente.
- * ATENÇÃO: NUNCA FAÇA ISSO EM PRODUÇÃO!
- * @param params Os parâmetros do upload a serem assinados.
- * @returns A assinatura gerada.
+ * Generates Cloudinary signature on the client.
+ * WARNING: NEVER DO THIS IN PRODUCTION!
+ * @param params The upload parameters to be signed.
+ * @returns The generated signature.
  */
 async function generateCloudinarySignature(
     params: Record<string, any>,
     api_secret: string | null
 ): Promise<string> {
-    // 1. Ordene os parâmetros alfabeticamente por chave
+    // 1. Sort parameters alphabetically by key
     const sortedKeys = Object.keys(params).sort();
     let stringToSign = "";
 
-    // 2. Concatene os pares chave=valor
+    // 2. Concatenate key=value pairs
     sortedKeys.forEach((key) => {
         const value = params[key];
         // Cloudinary espera valores booleanos como "true" ou "false" strings
@@ -65,21 +66,21 @@ async function generateCloudinarySignature(
         stringToSign += `${key}=${formattedValue}&`;
     });
 
-    // Remova o último '&' e adicione o API Secret
+    // Remove last '&' and add API Secret
     stringToSign = stringToSign.slice(0, -1) + api_secret;
 
-    console.log("String a ser assinada:", stringToSign);
+    console.log("String to be signed:", stringToSign);
 
     const digest = await Crypto.digestStringAsync(
         Crypto.CryptoDigestAlgorithm.SHA1,
         stringToSign
     );
 
-    // 3. Aplique o hash SHA-1
+    // 3. Apply SHA-1 hash
     return digest;
 }
 
-// Extrai o public_id de uma URL do Cloudinary
+// Extracts public_id from a Cloudinary URL
 function getPublicIdFromUrl(url: string) {
     const match = url.match(/\/([^\/]+)\.[a-z]+$/i);
     const publicId = match ? match[1] : undefined;
@@ -92,17 +93,17 @@ function getPublicIdFromUrl(url: string) {
 /*
         URL: blob:http://localhost:19006/a1b2c3d4...
 
-        É apenas um ponteiro para um objeto Blob na memória do navegador.
+        It's just a pointer to a Blob object in browser memory.
 
-        Não é um arquivo físico, e não pode ser enviado diretamente por FormData.
+        It's not a physical file, and cannot be sent directly via FormData.
 
-        Então, você precisa:
+        So you need to:
 
-            fetch(blobUrl) → para ler os bytes
+            fetch(blobUrl) → to read the bytes
 
-            .blob() → para converter em um Blob real
+            .blob() → to convert to a real Blob
 
-            new File([blob], ...) → criar um objeto File, que o FormData entende.
+            new File([blob], ...) → create a File object that FormData understands.
      */
 
 async function prepareFileForUpload(uri: string) {
@@ -118,7 +119,7 @@ async function prepareFileForUpload(uri: string) {
     }
 }
 
-// Formata uma Date para o formato: "September 27, 2025 at 07:31 AM"
+// Formats a Date to format: "September 27, 2025 at 07:31 AM"
 function formatDateTime(date: Date) {
     try {
         const datePart = date.toLocaleDateString("en-US", {
@@ -133,7 +134,7 @@ function formatDateTime(date: Date) {
         });
         return `${datePart} at ${timePart}`;
     } catch (e) {
-        // Fallback para ISO se algo falhar
+        // Fallback to ISO if something fails
         return date.toISOString();
     }
 }
@@ -154,7 +155,7 @@ export function useCreateMeal() {
         const file = await prepareFileForUpload(imageUri);
         const formData = new FormData();
 
-        const timestamp = Math.round(new Date().getTime() / 1000); // Carimbo de data/hora em segundos
+        const timestamp = Math.round(new Date().getTime() / 1000); // Timestamp in seconds
 
         let publicIdToUse: string | undefined;
         let shouldOverwrite = false;
@@ -165,33 +166,33 @@ export function useCreateMeal() {
                 publicIdToUse = extractedPublicId;
                 shouldOverwrite = true;
                 console.log(
-                    `Tentando sobrescrever com public_id: ${publicIdToUse}`
+                    `Trying to overwrite with public_id: ${publicIdToUse}`
                 );
             } else {
                 console.warn(
-                    `Não foi possível extrair o public_id da URL: ${oldImageUrl}.`
+                    `Could not extract public_id from URL: ${oldImageUrl}.`
                 );
                 throw new Error(
-                    `Não foi possível extrair o public_id da URL: ${oldImageUrl}.`
+                    t('meals.couldNotExtractPublicId', { url: oldImageUrl })
                 );
             }
         } else {
             console.log(
-                "Nenhuma URL de imagem antiga fornecida. Realizando um novo upload."
+                "No old image URL provided. Performing a new upload."
             );
         }
 
-        // Parâmetros que serão assinados
+        // Parameters to be signed
         const paramsToSign: Record<string, any> = {
             timestamp: timestamp,
-            folder: `campus/${campusId}/meals`, // Use 'folder' para uploads assinados
+            folder: `campus/${campusId}/meals`, // Use 'folder' for signed uploads
         };
 
         if (publicIdToUse) {
             paramsToSign.public_id = publicIdToUse;
         }
         if (shouldOverwrite) {
-            paramsToSign.overwrite = true; // Use o booleano 'true' para a assinatura
+            paramsToSign.overwrite = true; // Use boolean 'true' for signature
         }
         const CLOUDINARY_API_SECRET = await fetchApiKeyFromDatabase(
             "cloudinary"
@@ -201,19 +202,19 @@ export function useCreateMeal() {
             CLOUDINARY_API_SECRET
         );
 
-        // Adicione todos os parâmetros ao FormData
+        // Add all parameters to FormData
         formData.append("file", file as any);
         formData.append("api_key", CLOUDINARY_API_KEY);
-        formData.append("timestamp", timestamp.toString()); // Envie como string
+        formData.append("timestamp", timestamp.toString()); // Send as string
         formData.append("signature", signature);
 
         if (publicIdToUse) {
             formData.append("public_id", publicIdToUse);
         }
         if (shouldOverwrite) {
-            formData.append("overwrite", "true"); // Envie como string "true" para o Cloudinary
+            formData.append("overwrite", "true"); // Send as string "true" for Cloudinary
         }
-        formData.append("folder", `campus/${campusId}/meals`); // Envie a pasta
+        formData.append("folder", `campus/${campusId}/meals`); // Send folder
 
         try {
             const response = await axios.post(CLOUDINARY_URL, formData, {
@@ -300,8 +301,8 @@ export function useCreateMeal() {
             // );
             // } catch (error) {
             //     showAlert(
-            //         "Erro Geral",
-            //         "Não foi possível completar o envio da notificação."
+            //         "General Error",
+            //         "Could not complete notification sending."
             //     );
             // }
             setLoading(false);
@@ -403,17 +404,17 @@ export function useCreateMeal() {
 
         try {
             await remove(mealRef);
-            // Sucesso: notifique, delete imagem do Cloudinary, mostre alerta
+            // Success: notify, delete Cloudinary image, show alert
             if (meal.pathImage) {
                 const success = await deleteImageFromCloudinary(meal.pathImage);
                 if (!success) {
-                    showAlert("Erro", "Imagem não eliminada");
+                    showAlert(t('common.error'), t('meals.imageNotDeleted'));
                 }
             }
-            showAlert("Sucesso", "Refeição eliminada com sucesso!");
+            showAlert(t('common.success'), t('meals.mealDeletedSuccessfully'));
             onRefresh(false);
         } catch (e: any) {
-            showAlert("Erro", "Erro ao eliminar refeição: " + e.message);
+            showAlert(t('common.error'), t('meals.errorDeletingMeal') + e.message);
         }
     }
 
@@ -424,15 +425,15 @@ export function useCreateMeal() {
 
         if (!publicId) {
             console.error(
-                "Não foi possível extrair o public_id da URL:",
+                "Could not extract public_id from URL:",
                 imageUrl
             );
             return false;
         }
 
-        const timestamp = Math.round(new Date().getTime() / 1000); // Carimbo de data/hora em segundos
+        const timestamp = Math.round(new Date().getTime() / 1000); // Timestamp in seconds
 
-        // Parâmetros que serão assinados para a deleção
+        // Parameters to be signed for deletion
         const paramsToSign: Record<string, any> = {
             public_id: publicId,
             timestamp: timestamp,
@@ -452,7 +453,7 @@ export function useCreateMeal() {
         formData.append("signature", signature);
 
         try {
-            console.log(`Tentando excluir public_id: ${publicId}`);
+            console.log(`Trying to delete public_id: ${publicId}`);
             const response = await axios.post(
                 CLOUDINARY_DESTROY_URL,
                 formData,
@@ -463,19 +464,19 @@ export function useCreateMeal() {
 
             if (response.data.result === "ok") {
                 console.log(
-                    `Imagem com public_id ${publicId} excluída com sucesso.`
+                    `Image with public_id ${publicId} deleted successfully.`
                 );
                 return true;
             } else {
                 console.error(
-                    `Falha ao excluir imagem ${publicId}:`,
+                    `Failed to delete image ${publicId}:`,
                     response.data
                 );
                 return false;
             }
         } catch (e: any) {
             console.error(
-                "Erro na deleção do Cloudinary:",
+                "Cloudinary deletion error:",
                 e.response ? e.response.data : e.message
             );
             throw e;
@@ -492,7 +493,7 @@ export function useCreateMeal() {
         const optionLabel = option;
 
         try {
-            if (option === "Segunda via") {
+            if (option === t('meals.secondPortion')) {
                 const mealsRef = ref(
                     database,
                     `campus/${campusId}/cursus/${cursusId}/meals/${meal.id}/secondPortion`
@@ -503,8 +504,8 @@ export function useCreateMeal() {
                 };
                 await set(mealsRef, map).then(() => {
                     showAlert(
-                        "Sucesso",
-                        `Segunda via de ${meal.name} disponibilizado(a) com sucesso!`
+                        t('common.success'),
+                        t('meals.secondPortionAvailable', { name: meal.name })
                     );
                 });
             }
@@ -523,8 +524,8 @@ export function useCreateMeal() {
                 meal.type = originalType;
             }
         } catch (e: any) {
-            console.error("Erro ao notificar refeição:", e);
-            showAlert("Erro", e?.message || "Erro ao enviar notificação");
+            console.error("Error notifying meal:", e);
+            showAlert(t('common.error'), e?.message || t('meals.errorSendingNotification'));
             throw e;
         }
     }

@@ -1,3 +1,4 @@
+import { t } from "@/i18n";
 import { getComment, sendRatingAndComment } from "@/repository/userRepository";
 import { MaterialIcons } from "@expo/vector-icons";
 import React, { useEffect, useRef, useState } from "react";
@@ -105,12 +106,12 @@ export default function CommentBox({
         const hasRating = userRating > 0 && !hasExistingRating;
 
         if (!hasComment && !hasRating) {
-            setError("Adicione um comentário ou uma avaliação por estrelas");
+            setError(t('comments.requireCommentOrRating'));
             return;
         }
 
         if (!campusId || !cursusId || !userId || !typeId) {
-            setError("Dados insuficientes para enviar");
+            setError(t('comments.insufficientData'));
             return;
         }
 
@@ -172,11 +173,11 @@ export default function CommentBox({
                         style={integrated ? styles.cardIntegrated : styles.card}
                     >
                         {!integrated && (
-                            <Text style={styles.title}>Comentário</Text>
+                            <Text style={styles.title}>{t('comments.comment')}</Text>
                         )}
                         {integrated && (
                             <Text style={styles.titleIntegrated}>
-                                Deixe seu comentário:
+                                {t('comments.leaveComment')}
                             </Text>
                         )}
                         {loadingComment ? (
@@ -194,7 +195,7 @@ export default function CommentBox({
                                     onFocus={() =>
                                         !saved && setShowAnonymousOption(true)
                                     }
-                                    placeholder="Escreva seu comentário"
+                                    placeholder={t('comments.writeComment')}
                                     placeholderTextColor={"#ccc"}
                                     style={[
                                         integrated
@@ -232,7 +233,7 @@ export default function CommentBox({
                                             }
                                         />
                                         <Text style={styles.checkboxLabel}>
-                                            Comentário anônimo
+                                            {t('comments.anonymousComment')}
                                         </Text>
                                     </TouchableOpacity>
                                 )}
@@ -252,18 +253,18 @@ export default function CommentBox({
                                     >
                                         {loading ? (
                                             <Text style={{ color: "#fff" }}>
-                                                Enviando...
+                                                {t('comments.sending')}
                                             </Text>
                                         ) : (
                                             <Text style={styles.buttonText}>
                                                 {userRating > 0 &&
                                                 !hasExistingRating &&
                                                 comment.trim().length > 0
-                                                    ? "ENVIAR AVALIAÇÃO E COMENTÁRIO"
+                                                    ? t('comments.sendRatingAndComment')
                                                     : userRating > 0 &&
                                                       !hasExistingRating
-                                                    ? "ENVIAR AVALIAÇÃO"
-                                                    : "ENVIAR COMENTÁRIO"}
+                                                    ? t('comments.sendRating')
+                                                    : t('comments.sendComment')}
                                             </Text>
                                         )}
                                     </TouchableOpacity>
@@ -273,16 +274,16 @@ export default function CommentBox({
                                         <Text style={styles.savedText}>
                                             ✓{" "}
                                             {hasExistingRating
-                                                ? `Comentário ${
+                                                ? `${t('comments.comment')} ${
                                                       isAnonymous
-                                                          ? "(anônimo) "
+                                                          ? `(${t('comments.anonymous')}) `
                                                           : ""
-                                                  }salvo`
-                                                : `Avaliação e comentário ${
+                                                  }${t('comments.saved')}`
+                                                : `${t('comments.ratingAndComment')} ${
                                                       isAnonymous
-                                                          ? "(anônimo) "
+                                                          ? `(${t('comments.anonymous')}) `
                                                           : ""
-                                                  }salvos`}
+                                                  }${t('comments.saved')}`}
                                         </Text>
                                     </View>
                                 )}
@@ -299,11 +300,11 @@ export default function CommentBox({
                             }
                         >
                             {!integrated && (
-                                <Text style={styles.title}>Comentário</Text>
+                                <Text style={styles.title}>{t('comments.comment')}</Text>
                             )}
                             {integrated && (
                                 <Text style={styles.titleIntegrated}>
-                                    Deixe seu comentário:
+                                    {t('comments.leaveComment')}
                                 </Text>
                             )}
                             {loadingComment ? (
@@ -320,7 +321,7 @@ export default function CommentBox({
                                                 setComment(t);
                                         }}
                                         onFocus={handleTextInputFocus}
-                                        placeholder="Escreva seu comentário"
+                                        placeholder={t('comments.writeComment')}
                                         placeholderTextColor={"#ccc"}
                                         style={[
                                             integrated
@@ -360,7 +361,7 @@ export default function CommentBox({
                                                 }
                                             />
                                             <Text style={styles.checkboxLabel}>
-                                                Comentário anônimo
+                                                {t('comments.anonymousComment')}
                                             </Text>
                                         </TouchableOpacity>
                                     )}
@@ -382,18 +383,18 @@ export default function CommentBox({
                                         >
                                             {loading ? (
                                                 <Text style={{ color: "#fff" }}>
-                                                    Enviando...
+                                                    {t('comments.sending')}
                                                 </Text>
                                             ) : (
                                                 <Text style={styles.buttonText}>
                                                     {userRating > 0 &&
                                                     !hasExistingRating &&
                                                     comment.trim().length > 0
-                                                        ? "ENVIAR AVALIAÇÃO E COMENTÁRIO"
+                                                        ? t('comments.sendRatingAndComment')
                                                         : userRating > 0 &&
                                                           !hasExistingRating
-                                                        ? "ENVIAR AVALIAÇÃO"
-                                                        : "ENVIAR COMENTÁRIO"}
+                                                        ? t('comments.sendRating')
+                                                        : t('comments.sendComment')}
                                                 </Text>
                                             )}
                                         </TouchableOpacity>
@@ -404,19 +405,19 @@ export default function CommentBox({
                                                 ✓{" "}
                                                 {hasExistingRating &&
                                                 comment.trim().length > 0
-                                                    ? `Avaliação e comentário ${
+                                                    ? `${t('comments.ratingAndComment')} ${
                                                           isAnonymous
-                                                              ? "(anônimo) "
+                                                              ? `(${t('comments.anonymous')}) `
                                                               : ""
-                                                      }salvos`
+                                                      }${t('comments.saved')}`
                                                     : hasExistingRating
-                                                    ? "Avaliação salva"
+                                                    ? t('comments.ratingSaved')
                                                     : comment.trim().length > 0
-                                                    ? `Comentário ${
+                                                    ? `${t('comments.comment')} ${
                                                           isAnonymous
-                                                              ? "(anônimo) "
+                                                              ? `(${t('comments.anonymous')}) `
                                                               : ""
-                                                      }salvo`
+                                                      }${t('comments.saved')}`
                                                     : null}
                                             </Text>
                                         </View>

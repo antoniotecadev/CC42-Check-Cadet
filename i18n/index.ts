@@ -34,13 +34,13 @@ class SimpleI18n {
             if (translation && typeof translation === 'object' && k in translation) {
                 translation = translation[k];
             } else {
-                // Fallback para português se a chave não existir no idioma atual
+                // Fallback to Portuguese if key doesn't exist in current language
                 translation = this.translations['pt'];
                 for (const fallbackKey of keys) {
                     if (translation && typeof translation === 'object' && fallbackKey in translation) {
                         translation = translation[fallbackKey];
                     } else {
-                        return key; // Retorna a chave se não encontrar tradução
+                        return key; // Return key if translation not found
                     }
                 }
                 break;
@@ -51,7 +51,7 @@ class SimpleI18n {
             return translation;
         }
 
-        return key; // Retorna a chave se não encontrar tradução
+        return key; // Return key if translation not found
     }
 }
 
@@ -74,10 +74,10 @@ export const loadSavedLanguage = async (): Promise<string> => {
             return 'en';
         }
         
-        // Fallback para português
+        // Fallback to Portuguese
         return 'pt';
     } catch (error) {
-        console.error('Erro ao carregar idioma salvo:', error);
+        console.error('Error loading saved language:', error);
         return 'pt';
     }
 };
@@ -90,7 +90,7 @@ export const changeLanguage = async (locale: string): Promise<void> => {
             await AsyncStorage.setItem('app_language', locale);
         }
     } catch (error) {
-        console.error('Erro ao salvar idioma:', error);
+        console.error('Error saving language:', error);
         throw error;
     }
 };

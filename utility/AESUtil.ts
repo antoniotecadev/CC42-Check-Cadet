@@ -5,9 +5,9 @@ import Utf8 from "crypto-js/enc-utf8";
 
 const ALGORITHM = "AES";
 
-// Simula a função nativa que busca a chave secreta
+// Simulates the native function that fetches the secret key
 function getSecretKeyFromJNI(): string {
-    // ATENÇÃO: substitua pela lógica real segura
+    // WARNING: replace with real secure logic
     return "mR7tP3xL9sQ2vY1z"; // deve ter 16, 24 ou 32 bytes
 }
 

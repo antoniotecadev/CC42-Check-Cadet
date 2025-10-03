@@ -6,6 +6,7 @@ import RatingSection from "@/components/ui/RatingSection";
 import useItemStorage from "@/hooks/storage/useItemStorage";
 import { showAlert } from "@/hooks/useAlert";
 import { useColorScheme } from "@/hooks/useColorScheme";
+import { t } from "@/i18n";
 import {
     observeSecondPortion,
     subscribeSecondPortion,
@@ -89,7 +90,7 @@ export default function MealDetailScreen() {
     if (!meal) {
         return (
             <ThemedText style={{ margin: 32, textAlign: "center" }}>
-                Refeição não encontrada.
+                {t('meals.notFound')}
             </ThemedText>
         );
     }
@@ -104,14 +105,14 @@ export default function MealDetailScreen() {
                 imageSource={
                     modalData.imageSource ?? require("@/assets/images/icon.png")
                 }
-                buttonText="OK"
+                buttonText={t('common.confirm')}
                 onClose={() =>
                     setModalData({ ...modalData, modalVisible: false })
                 }
             />
             <Stack.Screen
                 options={{
-                    title: "Detalhes",
+                    title: t('navigation.details'),
                 }}
             />
             <ThemedView
@@ -151,7 +152,7 @@ export default function MealDetailScreen() {
                             )}
                             <Text style={styles.date}>{meal.createdDate}</Text>
                             <Text style={styles.qty}>
-                                Quantidade: {meal.quantityNotReceived}{" "}
+                                {t('meals.quantity')}: {meal.quantityNotReceived}{" "}
                                 {meal.numberSubscribed
                                     ? "/ " + meal.numberSubscribed
                                     : ""}
@@ -189,17 +190,17 @@ export default function MealDetailScreen() {
                                         setLoadingSecond(false);
                                         setModalData({
                                             modalVisible: true,
-                                            title: "Sucesso",
+                                            title: t('common.success'),
                                             message:
-                                                meal.name + "\nInscrição feita",
+                                                meal.name + "\n" + t('meals.subscriptionDone'),
                                             color: "#4caf50ff",
                                         });
                                     } else {
                                         setLoadingSecond(false);
                                         showAlert(
-                                            "Aviso",
+                                            t('common.warning'),
                                             res.message ||
-                                                "Não foi possível inscrever-se na segunda via"
+                                                t('meals.subscriptionError')
                                         );
                                     }
                                 }}
@@ -226,16 +227,16 @@ export default function MealDetailScreen() {
                                     }}
                                 >
                                     {loadingSecond
-                                        ? "Processando..."
+                                        ? t('meals.processing')
                                         : secondInfo
                                         ? secondInfo.subscribed
                                             ? secondInfo.received
-                                                ? "RECEBEU SEGUNDA VIA"
-                                                : "INSCRIÇÃO FEITA"
+                                                ? t('meals.receivedSecondPortion')
+                                                : t('meals.subscriptionDone')
                                             : secondInfo.enabled
-                                            ? "INSCREVER - SE"
-                                            : "SEGUNDA VIA TERMINOU"
-                                        : "SEGUNDA VIA INDISPONÍVEL"}
+                                            ? t('meals.subscribe')
+                                            : t('meals.secondPortionEnded')
+                                        : t('meals.secondPortionUnavailable')}
                                 </Text>
                             </TouchableOpacity>
                         </View>

@@ -10,6 +10,7 @@ import useItemStorage from "@/hooks/storage/useItemStorage";
 import useAlert from "@/hooks/useAlert";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { useCreateMeal } from "@/hooks/useCreateMeal";
+import { t } from "@/i18n";
 import { Meal } from "@/model/Meal";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
@@ -70,10 +71,10 @@ export default function MealsScreen() {
     }>({ visible: false, meal: null });
 
     const options = [
-        { label: "Editar", value: 0 },
-        { label: "Notificar", value: 1 },
-        { label: "Eliminar", value: 2 },
-        { label: "Cancelar", value: 3 },
+        { label: t('common.edit'), value: 0 },
+        { label: t('meals.notify'), value: 1 },
+        { label: t('common.delete'), value: 2 },
+        { label: t('common.cancel'), value: 3 },
     ];
 
     useEffect(() => {
@@ -174,7 +175,7 @@ export default function MealsScreen() {
         if (selectedIndex === 1) setNotifyMeal(meal);
         if (selectedIndex === 2) {
             showConfirm(
-                "Eliminar",
+                t('common.delete'),
                 meal.name,
                 async () => {
                     await deleteMealFromFirebase(
@@ -192,7 +193,7 @@ export default function MealsScreen() {
     const handleMenuPress = () => {
         ActionSheetIOS.showActionSheetWithOptions(
             {
-                options: ["Criar Refeição", "Cancelar"],
+                options: [t('meals.createMeal'), t('common.cancel')],
                 cancelButtonIndex: 1,
                 userInterfaceStyle: "dark",
             },
@@ -207,7 +208,7 @@ export default function MealsScreen() {
         else
             ActionSheetIOS.showActionSheetWithOptions(
                 {
-                    options: ["Editar", "Notificar", "Eliminar", "Cancelar"],
+                    options: [t('common.edit'), t('meals.notify'), t('common.delete'), t('common.cancel')],
                     destructiveButtonIndex: 2,
                     cancelButtonIndex: 3,
                     userInterfaceStyle: "dark",
@@ -217,7 +218,7 @@ export default function MealsScreen() {
                     if (selectedIndex === 1) setNotifyMeal(meal);
                     if (selectedIndex === 2) {
                         showConfirm(
-                            "Eliminar",
+                            t('common.delete'),
                             meal.name,
                             async () => {
                                 await deleteMealFromFirebase(
@@ -239,7 +240,7 @@ export default function MealsScreen() {
         navigation.setOptions &&
             staff &&
             navigation.setOptions({
-                title: cursusName || "Refeições",
+                title: cursusName || t('navigation.meals'),
                 headerRight: () =>
                     isWeb ? (
                         <TouchableOpacity
@@ -339,7 +340,7 @@ export default function MealsScreen() {
                         }}
                     >
                         <ThemedText style={{ textAlign: "center" }}>
-                            Refeições não encontradas 😪
+                            {t('meals.notFoundEmpty')}
                         </ThemedText>
                     </ThemedView>
                 )}

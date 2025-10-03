@@ -1,5 +1,6 @@
 import { useColorCoalition } from "@/components/ColorCoalitionContext";
 import { cursusType } from "@/constants/cursusOptions";
+import { t } from "@/i18n";
 import messageService from "@/services/messageService";
 import { Picker } from "@react-native-picker/picker";
 import { useLocalSearchParams } from "expo-router";
@@ -48,7 +49,7 @@ export default function SendMessage() {
             });
             setTitle("");
             setMessage("");
-            setSuccess("Mensagem enviada com sucesso");
+            setSuccess(t('messages.sendSuccess'));
         } catch (e: any) {
             setError(e?.message || String(e));
         } finally {
@@ -107,7 +108,7 @@ export default function SendMessage() {
 
                 <TextInput
                     style={styles.input}
-                    placeholder="Título"
+                    placeholder={t('messages.messageTitle')}
                     placeholderTextColor="#666"
                     value={title}
                     onChangeText={(t) => setTitle(t)}
@@ -117,7 +118,7 @@ export default function SendMessage() {
 
                 <TextInput
                     style={[styles.input, styles.textarea]}
-                    placeholder="Mensagem"
+                    placeholder={t('messages.messageContent')}
                     placeholderTextColor="#666"
                     value={message}
                     onChangeText={(t) => setMessage(t)}
@@ -142,7 +143,7 @@ export default function SendMessage() {
                     {loading ? (
                         <ActivityIndicator color={colorCoalition} />
                     ) : (
-                        <Text style={styles.buttonText}>ENVIAR MENSAGEM</Text>
+                        <Text style={styles.buttonText}>{t('messages.sendMessage').toUpperCase()}</Text>
                     )}
                 </TouchableOpacity>
             </ScrollView>

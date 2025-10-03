@@ -1,4 +1,5 @@
 import useTokenStorage from "@/hooks/storage/useTokenStorage";
+import { t } from "@/i18n";
 import { fetchApiKeyFromDatabase } from "@/services/firebaseApiKey";
 import axios from "axios";
 import { router } from "expo-router";
@@ -17,7 +18,7 @@ export default function useApiInterceptors() {
         baseURL,
     });
 
-    // Interceptor para adicionar token automaticamente
+    // Interceptor to automatically add token
     api.interceptors.request.use(async (config) => {
         const token = await getAccessToken();
         if (token) {
@@ -26,7 +27,7 @@ export default function useApiInterceptors() {
         return config;
     });
 
-    // Controla uma única tentativa de refresh por vez
+    // Controls a single refresh attempt at a time
     let isRefreshing = false;
     let failedQueue: any[] = [];
 
@@ -38,13 +39,13 @@ export default function useApiInterceptors() {
         failedQueue = [];
     };
 
-    // Interceptor de resposta
+    // Response interceptor
     api.interceptors.response.use(
         (response) => response,
         async (error) => {
             const originalRequest = error.config;
 
-            // Se já tentou e falhou, não tenta de novo
+            // If already tried and failed, don't try again
             if (error.response?.status === 401 && !originalRequest._retry) {
                 originalRequest._retry = true;
 
@@ -60,10 +61,10 @@ export default function useApiInterceptors() {
                 isRefreshing = true;
                 try {
                     const rfToken = await getRefreshToken();
-                    if (!rfToken) throw new Error("Refresh token ausente");
+                    if (!rfToken) throw new Error(t('auth.refreshTokenNotFound'));
 
                     const clientSecret = await fetchApiKeyFromDatabase("intra");
-                    if (!clientSecret) throw new Error("Client secret ausente");
+                    if (!clientSecret) throw new Error(t('auth.clientSecretMissing'));
 
                     const res = await axios.post(
                         process.env.EXPO_PUBLIC_API_URL + "/oauth/token",
@@ -93,7 +94,7 @@ export default function useApiInterceptors() {
                 } catch (err) {
                     processQueue(err, null);
                     await clearTokens();
-                    // Redirecionar para login se quiser
+                    // Redirect to login if desired
                     router.replace("/login");
                     return Promise.reject(err);
                 } finally {

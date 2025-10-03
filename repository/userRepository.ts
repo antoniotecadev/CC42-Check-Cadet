@@ -94,7 +94,7 @@ export async function userIsPresentOrSubscribed({
     const existingData = snapshot.exists();
     if (type === "events" && existingData) {
         const data = snapshot.val();
-        return !!data.checkin && !!data.checkout; // Retorna true se houver check-in e check-out
+        return !!data.checkin && !!data.checkout; // Returns true if there's both check-in and check-out
     }
     return existingData;
 }
@@ -204,7 +204,7 @@ export function useUsersPaginated(
                 ? ["event-users", eventId]
                 : ["cursus-users", cursusId, campusId],
         queryFn: async ({ pageParam = 1 }) => {
-            // Função que busca os usuários
+            // Function that fetches users
             type === "events"
                 ? (res = await api.get<UserPresence[]>(
                       `/v2/events/${eventId}/users?page[number]=${pageParam}&page[size]=${pageSize}`
@@ -218,10 +218,10 @@ export function useUsersPaginated(
                     res.data.length === pageSize ? pageParam + 1 : undefined,
             };
         },
-        initialPageParam: 1, // Começa na primeira página
-        getNextPageParam: (lastPage) => lastPage.nextPage, // Define a próxima página com base no tamanho da página
-        enabled: type === "events" ? !!eventId : !!cursusId && !!campusId, // Garante que a query só roda se eventId | cursusId && campusId estiver definido
-        refetchOnWindowFocus: false, // Evita refetch automático ao voltar para a página
+        initialPageParam: 1, // Starts on the first page
+        getNextPageParam: (lastPage) => lastPage.nextPage, // Defines next page based on page size
+        enabled: type === "events" ? !!eventId : !!cursusId && !!campusId, // Ensures query only runs if eventId | cursusId && campusId is defined
+        refetchOnWindowFocus: false, // Avoids automatic refetch when returning to page
         staleTime: 1000 * 60 * 30, // Dados ficam "frescos" por 30 minutos
         retry: 2, // Tenta novamente 2 vezes em caso de falha
     });
@@ -232,14 +232,14 @@ export function optimizeUsers(
     ids: (string | number)[],
     type: "events" | "meals"
 ): UserPresence[] {
-    // Transforma lista de IDs em Set para buscas rápidas
+    // Transforms ID list into Set for fast searches
     const idSet = new Set(ids.map(String));
     const key = type === "meals" ? "isSubscribed" : "isPresent";
 
-    // Usa reduce para filtrar e mapear ao mesmo tempo
+    // Uses reduce to filter and map at the same time
     return users.reduce<UserPresence[]>((acc, user) => {
         if (user.kind !== "student") {
-            return acc; // pula se for 'student'
+            return acc; // skip if 'student'
         }
 
         const updatedUser = {
@@ -247,7 +247,7 @@ export function optimizeUsers(
             [key]: idSet.has(String(user.id)),
         };
 
-        acc.push(updatedUser); // adiciona ao resultado
+        acc.push(updatedUser); // add to result
         return acc;
     }, []);
 }

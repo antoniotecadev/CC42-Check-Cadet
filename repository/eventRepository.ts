@@ -1,5 +1,6 @@
 import { database } from "@/firebaseConfig";
 import useAlert from "@/hooks/useAlert";
+import { t } from "@/i18n";
 import { Event } from "@/model/Event";
 import useApiInterceptors from "@/services/api";
 import { BarcodeResultParams } from "@/utility/QRCodeUtil";
@@ -29,7 +30,7 @@ export function useEvents(params: GetEventsParams) {
             const response = await api.get<Event[]>(url);
             return response.data;
         } catch (error: any) {
-            showError("ERRO", "Erro ao buscar eventos: " + error.message);
+            showError(t('common.error'), t('events.errorLoadingEvents') + error.message);
             return [];
         }
     };
@@ -80,7 +81,7 @@ export function fetchRatings(
         const sum = ratings.reduce((acc, val) => acc + val, 0); // soma todos os valores
         const ratingValue = ratingCount > 0 ? sum / ratingCount : 0;
 
-        // Monta os ícones das estrelas
+        // Build star icons
         const stars: ("star" | "star-half" | "star-o")[] = [];
         let value = ratingValue;
         for (let i = 0; i < 5; i++) {
@@ -94,7 +95,7 @@ export function fetchRatings(
             value -= 1;
         }
 
-        // Verifica se o usuário já avaliou
+        // Check if user has already rated
         const userRating = ratingsObj[userId]
             ? Number(ratingsObj[userId])
             : undefined;
@@ -122,13 +123,13 @@ export async function markAttendance({
     try {
         setLoading(true);
 
-        // Referência para participantes do evento
+        // Reference to event participants
         const participantsRef = ref(
             database,
             `campus/${campusId}/cursus/${cursusId}/events/${eventId}/participants/${userId}`
         );
 
-        // Verifica o estado atual da presença
+        // Check current attendance status
         const snapshot = await get(participantsRef);
         const existingData = snapshot.exists() ? snapshot.val() : null;
         
@@ -137,8 +138,8 @@ export async function markAttendance({
             if (existingData && existingData.checkin) {
                 setLoading(false);
                 showModal({
-                    title: "Aviso!",
-                    message: `${displayName}\nJá fez check-in neste evento.`,
+                    title: t('common.warning'),
+                    message: `${displayName}\n${t('events.alreadyCheckedIn')}`,
                     color: "#FDD835",
                     imageSource: { uri: imageSource },
                     onClose: onResumeCamera,
@@ -175,8 +176,8 @@ export async function markAttendance({
 
             setLoading(false);
             showModal({
-                title: "Sucesso!",
-                message: `${displayName}\nCheck-in realizado com sucesso!`,
+                title: t('common.success'),
+                message: `${displayName}\n${t('events.checkinSuccessful')}`,
                 color: "#4CAF50",
                 imageSource: { uri: imageSource },
                 onClose: onResumeCamera,
@@ -187,8 +188,8 @@ export async function markAttendance({
             if (!existingData || !existingData.checkin) {
                 setLoading(false);
                 showModal({
-                    title: "Aviso!",
-                    message: `${displayName}\nPrecisa fazer check-in primeiro.`,
+                    title: t('common.warning'),
+                    message: `${displayName}\n${t('events.needCheckinFirst')}`,
                     color: "#FF5722",
                     imageSource: { uri: imageSource },
                     onClose: onResumeCamera,
@@ -199,8 +200,8 @@ export async function markAttendance({
             if (existingData.checkout) {
                 setLoading(false);
                 showModal({
-                    title: "Aviso!",
-                    message: `${displayName}\nJá fez check-out neste evento.`,
+                    title: t('common.warning'),
+                    message: `${displayName}\n${t('events.alreadyCheckedOut')}`,
                     color: "#FDD835",
                     imageSource: { uri: imageSource },
                     onClose: onResumeCamera,
@@ -237,8 +238,8 @@ export async function markAttendance({
 
             setLoading(false);
             showModal({
-                title: "Sucesso!",
-                message: `${displayName}\nCheck-out realizado com sucesso!`,
+                title: t('common.success'),
+                message: `${displayName}\n${t('events.checkoutSuccessful')}`,
                 color: "#4CAF50",
                 imageSource: { uri: imageSource },
                 onClose: onResumeCamera,
@@ -247,8 +248,8 @@ export async function markAttendance({
     } catch (e: any) {
         setLoading(false);
         showModal({
-            title: "Erro!",
-            message: `Erro ao fazer check: ${e.message}`,
+            title: t('common.error'),
+            message: `${t('events.errorMakingCheck')}: ${e.message}`,
             color: "#E53935",
             imageSource: { uri: imageSource },
             onClose: onResumeCamera,

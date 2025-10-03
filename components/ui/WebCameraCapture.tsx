@@ -2,6 +2,7 @@ import { CameraType, CameraView, useCameraPermissions } from "expo-camera";
 import { Image } from "expo-image";
 import { useRef, useState } from "react";
 import { Button, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { t } from "../../i18n";
 
 export default function WebCameraCapture({
     onSetImage,
@@ -25,9 +26,9 @@ export default function WebCameraCapture({
         return (
             <View style={styles.container}>
                 <Text style={styles.message}>
-                    We need your permission to show the camera
+                    {t('camera.permissionMessage')}
                 </Text>
-                <Button onPress={requestPermission} title="grant permission" />
+                <Button onPress={requestPermission} title={t('camera.grantPermission')} />
             </View>
         );
     }
@@ -54,7 +55,7 @@ export default function WebCameraCapture({
                         style={styles.button}
                         onPress={() => setCapturedUri(null)}
                     >
-                        <Text style={styles.buttonText}>📷 Tirar outra</Text>
+                        <Text style={styles.buttonText}>📷 {t('camera.takeAnother')}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                         style={styles.button}
@@ -63,7 +64,7 @@ export default function WebCameraCapture({
                             onSetShowCameraWeb(false);
                         }}
                     >
-                        <Text style={styles.buttonText}>✔ Usar esta</Text>
+                        <Text style={styles.buttonText}>✔ {t('camera.useThis')}</Text>
                     </TouchableOpacity>
                 </>
             ) : (
@@ -80,14 +81,14 @@ export default function WebCameraCapture({
                             onPress={toggleCameraFacing}
                         >
                             <Text style={styles.buttonText}>
-                                🔁 {facing === "back" ? "Frontal" : "Traseira"}
+                                🔁 {facing === "back" ? t('camera.front') : t('camera.back')}
                             </Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                             style={styles.button}
                             onPress={takePicture}
                         >
-                            <Text style={styles.buttonText}>📸 Capturar</Text>
+                            <Text style={styles.buttonText}>📸 {t('camera.capture')}</Text>
                         </TouchableOpacity>
                     </View>
                 </CameraView>

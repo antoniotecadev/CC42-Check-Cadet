@@ -1,6 +1,7 @@
+import { t } from "@/i18n";
 import { UserPresence } from "@/repository/userRepository";
 
-// Função utilitária para gerar o HTML do PDF
+// Utility function to generate attendance HTML for PDF
 export function generateAttendanceHtml({
     title,
     logoBase64,
@@ -12,7 +13,7 @@ export function generateAttendanceHtml({
     numberNoCheckout = 0,
     userFilter,
 }: {
-    title: "Lista de Presença" | "Lista de Assinaturas";
+    title: string;
     logoBase64: string;
     description: string;
     date: string;
@@ -52,9 +53,9 @@ export function generateAttendanceHtml({
                 <img src="${logoBase64}" class="logo" />
                 <div class="title">${title}</div>
                 <div class="subtitle">${
-                    title === "Lista de Assinaturas"
-                        ? `1ª via subscritos: ${numberPresenceORSubscribed} | 1ª via não subscritos: ${numberAbsentsORUnSubscribed} | 2ª via subscritos: ${userFilter.filter(u => u.hasSecondPortion).length} | 2ª via não subscritos: ${userFilter.filter(u => !u.hasSecondPortion).length}`
-                        : `Check-in Feito: ${numberPresenceORSubscribed} | Check-in Não Feito: ${numberAbsentsORUnSubscribed} | Check-out Feito: ${numberCheckout} | Check-out Não Feito: ${numberNoCheckout}`
+                    title === t('events.subscriptionList')
+                        ? `${t('events.firstPortion')} ${t('events.subscribed')}: ${numberPresenceORSubscribed} | ${t('events.firstPortion')} ${t('events.notSubscribed')}: ${numberAbsentsORUnSubscribed} | ${t('events.secondPortion')} ${t('events.subscribed')}: ${userFilter.filter(u => u.hasSecondPortion).length} | ${t('events.secondPortion')} ${t('events.notSubscribed')}: ${userFilter.filter(u => !u.hasSecondPortion).length}`
+                        : `${t('events.checkinDone')}: ${numberPresenceORSubscribed} | ${t('events.checkinNotDone')}: ${numberAbsentsORUnSubscribed} | ${t('events.checkoutDone')}: ${numberCheckout} | ${t('events.checkoutNotDone')}: ${numberNoCheckout}`
                 }</div>
                 <div class="subtitle">${description || ""} - ${date || ""}</div>
             </div>
@@ -64,7 +65,7 @@ export function generateAttendanceHtml({
                     <th>Nome Completo</th>
                     <th>Login</th>
                     ${
-                        title === "Lista de Assinaturas"
+                        title === t('events.subscriptionList')
                             ? "<th>Primeira via</th><th>Segunda via</th>"
                             : "<th>Check-in</th><th>Check-out</th>"
                     }
@@ -77,26 +78,26 @@ export function generateAttendanceHtml({
                         <td>${u.displayname}</td>
                         <td>${u.login}</td>
                         ${
-                            title === "Lista de Assinaturas"
+                            title === t('events.subscriptionList')
                                 ? `<td class="${
                                       u.hasFirstPortion ? "present" : "absent"
                                   }">${
-                                      u.hasFirstPortion ? "Subscrito" : "Não subscrito"
+                                      u.hasFirstPortion ? t('events.subscribed') : t('events.notSubscribed')
                                   }</td>
                                   <td class="${
                                       u.hasSecondPortion ? "present" : "absent"
                                   }">${
-                                      u.hasSecondPortion ? "Subscrito" : "Não subscrito"
+                                      u.hasSecondPortion ? t('events.subscribed') : t('events.notSubscribed')
                                   }</td>`
                                 : `<td class="${
                                       u.hasCheckin ? "present" : "absent"
                                   }">${
-                                      u.hasCheckin ? "Presente" : "Ausente"
+                                      u.hasCheckin ? t('events.present') : t('events.absent')
                                   }</td>
                                   <td class="${
                                       u.hasCheckout ? "present" : "absent"
                                   }">${
-                                      u.hasCheckout ? "Presente" : "Ausente"
+                                      u.hasCheckout ? t('events.present') : t('events.absent')
                                   }</td>`
                         }
                     </tr>
@@ -112,12 +113,12 @@ export function generateAttendanceHtml({
                 <table>
                     <tr>
                         <th>#</th>
-                        <th>Nome Completo</th>
+                        <th>${t('events.fullName')}</th>
                         <th>Login</th>
                         ${
-                            title === "Lista de Assinaturas"
-                                ? "<th>Primeira via</th><th>Segunda via</th>"
-                                : "<th>Check-in</th><th>Check-out</th>"
+                            title === t('events.subscriptionList')
+                                ? `<th>${t('events.firstPortion')}</th><th>${t('events.secondPortion')}</th>`
+                                : `<th>${t('events.checkIn')}</th><th>${t('events.checkOut')}</th>`
                         }
                     </tr>
                     ${page
@@ -128,26 +129,26 @@ export function generateAttendanceHtml({
                             <td>${u.displayname}</td>
                             <td>${u.login}</td>
                            ${
-                               title === "Lista de Assinaturas"
+                               title === t('events.subscriptionList')
                                    ? `<td class="${
                                          u.hasFirstPortion ? "present" : "absent"
                                      }">${
-                                         u.hasFirstPortion ? "Subscrito" : "Não subscrito"
+                                         u.hasFirstPortion ? t('events.subscribed') : t('events.notSubscribed')
                                      }</td>
                                      <td class="${
                                          u.hasSecondPortion ? "present" : "absent"
                                      }">${
-                                         u.hasSecondPortion ? "Subscrito" : "Não subscrito"
+                                         u.hasSecondPortion ? t('events.subscribed') : t('events.notSubscribed')
                                      }</td>`
                                    : `<td class="${
                                          u.hasCheckin ? "present" : "absent"
                                      }">${
-                                         u.hasCheckin ? "Presente" : "Ausente"
+                                         u.hasCheckin ? t('events.present') : t('events.absent')
                                      }</td>
                                      <td class="${
                                          u.hasCheckout ? "present" : "absent"
                                      }">${
-                                         u.hasCheckout ? "Presente" : "Ausente"
+                                         u.hasCheckout ? t('events.present') : t('events.absent')
                                      }</td>`
                            }
                         </tr>
@@ -155,7 +156,7 @@ export function generateAttendanceHtml({
                         )
                         .join("")}
                 </table>
-                <div class="footer">${title} gerada em ${new Date().toLocaleString()}</div>
+                <div class="footer">${title} ${t('common.generatedAt')} ${new Date().toLocaleString()}</div>
                 ${
                     pageIndex < pages.length - 2
                         ? '<div class="page-break"></div>'

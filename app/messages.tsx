@@ -1,5 +1,6 @@
 import { useColorCoalition } from "@/components/ColorCoalitionContext";
 import { database } from "@/firebaseConfig";
+import { t } from "@/i18n";
 import { FlashList } from "@shopify/flash-list";
 import {
     limitToLast,
@@ -35,12 +36,16 @@ export default function MessagesScreen() {
     useLayoutEffect(() => {
         if (navigation.setOptions) {
             if (cursusId === "21") {
-                navigation.setOptions({ title: "42 Cursus" });
+                navigation.setOptions({ title: t("cursus.42cursus") });
             } else if (cursusId === "9") {
-                navigation.setOptions({ title: "C Piscine" });
+                navigation.setOptions({ title: t("cursus.cpiscine") });
             } else if (cursusId === "66") {
                 navigation.setOptions({
-                    title: "C-Piscine-Reloaded",
+                    title: t("cursus.cpiscineReloaded"),
+                });
+            } else if (cursusId === "3") {
+                navigation.setOptions({
+                    title: t("cursus.discoveryPiscine"),
                 });
             }
         }
@@ -88,7 +93,7 @@ export default function MessagesScreen() {
     if (!messages.length)
         return (
             <View style={[styles.center, isWeb ? styles.inner : {}]}>
-                <ThemedText>Nenhuma mensagem encontrada.</ThemedText>
+                <ThemedText>{t("messages.noMessages")}</ThemedText>
             </View>
         );
 

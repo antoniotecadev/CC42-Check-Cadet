@@ -1,4 +1,5 @@
 import { database } from "@/firebaseConfig";
+import { t } from "@/i18n";
 import Message from "@/model/Message";
 import { push, ref, set } from "firebase/database";
 import { sendNotificationForMessage } from "./FirebaseNotification";
@@ -10,19 +11,20 @@ export const sendMessage = async (
     payload: Message
 ) => {
     let cursusId = "";
-    if (cursusSelection === "42 Cursus") cursusId = "21";
-    else if (cursusSelection === "C Piscine") cursusId = "9";
-    else if (cursusSelection === "C-Piscine-Reloaded") cursusId = "66";
-    
+    if (cursusSelection === t('cursus.42cursus')) cursusId = "21";
+    else if (cursusSelection === t('cursus.cpiscine')) cursusId = "9";
+    else if (cursusSelection === t('cursus.cpiscineReloaded')) cursusId = "66";
+    else if (cursusSelection === t('cursus.discoveryPiscine')) cursusId = "3";
+
     if (!payload.title || payload.title.trim() === "") {
-        throw new Error("O título não pode estar vazio");
+        throw new Error(t('messages.titleCannotBeEmpty'));
     }
     if (!payload.message || payload.message.trim() === "") {
-        throw new Error("A mensagem não pode estar vazia");
+        throw new Error(t('messages.messageCannotBeEmpty'));
     }
 
     if (!cursusId) {
-        throw new Error("Cursus inválido");
+        throw new Error(t('cursus.invalidCursus'));
     }
 
     const messagesRef = ref(

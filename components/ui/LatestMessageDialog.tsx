@@ -4,8 +4,9 @@ import type { Message } from "@/model/Message";
 import { get, limitToLast, orderByChild, query, ref } from "firebase/database";
 import React, { useEffect, useState } from "react";
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { ThemedText } from "./ThemedText";
-import { ThemedView } from "./ThemedView";
+import { t } from "../../i18n";
+import { ThemedText } from "../ThemedText";
+import { ThemedView } from "../ThemedView";
 
 const PREFS_KEY_LAST_ID = "latest_message_last_seen_id";
 const PREFS_KEY_DONT_SHOW = "latest_message_dont_show_until_new";
@@ -141,7 +142,7 @@ export default function LatestMessageDialog({
                             </ThemedText>
                         </>
                     ) : (
-                        <ThemedText>Sem mensagens</ThemedText>
+                        <ThemedText>{t('messages.noMessages')}</ThemedText>
                     )}
 
                     <View style={styles.actions}>
@@ -156,7 +157,7 @@ export default function LatestMessageDialog({
                             onPress={onDontShowAgain}
                         >
                             <Text style={[styles.actionText, styles.ghostText]}>
-                                Não mostrar novamente
+                                {t('messages.dontShowAgain')}
                             </Text>
                         </TouchableOpacity>
                     </View>

@@ -5,6 +5,7 @@ import { styles } from "@/styles/ratingSection";
 import { FontAwesome } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
+import { t } from "../../i18n";
 import CommentBox from "./CommentBox";
 
 interface RatingSectionProps {
@@ -38,7 +39,7 @@ export default function RatingSection({
     // Reset userRating when user submits successfully
     const handleSubmitSuccess = () => {
         setUserRating(0);
-        showSuccess("SUCESSO", "Enviado com sucesso!");
+        showSuccess(t('common.success'), t('rating.sentSuccessfully'));
     };
 
     useEffect(() => {
@@ -56,7 +57,7 @@ export default function RatingSection({
                 setUserPresentOrSuscribed(isUserPresentOrSubscribed);
             } catch (error) {
                 if (isMounted) {
-                    showError("ERRO", "Erro ao verificar presença do usuário.");
+                    showError(t('common.error'), t('rating.errorCheckingUserPresence'));
                 }
             }
         };
@@ -99,20 +100,20 @@ export default function RatingSection({
                         ))}
                     </View>
                     <Text style={styles.ratingCount}>
-                        {rating?.ratingCount ?? 0} avaliações
+                        {rating?.ratingCount ?? 0} {t('rating.ratingsCount')}
                     </Text>
                 </View>
             </View>
 
-            {/* Card integrado: Avaliação + Comentário */}
+            {/* Integrated card: Rating + Comment */}
             {userPresentOrSuscribed && (
                 <View style={[localStyles.interactionCard, { backgroundColor: color }]}>
-                    <Text style={localStyles.sectionTitle}>Sua Avaliação & Comentário</Text>
+                    <Text style={localStyles.sectionTitle}>{t('rating.yourRatingAndComment')}</Text>
                     
-                    {/* Seção de avaliação por estrelas */}
+                    {/* Star rating section */}
                     <View style={localStyles.ratingSection}>
                         <Text style={localStyles.ratingLabel}>
-                            {rating?.userRating ? "Sua avaliação" : "Avalie com estrelas"}
+                            {rating?.userRating ? t('rating.yourRating') : t('rating.rateWithStars')}
                         </Text>
                         <View style={localStyles.starsContainer}>
                             <View style={styles.starsRowSmall}>
@@ -133,16 +134,16 @@ export default function RatingSection({
                             </View>
                             {rating?.userRating && (
                                 <Text style={localStyles.completedRating}>
-                                    ✓ {rating.userRating} estrela{rating.userRating > 1 ? "s" : ""}
+                                    ✓ {rating.userRating} {rating.userRating > 1 ? t('rating.stars') : t('rating.star')}
                                 </Text>
                             )}
                         </View>
                     </View>
 
-                    {/* Divisor visual */}
+                    {/* Visual divider */}
                     <View style={localStyles.divider} />
 
-                    {/* Seção de comentário integrada */}
+                    {/* Integrated comment section */}
                     <CommentBox
                         campusId={campusId}
                         cursusId={cursusId}
@@ -159,13 +160,13 @@ export default function RatingSection({
                 </View>
             )}
 
-            {/* Mensagem para usuários não presentes/subscritos */}
+            {/* Message for users not present/subscribed */}
             {!userPresentOrSuscribed && (
                 <View style={[localStyles.notPresentCard, { backgroundColor: color }]}>
                     <Text style={localStyles.notPresentText}>
                         {type === "events" 
-                            ? "📋 Você precisa fazer check-in e check-out para avaliar e comentar" 
-                            : "🍽️ Você precisa estar subscrito na refeição para avaliar e comentar"}
+                            ? t('rating.needCheckinToRate')
+                            : t('rating.needSubscriptionToRate')}
                     </Text>
                 </View>
             )}
