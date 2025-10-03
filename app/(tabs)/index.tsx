@@ -1,8 +1,10 @@
 import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
+import LanguageSelector from "@/components/ui/LanguageSelector";
 import useUserStorage from "@/hooks/storage/useUserStorage";
 import useAlert, { showAlert } from "@/hooks/useAlert";
+import { t } from "@/i18n";
 import { Image } from "expo-image";
 import * as Notifications from "expo-notifications";
 
@@ -70,12 +72,12 @@ export default function HomeScreen() {
 
     
     const options = [
-        { label: isStaff ? "Enviar Mensagem" : "Menu", value: 0 },
-        { label: "Ver Mensagens", value: 1 },
-        { label: "QR Code Scanner", value: 2 },
-        { label: "Sobre e Suporte", value: 3 },
-        { label: "Sair", value: 4 },
-        { label: "Cancelar", value: 5 },
+        { label: isStaff ? t('home.sendMessage') : t('home.menu'), value: 0 },
+        { label: t('home.viewMessages'), value: 1 },
+        { label: t('home.qrScanner'), value: 2 },
+        { label: t('home.aboutSupport'), value: 3 },
+        { label: t('home.logout'), value: 4 },
+        { label: t('common.cancel'), value: 5 },
     ];
     
     const handleRefreshReady = (refreshFn: (() => void) | null) => {
@@ -116,8 +118,8 @@ export default function HomeScreen() {
                 );
             } else {
                 showConfirm(
-                    "Ocorreu um erro ao carregar os dados ⚠",
-                    "Sair e tentar logar novamente ?",
+                    t('common.error'),
+                    t('home.loginAgainPrompt'),
                     () => {
                         router.replace("/login");
                     }
@@ -177,12 +179,12 @@ export default function HomeScreen() {
 
     const handleMenuPress = () => {
         const options = [
-            isStaff ? "Enviar Mensagem" : "Menu",
-            "Ver Mensagens",
-            "QR Code Scanner",
-            "Sobre e Suporte",
-            "Sair",
-            "Cancelar",
+            isStaff ? t('home.sendMessage') : t('home.menu'),
+            t('home.viewMessages'),
+            t('home.qrScanner'),
+            t('home.aboutSupport'),
+            t('home.logout'),
+            t('common.cancel'),
         ];
         if (Platform.OS === "ios") {
             ActionSheetIOS.showActionSheetWithOptions(
@@ -248,8 +250,8 @@ export default function HomeScreen() {
 
     const handleSignOut = () => {
         showConfirm(
-            "Sair",
-            "Tem certeza que deseja terminar a sessão?",
+            t('home.logout'),
+            t('home.logoutConfirm'),
             async () => {
                 const token = await getAccessToken();
                 if (token) await revokeToken(token);
@@ -425,6 +427,12 @@ export default function HomeScreen() {
                 }
             >
                 <>
+                    <ThemedView style={{ padding: 16, paddingBottom: 8 }}>
+                        <LanguageSelector 
+                            showTitle={true}
+                            color={color}
+                        />
+                    </ThemedView>
                     {user && (
                         <EventsList
                             isWeb={isWeb}

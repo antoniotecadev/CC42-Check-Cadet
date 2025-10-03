@@ -1,4 +1,5 @@
 import useTokenStorage from "@/hooks/storage/useTokenStorage";
+import { t } from "@/i18n";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import {
@@ -81,7 +82,7 @@ export default function SplashScreen() {
                     { width, height, backgroundColor: "black" },
                 ]}
             >
-                <Text style={{ color: "white" }}>Carregando...</Text>
+                <Text style={{ color: "white" }}>{t('common.loading')}</Text>
             </View>
         );
     }
@@ -94,7 +95,7 @@ export default function SplashScreen() {
         >
             <View style={styles.content}>
                 <Text style={styles.appName}>CC 42</Text>
-                <Text style={styles.checkCadet}>Check Cadet</Text>
+                <Text style={styles.checkCadet}>{t('home.checkCadet')}</Text>
             </View>
         </ImageBackground>
     );

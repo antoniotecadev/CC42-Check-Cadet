@@ -14,6 +14,7 @@ import {
     ColorCoalitionProvider,
     useColorCoalition,
 } from "@/components/ColorCoalitionContext";
+import { LanguageProvider } from "@/contexts/LanguageContext";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import React, { useEffect } from "react";
 
@@ -121,33 +122,34 @@ export default function RootLayout() {
 
     return (
         <QueryClientProvider client={queryClient}>
-            <ThemeProvider
-                value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
-            >
-                <ColorCoalitionProvider>
-                    <StackHeader colorScheme={colorScheme ?? "light"}>
-                        <Stack.Screen
-                            name="index"
-                            options={{ headerShown: false }}
-                        />
-                        <Stack.Screen
-                            name="login"
-                            options={{ headerShown: false }}
-                        />
-                        <Stack.Screen
-                            name="(tabs)"
-                            options={{ headerShown: false }}
-                        />
-                        <Stack.Screen
-                            name="qr_code"
-                            options={{
-                                headerShown: true,
-                                title: "QR Code",
-                                headerBackTitle: "Voltar", // iOS: texto do botão
-                                headerBackVisible: true, // mostrar ou ocultar botão de voltar
-                            }}
-                        />
-                        <Stack.Screen
+            <LanguageProvider>
+                <ThemeProvider
+                    value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+                >
+                    <ColorCoalitionProvider>
+                        <StackHeader colorScheme={colorScheme ?? "light"}>
+                            <Stack.Screen
+                                name="index"
+                                options={{ headerShown: false }}
+                            />
+                            <Stack.Screen
+                                name="login"
+                                options={{ headerShown: false }}
+                            />
+                            <Stack.Screen
+                                name="(tabs)"
+                                options={{ headerShown: false }}
+                            />
+                            <Stack.Screen
+                                name="qr_code"
+                                options={{
+                                    headerShown: true,
+                                    title: "QR Code",
+                                    headerBackTitle: "Voltar", // iOS: texto do botão
+                                    headerBackVisible: true, // mostrar ou ocultar botão de voltar
+                                }}
+                            />
+                            <Stack.Screen
                             name="qr_code_scanner"
                             options={{
                                 headerShown: Platform.OS === "web",
@@ -198,6 +200,7 @@ export default function RootLayout() {
                 </ColorCoalitionProvider>
             </ThemeProvider>
             {showDevtools ? <ReactQueryDevtools initialIsOpen={false} /> : null}
+        </LanguageProvider>
         </QueryClientProvider>
     );
 }
