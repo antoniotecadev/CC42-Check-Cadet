@@ -28,6 +28,9 @@ interface Cursu {
     created_at: string;
 }
 
+// IDs prioritários (movido para fora do componente para estabilidade)
+const PRIORITY_IDS = [21, 66, 9, 3];
+
 export default function CursusScreen() {
     const { getItem } = useItemStorage();
     const colorScheme = useColorScheme();
@@ -50,9 +53,6 @@ export default function CursusScreen() {
         cursus_id: null,
         campus_name: null,
     });
-
-    // IDs prioritários
-    const priorityIds = [21, 66, 9, 3];
 
     const borderColor = colorScheme === "light" ? "#f0f0f0" : "#333";
 
@@ -77,9 +77,9 @@ export default function CursusScreen() {
             }
         };
         fetchDataUser();
-    }, [getItem]);
+    }, []); // Removendo getItem das dependências
 
-    const fetchCursus = async (
+    const fetchCursus = useCallback(async (
         api: AxiosInstance,
         pageNumber = 1,
         pageSize = 100
@@ -87,29 +87,34 @@ export default function CursusScreen() {
         let res;
         if (user.isStaff) {
             res = await api.get("/v2/cursus", {
-                params: { "page[number]": pageNumber, "page[size]": pageSize, "filter[id]": priorityIds.join(',') },
+                params: { "page[number]": pageNumber, "page[size]": pageSize, "filter[id]": PRIORITY_IDS.join(',') },
             });
         } else {
             const response = await api.get(`/v2/cursus/${user.cursus_id}`);
             res = { data: [response.data] };
         }
         return res.data as Cursu[];
-    };
+    }, [user.isStaff, user.cursus_id]);
 
     const { data, isLoading, isError, refetch, isFetching } = useQuery({
         queryKey: ["cursus", user.cursus_id, user.isStaff],
         queryFn: () => fetchCursus(api),
-        enabled: !!api,
-        staleTime: 1000 * 60 * 60 * 24, // Dados ficam "frescos" por 24 horas
-        retry: 2, // Tenta novamente 2 vezes em caso de falha
+        enabled: !!api && !!user.id && !!user.campus_id,
+        staleTime: 1000 * 60 * 60 * 24, // Data stays "fresh" for 24 hours
+        retry: 2, // Try again 2 times in case of failure
+        refetchOnWindowFocus: false, // Prevent refetch on window focus
+        refetchOnMount: false, // Prevent refetch on mount if data is still fresh
     });
 
-    const filtered =
-        data?.filter(
+    // Filtragem dos cursus baseada na pesquisa
+    const filtered = React.useMemo(() => {
+        if (!data) return [];
+        return data.filter(
             (cursu) =>
                 cursu.name.toLowerCase().includes(search.toLowerCase()) ||
                 String(cursu.id).includes(search)
-        ) || [];
+        );
+    }, [data, search]);
 
     // Ordena os cursus: prioritários primeiro, depois os demais
     const sortedFiltered = React.useMemo(() => {
@@ -117,12 +122,12 @@ export default function CursusScreen() {
         const priority: Cursu[] = [];
         const others: Cursu[] = [];
         for (const c of filtered) {
-            if (priorityIds.includes(c.id)) priority.push(c);
+            if (PRIORITY_IDS.includes(c.id)) priority.push(c);
             else others.push(c);
         }
         // Mantém a ordem dos IDs prioritários
         priority.sort(
-            (a, b) => priorityIds.indexOf(a.id) - priorityIds.indexOf(b.id)
+            (a, b) => PRIORITY_IDS.indexOf(a.id) - PRIORITY_IDS.indexOf(b.id)
         );
         return [...priority, ...others];
     }, [filtered]);
@@ -180,7 +185,7 @@ export default function CursusScreen() {
                             lightColor="#888"
                             style={styles.notFound}
                         >
-                            Tentar novamente
+                            {t('cursus.tryAgain')}
                         </ThemedText>
                     </>
                 ) : filtered.length === 0 ? (
@@ -194,7 +199,7 @@ export default function CursusScreen() {
                             lightColor="#888"
                             style={styles.notFound}
                         >
-                            Tentar novamente
+                            {t('cursus.tryAgain')}
                         </ThemedText>
                     </>
                 ) : (
@@ -227,7 +232,7 @@ export default function CursusScreen() {
                                     <ThemedText
                                         style={[
                                             styles.name,
-                                            priorityIds.includes(item.id) && {
+                                            PRIORITY_IDS.includes(item.id) && {
                                                 color: "green",
                                             },
                                         ]}
