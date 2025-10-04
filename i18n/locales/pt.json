@@ -66,6 +66,7 @@
     "errorSigningOut": "Erro ao sair."
   },
   "home": {
+    "title": "Início",
     "checkCadet": "Check Cadet",
     "menu": "Menu",
     "sendMessage": "Enviar Mensagem",

@@ -66,6 +66,7 @@
     "errorSigningOut": "Error signing out."
   },
   "home": {
+    "title": "Home",
     "checkCadet": "Check Cadet",
     "menu": "Menu",
     "sendMessage": "Send Message",
