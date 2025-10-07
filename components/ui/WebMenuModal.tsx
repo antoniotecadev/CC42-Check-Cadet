@@ -27,7 +27,7 @@ export default function WebMenuModal({
                     {isHome
                         ? options.map((opt) => (
                               <TouchableOpacity
-                                  disabled={opt.value === 0 && !isStaff}
+                                  disabled={opt.value === 0}
                                   key={opt.value}
                                   style={styles.option}
                                   onPress={() => {
@@ -41,8 +41,7 @@ export default function WebMenuModal({
                                           opt.value === 4 && {
                                               color: "#E53935",
                                           },
-                                          opt.value === 0 &&
-                                              !isStaff && { color: "#ddd" },
+                                          opt.value === 0 && { color: "#ddd" },
                                           opt.value === 5 && {
                                               fontWeight: "600",
                                               color: "#555",

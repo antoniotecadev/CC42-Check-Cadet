@@ -71,10 +71,10 @@ export default function MealsScreen() {
     }>({ visible: false, meal: null });
 
     const options = [
-        { label: t('common.edit'), value: 0 },
-        { label: t('meals.notify'), value: 1 },
-        { label: t('common.delete'), value: 2 },
-        { label: t('common.cancel'), value: 3 },
+        { label: t("common.edit"), value: 0 },
+        { label: t("meals.notify"), value: 1 },
+        { label: t("common.delete"), value: 2 },
+        { label: t("common.cancel"), value: 3 },
     ];
 
     useEffect(() => {
@@ -175,7 +175,7 @@ export default function MealsScreen() {
         if (selectedIndex === 1) setNotifyMeal(meal);
         if (selectedIndex === 2) {
             showConfirm(
-                t('common.delete'),
+                t("common.delete"),
                 meal.name,
                 async () => {
                     await deleteMealFromFirebase(
@@ -193,7 +193,7 @@ export default function MealsScreen() {
     const handleMenuPress = () => {
         ActionSheetIOS.showActionSheetWithOptions(
             {
-                options: [t('meals.createMeal'), t('common.cancel')],
+                options: [t("meals.createMeal"), t("common.cancel")],
                 cancelButtonIndex: 1,
                 userInterfaceStyle: "dark",
             },
@@ -204,11 +204,17 @@ export default function MealsScreen() {
     };
 
     const handleItemLongPress = (meal: Meal) => {
-        if (isWeb) setWebMenu({ visible: true, meal });
-        else
+        if (isWeb) {
+            return;
+        } else
             ActionSheetIOS.showActionSheetWithOptions(
                 {
-                    options: [t('common.edit'), t('meals.notify'), t('common.delete'), t('common.cancel')],
+                    options: [
+                        t("common.edit"),
+                        t("meals.notify"),
+                        t("common.delete"),
+                        t("common.cancel"),
+                    ],
                     destructiveButtonIndex: 2,
                     cancelButtonIndex: 3,
                     userInterfaceStyle: "dark",
@@ -218,7 +224,7 @@ export default function MealsScreen() {
                     if (selectedIndex === 1) setNotifyMeal(meal);
                     if (selectedIndex === 2) {
                         showConfirm(
-                            t('common.delete'),
+                            t("common.delete"),
                             meal.name,
                             async () => {
                                 await deleteMealFromFirebase(
@@ -240,15 +246,16 @@ export default function MealsScreen() {
         navigation.setOptions &&
             staff &&
             navigation.setOptions({
-                title: cursusName || t('navigation.meals'),
+                title: cursusName || t("navigation.meals"),
                 headerRight: () =>
                     isWeb ? (
                         <TouchableOpacity
                             onPress={() => setShowCreateModal(true)}
                             style={{ marginRight: 16 }}
+                            disabled={true}
                         >
                             <MaterialCommunityIcons
-                                color={colorIcon}
+                                color={"#ddd"}
                                 name="card-plus"
                                 size={28}
                             />
@@ -292,14 +299,16 @@ export default function MealsScreen() {
                     onRefresh(false);
                 }}
             />
-            <WebMenuModal
-                isHome={false}
-                options={options}
-                isStaff={staff}
-                visible={webMenu.visible}
-                onClose={() => setWebMenu({ ...webMenu, visible: false })}
-                onSelect={(option) => handleMenuWeb(option, webMenu.meal!)}
-            />
+            {isWeb && (
+                <WebMenuModal
+                    isHome={false}
+                    options={options}
+                    isStaff={staff}
+                    visible={webMenu.visible}
+                    onClose={() => setWebMenu({ ...webMenu, visible: false })}
+                    onSelect={(option) => handleMenuWeb(option, webMenu.meal!)}
+                />
+            )}
             <NotifyMealModal
                 visible={!!notifyMeal}
                 meal={notifyMeal}
@@ -340,7 +349,7 @@ export default function MealsScreen() {
                         }}
                     >
                         <ThemedText style={{ textAlign: "center" }}>
-                            {t('meals.notFoundEmpty')}
+                            {t("meals.notFoundEmpty")}
                         </ThemedText>
                     </ThemedView>
                 )}
