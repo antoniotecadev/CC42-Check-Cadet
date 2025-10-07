@@ -48,6 +48,12 @@ class SimpleI18n {
         }
 
         if (typeof translation === 'string') {
+            // Replace placeholders with values from options
+            if (options) {
+                return translation.replace(/\{\{(\w+)\}\}/g, (match, placeholder) => {
+                    return options[placeholder] !== undefined ? String(options[placeholder]) : match;
+                });
+            }
             return translation;
         }
 
