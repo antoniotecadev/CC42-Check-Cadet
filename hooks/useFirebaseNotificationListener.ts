@@ -159,7 +159,7 @@ export function useFirebaseNotificationListener({
             mealName: string,
             mealType: string
         ) {
-            const title = `🍽️ ${mealType}: Segunda Via`;
+            const title = `${mealType}: Segunda Via`;
             const body = `${mealName}`;
 
             notify({
