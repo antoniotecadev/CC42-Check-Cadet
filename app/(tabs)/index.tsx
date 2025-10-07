@@ -70,16 +70,15 @@ export default function HomeScreen() {
     const blurhash =
         "|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuayj[";
 
-    
     const options = [
-        { label: isStaff ? t('home.sendMessage') : t('home.menu'), value: 0 },
-        { label: t('home.viewMessages'), value: 1 },
-        { label: t('home.qrScanner'), value: 2 },
-        { label: t('home.aboutSupport'), value: 3 },
-        { label: t('home.logout'), value: 4 },
-        { label: t('common.cancel'), value: 5 },
+        { label: isStaff ? t("home.sendMessage") : t("home.menu"), value: 0 },
+        { label: t("home.viewMessages"), value: 1 },
+        { label: t("home.qrScanner"), value: 2 },
+        { label: t("home.aboutSupport"), value: 3 },
+        { label: t("home.logout"), value: 4 },
+        { label: t("common.cancel"), value: 5 },
     ];
-    
+
     const handleRefreshReady = (refreshFn: (() => void) | null) => {
         refreshRef.current = refreshFn;
     };
@@ -118,8 +117,8 @@ export default function HomeScreen() {
                 );
             } else {
                 showConfirm(
-                    t('common.error'),
-                    t('home.loginAgainPrompt'),
+                    t("common.error"),
+                    t("home.loginAgainPrompt"),
                     () => {
                         router.replace("/login");
                     }
@@ -149,7 +148,7 @@ export default function HomeScreen() {
                     try {
                         await set(tokenRef, token.data);
                     } catch (e: any) {
-                        showAlert(t('common.error'), e.message);
+                        showAlert(t("common.error"), e.message);
                     }
                 }
             });
@@ -180,12 +179,12 @@ export default function HomeScreen() {
 
     const handleMenuPress = () => {
         const options = [
-            isStaff ? t('home.sendMessage') : t('home.menu'),
-            t('home.viewMessages'),
-            t('home.qrScanner'),
-            t('home.aboutSupport'),
-            t('home.logout'),
-            t('common.cancel'),
+            isStaff ? t("home.sendMessage") : t("home.menu"),
+            t("home.viewMessages"),
+            t("home.qrScanner"),
+            t("home.aboutSupport"),
+            t("home.logout"),
+            t("common.cancel"),
         ];
         if (Platform.OS === "ios") {
             ActionSheetIOS.showActionSheetWithOptions(
@@ -200,7 +199,7 @@ export default function HomeScreen() {
                     handleMenuHome(selectedIndex);
                 }
             );
-        } else if (Platform.OS === "web") {
+        } else if (isWeb) {
             setWebMenuVisible(true);
         }
     };
@@ -228,10 +227,10 @@ export default function HomeScreen() {
 
     const handleMenuCursus = () => {
         const options = [
-            t('cursus.42cursus'),
-            t('cursus.cpiscine'),
-            t('cursus.cpiscineReloaded'),
-            t('cursus.discoveryPiscine'),
+            t("cursus.42cursus"),
+            t("cursus.cpiscine"),
+            t("cursus.cpiscineReloaded"),
+            t("cursus.discoveryPiscine"),
             t("common.cancel"),
         ];
         if (Platform.OS === "ios") {
@@ -245,15 +244,15 @@ export default function HomeScreen() {
                     handleMenuHomeCursus(selectedIndex);
                 }
             );
-        } else if (Platform.OS === "web") {
+        } else if (isWeb) {
             setWebMenuCursusVisible(true);
         }
     };
 
     const handleSignOut = () => {
         showConfirm(
-            t('home.logout'),
-            t('home.logoutConfirm'),
+            t("home.logout"),
+            t("home.logoutConfirm"),
             async () => {
                 const token = await getAccessToken();
                 if (token) await revokeToken(token);
@@ -312,19 +311,23 @@ export default function HomeScreen() {
                 visible={aboutVisible}
                 onClose={() => setAboutVisible(false)}
             />
-            <WebMenuModal
-                isHome={true}
-                options={options}
-                isStaff={isStaff}
-                visible={webMenuVisible}
-                onClose={() => setWebMenuVisible(false)}
-                onSelect={handleMenuHome}
-            />
-            <WebMenuModalCursus
-                visible={webMenuCursusVisible}
-                onClose={() => setWebMenuCursusVisible(false)}
-                onSelect={handleMenuHomeCursus}
-            />
+            {isWeb && (
+                <>
+                    <WebMenuModal
+                        isHome={true}
+                        options={options}
+                        isStaff={isStaff}
+                        visible={webMenuVisible}
+                        onClose={() => setWebMenuVisible(false)}
+                        onSelect={handleMenuHome}
+                    />
+                    <WebMenuModalCursus
+                        visible={webMenuCursusVisible}
+                        onClose={() => setWebMenuCursusVisible(false)}
+                        onSelect={handleMenuHomeCursus}
+                    />
+                </>
+            )}
             <ParallaxScrollView
                 headerBackgroundColor={{ light: "#A1CEDC", dark: "#1D3D47" }}
                 headerImage={
@@ -336,7 +339,10 @@ export default function HomeScreen() {
                             }
                             placeholder={{ blurhash }}
                             transition={1000}
-                            style={[styles.coalitionLogo, { width: "100%", minWidth: 0 }]}
+                            style={[
+                                styles.coalitionLogo,
+                                { width: "100%", minWidth: 0 },
+                            ]}
                             contentFit="cover"
                         />
                         {/* Texto sobre a imagem */}
@@ -430,10 +436,7 @@ export default function HomeScreen() {
             >
                 <>
                     <ThemedView style={{ padding: 16, paddingBottom: 8 }}>
-                        <LanguageSelector 
-                            showTitle={true}
-                            color={color}
-                        />
+                        <LanguageSelector showTitle={true} color={color} />
                     </ThemedView>
                     {user && (
                         <EventsList
@@ -498,8 +501,8 @@ function EventsList({
             >
                 <Text style={{ color: color, fontWeight: "bold" }}>
                     {showEventsPast
-                        ? t('home.hidePastEvents')
-                        : t('home.showPastEvents')}
+                        ? t("home.hidePastEvents")
+                        : t("home.showPastEvents")}
                 </Text>
             </TouchableOpacity>
         );
@@ -525,13 +528,13 @@ function EventsList({
                     styles.alignText,
                 ]}
             >
-                {t('home.loadingEvents')}
+                {t("home.loadingEvents")}
             </Text>
         );
     if (error)
         return (
             <Text style={[{ color: "red" }, styles.alignText]}>
-                {t('home.errorLoadingEvents')}
+                {t("home.errorLoadingEvents")}
             </Text>
         );
 
