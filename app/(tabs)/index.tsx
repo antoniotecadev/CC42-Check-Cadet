@@ -132,7 +132,7 @@ export default function HomeScreen() {
                 const userId = user?.id;
                 const campusId = user?.campus?.[0]?.id;
                 const cursusId = user?.projects_users?.[0]?.cursus_ids?.[0];
-                console.log("🔁 Novo token detectado:", token.data);
+                // console.log("🔁 Novo token detectado:", token.data);
                 if (
                     userId &&
                     campusId &&
