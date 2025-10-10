@@ -92,6 +92,20 @@ export default function TabLayout() {
                     ),
                 }}
             />
+            <Tabs.Screen
+                name="manual_location"
+                options={{
+                    title: "Localização",
+                    headerTitle: "Localização",
+                    tabBarIcon: ({ color }) => (
+                        <MaterialIcons
+                            size={28}
+                            name="location-on"
+                            color={color}
+                        />
+                    ),
+                }}
+            />
         </Tabs>
     );
 }
