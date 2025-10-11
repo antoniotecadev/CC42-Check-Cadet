@@ -76,26 +76,36 @@ export async function getUserLocation(
 /**
  * Busca todos os usuários em uma área específica
  * @param areaId - ID da área (ex: 'cluster_1')
- * @returns Lista de usuários na área
+ * @param campusId - ID do campus
+ * @param cursusId - ID do cursus
+ * @returns Lista de usuários na área com seus IDs
  */
 export async function getUsersInArea(
-    areaId: string
-): Promise<UserLocationDocument[]> {
+    areaId: string,
+    campusId: string,
+    cursusId: string
+): Promise<Array<UserLocationDocument & { userId: string }>> {
     try {
         const db = getDatabase();
-        const usersRef = ref(db, "user_locations");
+        const usersRef = ref(
+            db,
+            `campus/${campusId}/cursus/${cursusId}/user_locations`
+        );
         const snapshot = await get(usersRef);
 
         if (!snapshot.exists()) {
             return [];
         }
 
-        const users: UserLocationDocument[] = [];
+        const users: Array<UserLocationDocument & { userId: string }> = [];
         const allUsers = snapshot.val();
 
-        Object.values(allUsers).forEach((userData: any) => {
-            if (userData.currentLocation?.areaId === areaId) {
-                users.push(userData as UserLocationDocument);
+        Object.entries(allUsers).forEach(([userId, userData]: [string, any]) => {
+            if (userData.areaId === areaId) {
+                users.push({
+                    ...userData,
+                    userId,
+                });
             }
         });
 
@@ -262,17 +272,28 @@ export function getOccupancyColor(level: "low" | "medium" | "high"): string {
  * Verifica se amigos estão na mesma área
  * @param userId - ID do usuário atual
  * @param friendsIds - Lista de IDs dos amigos
+ * @param campusId - ID do campus
+ * @param cursusId - ID do cursus
  * @returns Amigos que estão na mesma área
  */
-export async function checkNearbyFriends(userId: string, friendsIds: string[]) {
+export async function checkNearbyFriends(
+    userId: string,
+    friendsIds: string[],
+    campusId: string,
+    cursusId: string
+) {
     try {
-        const userLocation = await getUserLocation(userId);
+        const userLocation = await getUserLocation(userId, campusId, cursusId);
         if (!userLocation) return [];
 
         const nearbyFriends = [];
 
         for (const friendId of friendsIds) {
-            const friendLocation = await getUserLocation(friendId);
+            const friendLocation = await getUserLocation(
+                friendId,
+                campusId,
+                cursusId
+            );
 
             if (
                 friendLocation &&

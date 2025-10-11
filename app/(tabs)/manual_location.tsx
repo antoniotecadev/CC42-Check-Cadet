@@ -21,14 +21,16 @@
  * - Usamos `position: 'absolute'` com porcentagens para adaptar a qualquer tela
  */
 import useAlert from "@/hooks/useAlert";
-import { saveUserLocation } from "@/repository/manualLocationRepository";
+import { getUsersInArea, saveUserLocation } from "@/repository/manualLocationRepository";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
     ActivityIndicator,
+    FlatList,
     Image,
     ImageBackground,
+    Modal,
     ScrollView,
     StyleSheet,
     Text,
@@ -76,6 +78,46 @@ export default function ManualLocationScreen() {
         areaId: string;
         areaName: string;
     } | null>(null);
+
+    // Estados para modal de usuários na área
+    const [showUsersModal, setShowUsersModal] = useState(false);
+    const [selectedAreaForUsers, setSelectedAreaForUsers] = useState<Location | null>(null);
+    const [usersInArea, setUsersInArea] = useState<Array<{ userId: string; areaName: string; lastUpdated: number }>>([]);
+    const [loadingUsers, setLoadingUsers] = useState(false);
+
+    /**
+     * Busca os usuários em uma área específica
+     */
+    const fetchUsersInArea = async (location: Location) => {
+        setLoadingUsers(true);
+        setSelectedAreaForUsers(location);
+        setShowUsersModal(true);
+
+        try {
+            const campusId = await getItem("campus_id");
+            const cursusId = await getItem("cursus_id");
+
+            if (!campusId || !cursusId) {
+                showError("⚠️ Erro", "Informações de campus/cursus não encontradas.");
+                return;
+            }
+
+            const users = await getUsersInArea(location.id, campusId, cursusId);
+            setUsersInArea(users);
+
+            if (users.length === 0) {
+                showError(
+                    "📍 Área Vazia",
+                    `Não há estudantes em ${location.name} no momento.`
+                );
+            }
+        } catch (error) {
+            console.error("Erro ao buscar usuários:", error);
+            showError("🔴 Erro", "Não foi possível buscar os usuários.");
+        } finally {
+            setLoadingUsers(false);
+        }
+    };
 
     const searchStudent = async (login: string) => {
         if (!login.trim()) {
@@ -352,6 +394,7 @@ export default function ManualLocationScreen() {
                                         onPress={() =>
                                             handleLocationSelect(location)
                                         }
+                                        onLongPress={() => fetchUsersInArea(location)}
                                         activeOpacity={0.7}
                                     >
                                         <Text style={styles.locationName}>
@@ -388,10 +431,134 @@ export default function ManualLocationScreen() {
             >
                 <Text style={styles.legendTitle}>💡 Dica:</Text>
                 <Text style={styles.legendText}>
-                    As áreas coloridas representam diferentes locais da escola.
-                    Toque na área onde você está para registrar sua presença.
+                    Toque na área para registrar sua localização. Pressione e
+                    segure para ver quem está na área.
                 </Text>
             </View>
+
+            {/* Modal de Usuários na Área */}
+            <Modal
+                visible={showUsersModal}
+                animationType="slide"
+                transparent={true}
+                onRequestClose={() => setShowUsersModal(false)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                        {/* Header do Modal */}
+                        <View style={styles.modalHeader}>
+                            <View style={styles.modalTitleContainer}>
+                                <Ionicons
+                                    name="people"
+                                    size={24}
+                                    color="#f39c12"
+                                />
+                                <Text style={styles.modalTitle}>
+                                    {selectedAreaForUsers?.name || "Área"}
+                                </Text>
+                            </View>
+                            <TouchableOpacity
+                                onPress={() => setShowUsersModal(false)}
+                                style={styles.modalCloseButton}
+                            >
+                                <Ionicons
+                                    name="close-circle"
+                                    size={32}
+                                    color="#e74c3c"
+                                />
+                            </TouchableOpacity>
+                        </View>
+
+                        {/* Contador de Usuários */}
+                        <View style={styles.userCountBadge}>
+                            <Ionicons
+                                name="person"
+                                size={16}
+                                color="#fff"
+                            />
+                            <Text style={styles.userCountText}>
+                                {usersInArea.length}{" "}
+                                {usersInArea.length === 1
+                                    ? "estudante"
+                                    : "estudantes"}{" "}
+                                nesta área
+                            </Text>
+                        </View>
+
+                        {/* Lista de Usuários */}
+                        {loadingUsers ? (
+                            <View style={styles.modalLoadingContainer}>
+                                <ActivityIndicator
+                                    size="large"
+                                    color="#3498db"
+                                />
+                                <Text style={styles.modalLoadingText}>
+                                    Buscando estudantes...
+                                </Text>
+                            </View>
+                        ) : usersInArea.length > 0 ? (
+                            <FlatList
+                                data={usersInArea}
+                                keyExtractor={(item) => item.userId}
+                                contentContainerStyle={styles.usersList}
+                                renderItem={({ item, index }) => (
+                                    <View style={styles.userCard}>
+                                        <View style={styles.userNumber}>
+                                            <Text style={styles.userNumberText}>
+                                                {index + 1}
+                                            </Text>
+                                        </View>
+                                        <View style={styles.userCardContent}>
+                                            <View style={styles.userCardHeader}>
+                                                <Ionicons
+                                                    name="person-circle"
+                                                    size={20}
+                                                    color="#3498db"
+                                                />
+                                                <Text style={styles.userIdText}>
+                                                    ID: {item.userId}
+                                                </Text>
+                                            </View>
+                                            <View style={styles.userCardFooter}>
+                                                <Ionicons
+                                                    name="time-outline"
+                                                    size={14}
+                                                    color="#95a5a6"
+                                                />
+                                                <Text style={styles.userTimestamp}>
+                                                    Última atualização:{" "}
+                                                    {new Date(
+                                                        item.lastUpdated
+                                                    ).toLocaleString("pt-BR", {
+                                                        day: "2-digit",
+                                                        month: "2-digit",
+                                                        hour: "2-digit",
+                                                        minute: "2-digit",
+                                                    })}
+                                                </Text>
+                                            </View>
+                                        </View>
+                                    </View>
+                                )}
+                            />
+                        ) : (
+                            <View style={styles.emptyStateContainer}>
+                                <Ionicons
+                                    name="person-outline"
+                                    size={64}
+                                    color="#95a5a6"
+                                />
+                                <Text style={styles.emptyStateTitle}>
+                                    Nenhum estudante aqui
+                                </Text>
+                                <Text style={styles.emptyStateText}>
+                                    Esta área está vazia no momento.
+                                </Text>
+                            </View>
+                        )}
+                    </View>
+                </View>
+            </Modal>
 
             {/* Loading Overlay */}
             {isLoading && (
@@ -611,5 +778,138 @@ const styles = StyleSheet.create({
     },
     clearButton: {
         padding: 8,
+    },
+    // Modal Styles
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: "rgba(0, 0, 0, 0.7)",
+        justifyContent: "flex-end",
+    },
+    modalContent: {
+        backgroundColor: "#2c3e50",
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+        maxHeight: "80%",
+        paddingBottom: 20,
+    },
+    modalHeader: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        padding: 20,
+        borderBottomWidth: 1,
+        borderBottomColor: "#34495e",
+    },
+    modalTitleContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 12,
+    },
+    modalTitle: {
+        fontSize: 20,
+        fontWeight: "bold",
+        color: "#ecf0f1",
+    },
+    modalCloseButton: {
+        padding: 4,
+    },
+    userCountBadge: {
+        flexDirection: "row",
+        alignItems: "center",
+        backgroundColor: "#3498db",
+        marginHorizontal: 20,
+        marginTop: 16,
+        paddingHorizontal: 16,
+        paddingVertical: 10,
+        borderRadius: 8,
+        gap: 8,
+    },
+    userCountText: {
+        fontSize: 14,
+        fontWeight: "600",
+        color: "#fff",
+    },
+    usersList: {
+        padding: 20,
+        paddingTop: 16,
+    },
+    userCard: {
+        backgroundColor: "#34495e",
+        borderRadius: 12,
+        padding: 16,
+        marginBottom: 12,
+        flexDirection: "row",
+        alignItems: "center",
+        borderLeftWidth: 4,
+        borderLeftColor: "#3498db",
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+    },
+    userNumber: {
+        width: 36,
+        height: 36,
+        borderRadius: 18,
+        backgroundColor: "#3498db",
+        justifyContent: "center",
+        alignItems: "center",
+        marginRight: 12,
+    },
+    userNumberText: {
+        fontSize: 16,
+        fontWeight: "bold",
+        color: "#fff",
+    },
+    userCardContent: {
+        flex: 1,
+    },
+    userCardHeader: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginBottom: 8,
+        gap: 8,
+    },
+    userIdText: {
+        fontSize: 16,
+        fontWeight: "600",
+        color: "#ecf0f1",
+    },
+    userCardFooter: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 6,
+    },
+    userTimestamp: {
+        fontSize: 12,
+        color: "#95a5a6",
+    },
+    modalLoadingContainer: {
+        padding: 40,
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    modalLoadingText: {
+        marginTop: 16,
+        fontSize: 14,
+        color: "#95a5a6",
+    },
+    emptyStateContainer: {
+        padding: 40,
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    emptyStateTitle: {
+        fontSize: 18,
+        fontWeight: "bold",
+        color: "#ecf0f1",
+        marginTop: 16,
+        marginBottom: 8,
+    },
+    emptyStateText: {
+        fontSize: 14,
+        color: "#95a5a6",
+        textAlign: "center",
     },
 });
