@@ -285,6 +285,7 @@
     "enterValidLogin": "Enter a valid user.",
     "locationFound": "📍 Location Found",
     "studentAt": "{{name}} is at: {{location}}",
+    "studentIsAt": "is at:",
     "noLocation": "📍 No Location",
     "studentNoLocation": "{{name}} hasn't registered their location yet.",
     "errorSearching": "Could not find the student.",
@@ -310,6 +311,17 @@
     "noStudentsHere": "No students here",
     "areaEmpty": "This area is currently empty.",
     "lastUpdate": "Last update:",
-    "userIdLabel": "ID:"
+    "userIdLabel": "ID:",
+    "reliability": "Reliability:",
+    "veryReliable": "Very Reliable",
+    "reliable": "Reliable",
+    "uncertain": "Uncertain",
+    "unreliable": "Unreliable",
+    "updatedRecently": "Updated recently",
+    "updatedMinutesAgo": "Updated {{minutes}} minutes ago",
+    "updatedHoursAgo": "Updated {{hours}} hours ago",
+    "updatedDaysAgo": "Updated {{days}} days ago",
+    "locationMayBeOutdated": "This location may be outdated",
+    "lastSeenHere": "Last seen here {{time}} ago"
   }
 }

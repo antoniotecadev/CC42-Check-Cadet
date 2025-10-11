@@ -285,6 +285,7 @@
     "enterValidLogin": "Digite um user válido.",
     "locationFound": "📍 Localização Encontrada",
     "studentAt": "{{name}} está em: {{location}}",
+    "studentIsAt": "está em:",
     "noLocation": "📍 Sem Localização",
     "studentNoLocation": "{{name}} ainda não registou a sua localização.",
     "errorSearching": "Não foi possível encontrar o estudante.",
@@ -310,6 +311,17 @@
     "noStudentsHere": "Nenhum estudante aqui",
     "areaEmpty": "Esta área está vazia no momento.",
     "lastUpdate": "Última actualização:",
-    "userIdLabel": "ID:"
+    "userIdLabel": "ID:",
+    "reliability": "Confiabilidade:",
+    "veryReliable": "Muito Confiável",
+    "reliable": "Confiável",
+    "uncertain": "Incerto",
+    "unreliable": "Não Confiável",
+    "updatedRecently": "Actualizado recentemente",
+    "updatedMinutesAgo": "Actualizado há {{minutes}} minutos",
+    "updatedHoursAgo": "Actualizado há {{hours}} horas",
+    "updatedDaysAgo": "Actualizado há {{days}} dias",
+    "locationMayBeOutdated": "Esta localização pode estar desactualizada",
+    "lastSeenHere": "Visto aqui pela última vez há {{time}}"
   }
 }

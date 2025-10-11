@@ -82,6 +82,7 @@ export default function ManualLocationScreen() {
     const [studentLocation, setStudentLocation] = useState<{
         areaId: string;
         areaName: string;
+        lastUpdated: number;
     } | null>(null);
 
     // Estados para modal de usuários na área
@@ -97,6 +98,76 @@ export default function ManualLocationScreen() {
         }>
     >([]);
     const [loadingUsers, setLoadingUsers] = useState(false);
+
+    /**
+     * Calcula o nível de confiabilidade baseado no tempo decorrido
+     * @param lastUpdated - Timestamp da última atualização
+     * @returns Objeto com nível, cor e mensagem
+     */
+    const getReliability = (lastUpdated: number) => {
+        const now = Date.now();
+        const diffMs = now - lastUpdated;
+        const diffMinutes = Math.floor(diffMs / (1000 * 60));
+        const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+        // Menos de 5 minutos: Muito Confiável
+        if (diffMinutes < 5) {
+            return {
+                level: t("location.veryReliable"),
+                color: "#27ae60", // Verde
+                percentage: 100,
+                message: t("location.updatedRecently"),
+            };
+        }
+        // 5-30 minutos: Confiável
+        else if (diffMinutes < 30) {
+            return {
+                level: t("location.reliable"),
+                color: "#2ecc71", // Verde claro
+                percentage: 80,
+                message: t("location.updatedMinutesAgo", { minutes: diffMinutes }),
+            };
+        }
+        // 30 minutos - 2 horas: Incerto
+        else if (diffHours < 2) {
+            return {
+                level: t("location.uncertain"),
+                color: "#f39c12", // Laranja
+                percentage: 50,
+                message: diffHours === 1 
+                    ? t("location.updatedHoursAgo", { hours: 1 })
+                    : t("location.updatedMinutesAgo", { minutes: diffMinutes }),
+            };
+        }
+        // Mais de 2 horas: Não Confiável
+        else {
+            return {
+                level: t("location.unreliable"),
+                color: "#e74c3c", // Vermelho
+                percentage: 20,
+                message: diffDays > 0
+                    ? t("location.updatedDaysAgo", { days: diffDays })
+                    : t("location.updatedHoursAgo", { hours: diffHours }),
+            };
+        }
+    };
+
+    /**
+     * Formata o tempo decorrido de forma legível
+     */
+    const getTimeAgo = (lastUpdated: number) => {
+        const now = Date.now();
+        const diffMs = now - lastUpdated;
+        const diffMinutes = Math.floor(diffMs / (1000 * 60));
+        const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+        if (diffMinutes < 1) return t("location.updatedRecently");
+        if (diffMinutes < 60) return t("location.updatedMinutesAgo", { minutes: diffMinutes });
+        if (diffHours < 24) return t("location.updatedHoursAgo", { hours: diffHours });
+        return t("location.updatedDaysAgo", { days: diffDays });
+    };
 
     /**
      * Busca os usuários em uma área específica
@@ -161,12 +232,18 @@ export default function ManualLocationScreen() {
 
             if (location) {
                 setStudentLocation(location);
+                
+                // Calcular confiabilidade
+                const reliability = getReliability(location.lastUpdated);
+                
+                // Mensagem baseada na confiabilidade
+                let reliabilityMessage = `${location.areaName}\n\n`;
+                reliabilityMessage += `${t("location.reliability")} ${reliability.level}\n`;
+                reliabilityMessage += reliability.message;
+                
                 showSuccess(
                     t("location.locationFound"),
-                    t("location.studentAt", {
-                        name: studentData.usual_full_name,
-                        location: location.areaName,
-                    })
+                    `${studentData.usual_full_name} ${t("location.studentIsAt")}\n${reliabilityMessage}`
                 );
             } else {
                 showError(
@@ -310,18 +387,44 @@ export default function ManualLocationScreen() {
                             <Text style={styles.studentLogin}>
                                 {selectedStudent.login}
                             </Text>
-                            {studentLocation && (
-                                <View style={styles.locationBadge}>
-                                    <Ionicons
-                                        name="location"
-                                        size={16}
-                                        color="#27ae60"
-                                    />
-                                    <Text style={styles.locationText}>
-                                        {studentLocation.areaName}
-                                    </Text>
-                                </View>
-                            )}
+                            {studentLocation && (() => {
+                                const reliability = getReliability(studentLocation.lastUpdated);
+                                return (
+                                    <>
+                                        <View style={styles.locationBadge}>
+                                            <Ionicons
+                                                name="location"
+                                                size={16}
+                                                color="#27ae60"
+                                            />
+                                            <Text style={styles.locationText}>
+                                                {studentLocation.areaName}
+                                            </Text>
+                                        </View>
+                                        <View
+                                            style={[
+                                                styles.reliabilityBadge,
+                                                { backgroundColor: `${reliability.color}20` },
+                                            ]}
+                                        >
+                                            <View
+                                                style={[
+                                                    styles.reliabilityIndicator,
+                                                    { backgroundColor: reliability.color },
+                                                ]}
+                                            />
+                                            <Text
+                                                style={[
+                                                    styles.reliabilityText,
+                                                    { color: reliability.color },
+                                                ]}
+                                            >
+                                                {reliability.level} • {getTimeAgo(studentLocation.lastUpdated)}
+                                            </Text>
+                                        </View>
+                                    </>
+                                );
+                            })()}
                         </View>
                         <TouchableOpacity
                             style={styles.clearButton}
@@ -519,48 +622,67 @@ export default function ManualLocationScreen() {
                                 data={usersInArea}
                                 keyExtractor={(item) => item.userId}
                                 contentContainerStyle={styles.usersList}
-                                renderItem={({ item, index }) => (
-                                    <View style={styles.userCard}>
-                                        <View style={styles.userNumber}>
-                                            <Text style={styles.userNumberText}>
-                                                {index + 1}
-                                            </Text>
-                                        </View>
-                                        <View style={styles.userCardContent}>
-                                            <View style={styles.userCardHeader}>
-                                                <Ionicons
-                                                    name="person-circle"
-                                                    size={20}
-                                                    color="#3498db"
-                                                />
-                                                <Text style={styles.userIdText}>
-                                                    {item.displayName ||
-                                                        "Nome não disponível"}
+                                renderItem={({ item, index }) => {
+                                    const reliability = getReliability(item.lastUpdated);
+                                    return (
+                                        <View style={styles.userCard}>
+                                            <View style={styles.userNumber}>
+                                                <Text style={styles.userNumberText}>
+                                                    {index + 1}
                                                 </Text>
                                             </View>
-                                            <View style={styles.userCardFooter}>
-                                                <Ionicons
-                                                    name="time-outline"
-                                                    size={14}
-                                                    color="#95a5a6"
-                                                />
-                                                <Text
-                                                    style={styles.userTimestamp}
+                                            <View style={styles.userCardContent}>
+                                                <View style={styles.userCardHeader}>
+                                                    <Ionicons
+                                                        name="person-circle"
+                                                        size={20}
+                                                        color="#3498db"
+                                                    />
+                                                    <Text style={styles.userIdText}>
+                                                        {item.displayName ||
+                                                            "Nome não disponível"}
+                                                    </Text>
+                                                </View>
+                                                
+                                                {/* Badge de Confiabilidade */}
+                                                <View
+                                                    style={[
+                                                        styles.reliabilityBadgeSmall,
+                                                        { backgroundColor: `${reliability.color}20` },
+                                                    ]}
                                                 >
-                                                    {t("location.lastUpdate")}{" "}
-                                                    {new Date(
-                                                        item.lastUpdated
-                                                    ).toLocaleString("pt-BR", {
-                                                        day: "2-digit",
-                                                        month: "2-digit",
-                                                        hour: "2-digit",
-                                                        minute: "2-digit",
-                                                    })}
-                                                </Text>
+                                                    <View
+                                                        style={[
+                                                            styles.reliabilityIndicatorSmall,
+                                                            { backgroundColor: reliability.color },
+                                                        ]}
+                                                    />
+                                                    <Text
+                                                        style={[
+                                                            styles.reliabilityTextSmall,
+                                                            { color: reliability.color },
+                                                        ]}
+                                                    >
+                                                        {reliability.level}
+                                                    </Text>
+                                                </View>
+
+                                                <View style={styles.userCardFooter}>
+                                                    <Ionicons
+                                                        name="time-outline"
+                                                        size={14}
+                                                        color="#95a5a6"
+                                                    />
+                                                    <Text
+                                                        style={styles.userTimestamp}
+                                                    >
+                                                        {getTimeAgo(item.lastUpdated)}
+                                                    </Text>
+                                                </View>
                                             </View>
                                         </View>
-                                    </View>
-                                )}
+                                    );
+                                }}
                             />
                         ) : (
                             <View style={styles.emptyStateContainer}>
@@ -796,6 +918,45 @@ const styles = StyleSheet.create({
         fontSize: 13,
         color: "#27ae60",
         marginLeft: 4,
+        fontWeight: "600",
+    },
+    reliabilityBadge: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginTop: 8,
+        paddingHorizontal: 10,
+        paddingVertical: 6,
+        borderRadius: 6,
+        alignSelf: "flex-start",
+    },
+    reliabilityIndicator: {
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+        marginRight: 6,
+    },
+    reliabilityText: {
+        fontSize: 11,
+        fontWeight: "600",
+    },
+    reliabilityBadgeSmall: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginTop: 6,
+        marginBottom: 6,
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 4,
+        alignSelf: "flex-start",
+    },
+    reliabilityIndicatorSmall: {
+        width: 6,
+        height: 6,
+        borderRadius: 3,
+        marginRight: 4,
+    },
+    reliabilityTextSmall: {
+        fontSize: 10,
         fontWeight: "600",
     },
     clearButton: {
