@@ -95,8 +95,8 @@ export default function TabLayout() {
             <Tabs.Screen
                 name="manual_location"
                 options={{
-                    title: "Localização",
-                    headerTitle: "Localização",
+                    title: t("location.title"),
+                    headerTitle: t("location.manualLocation"),
                     tabBarIcon: ({ color }) => (
                         <MaterialIcons
                             size={28}

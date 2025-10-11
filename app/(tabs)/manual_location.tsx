@@ -45,6 +45,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { SCHOOL_LOCATIONS, type Location } from "@/constants/schoolLocations";
 import useItemStorage from "@/hooks/storage/useItemStorage";
+import { t } from "@/i18n";
 import useApiInterceptors from "@/services/api";
 
 interface Student42Data {
@@ -109,10 +110,7 @@ export default function ManualLocationScreen() {
             const cursusId = await getItem("cursus_id");
 
             if (!campusId || !cursusId) {
-                showError(
-                    "⚠️ Erro",
-                    "Informações de campus/cursus não encontradas."
-                );
+                showError(t("common.error"), t("location.campusInfoNotFound"));
                 return;
             }
 
@@ -121,13 +119,13 @@ export default function ManualLocationScreen() {
 
             if (users.length === 0) {
                 showError(
-                    "📍 Área Vazia",
-                    `Não há estudantes em ${location.name} no momento.`
+                    t("location.emptyArea"),
+                    t("location.noStudentsInArea", { area: location.name })
                 );
             }
         } catch (error) {
             console.error("Erro ao buscar usuários:", error);
-            showError("🔴 Erro", "Não foi possível buscar os usuários.");
+            showError(t("common.error"), t("location.errorLoadingUsers"));
         } finally {
             setLoadingUsers(false);
         }
@@ -135,7 +133,7 @@ export default function ManualLocationScreen() {
 
     const searchStudent = async (login: string) => {
         if (!login.trim()) {
-            showError("⚠️ Atenção", "Por favor, digite o login do estudante.");
+            showError(t("common.warning"), t("location.enterValidLogin"));
             return;
         }
 
@@ -163,20 +161,25 @@ export default function ManualLocationScreen() {
             if (location) {
                 setStudentLocation(location);
                 showSuccess(
-                    "📍 Localização Encontrada",
-                    `${studentData.usual_full_name} está em: ${location.areaName}`
+                    t("location.locationFound"),
+                    t("location.studentAt", {
+                        name: studentData.usual_full_name,
+                        location: location.areaName,
+                    })
                 );
             } else {
                 showError(
-                    "📍 Sem Localização",
-                    `${studentData.usual_full_name} ainda não registrou sua localização.`
+                    t("location.noLocation"),
+                    t("location.studentNoLocation", {
+                        name: studentData.usual_full_name,
+                    })
                 );
             }
         } catch (error: any) {
             console.error("Erro ao buscar estudante:", error);
             showError(
-                "❌ Erro",
-                error.message || "Não foi possível encontrar o estudante."
+                t("common.error"),
+                error.message || t("location.errorSearching")
             );
             setSelectedStudent(null);
         } finally {
@@ -200,8 +203,8 @@ export default function ManualLocationScreen() {
         setSelectedLocation(location.id);
 
         showConfirm(
-            "📍 Confirmar Localização",
-            `Você está em: ${location.name}`,
+            t("location.confirmLocation"),
+            t("location.youAreAt", { location: location.name }),
             async () => {
                 setIsLoading(true);
                 try {
@@ -232,14 +235,14 @@ export default function ManualLocationScreen() {
                     );
 
                     showSuccess(
-                        "🟢 Sucesso!",
-                        "Sua localização foi registrada com sucesso."
+                        t("location.locationSaved"),
+                        t("location.locationSavedSuccess")
                     );
                 } catch (error) {
                     console.error("Erro ao salvar localização:", error);
                     showError(
-                        "🔴 Erro",
-                        "Não foi possível salvar sua localização."
+                        t("location.errorSaving"),
+                        t("location.errorSavingLocation")
                     );
                 } finally {
                     setIsLoading(false);
@@ -255,12 +258,12 @@ export default function ManualLocationScreen() {
             <View
                 style={[styles.searchSection, { paddingTop: insets.top + 16 }]}
             >
-                <Text style={styles.searchTitle}>Buscar Estudante</Text>
+                <Text style={styles.searchTitle}>{t("location.searchStudent")}</Text>
 
                 <View style={styles.searchInputContainer}>
                     <TextInput
                         style={styles.searchInput}
-                        placeholder="Digite o login do estudante (ex: andre)"
+                        placeholder={t("location.searchPlaceholder")}
                         placeholderTextColor="#999"
                         value={searchQuery}
                         onChangeText={setSearchQuery}
@@ -332,7 +335,7 @@ export default function ManualLocationScreen() {
             {/* Instruções */}
             <View style={styles.instructionsContainer}>
                 <Text style={styles.instructions}>
-                    Toque na área do mapa onde você está localizado
+                    {t("location.tapToRegister")}
                 </Text>
             </View>
 
@@ -369,10 +372,7 @@ export default function ManualLocationScreen() {
                                     style={styles.loadingSpinner}
                                 />
                                 <Text style={styles.imageLoadingText}>
-                                    Carregando mapa da escola...
-                                </Text>
-                                <Text style={styles.imageLoadingSubtext}>
-                                    Por favor, aguarde
+                                    {t("common.loading")}
                                 </Text>
                             </View>
                         )}
@@ -447,10 +447,9 @@ export default function ManualLocationScreen() {
                     { marginBottom: insets.bottom + 50 },
                 ]}
             >
-                <Text style={styles.legendTitle}>💡 Dica:</Text>
+                <Text style={styles.legendTitle}>{t("location.tipTitle")}</Text>
                 <Text style={styles.legendText}>
-                    Toque na área para registrar sua localização. Pressione e
-                    segure para ver quem está na área.
+                    {t("location.tipText")}
                 </Text>
             </View>
 
@@ -493,9 +492,9 @@ export default function ManualLocationScreen() {
                             <Text style={styles.userCountText}>
                                 {usersInArea.length}{" "}
                                 {usersInArea.length === 1
-                                    ? "estudante"
-                                    : "estudantes"}{" "}
-                                nesta área
+                                    ? t("location.student")
+                                    : t("location.students")}{" "}
+                                {t("location.inThisArea")}
                             </Text>
                         </View>
 
@@ -507,7 +506,7 @@ export default function ManualLocationScreen() {
                                     color="#3498db"
                                 />
                                 <Text style={styles.modalLoadingText}>
-                                    Buscando estudantes...
+                                    {t("location.searchingStudents")}
                                 </Text>
                             </View>
                         ) : usersInArea.length > 0 ? (
@@ -543,7 +542,7 @@ export default function ManualLocationScreen() {
                                                 <Text
                                                     style={styles.userTimestamp}
                                                 >
-                                                    Última atualização:{" "}
+                                                    {t("location.lastUpdate")}{" "}
                                                     {new Date(
                                                         item.lastUpdated
                                                     ).toLocaleString("pt-BR", {
@@ -566,10 +565,10 @@ export default function ManualLocationScreen() {
                                     color="#95a5a6"
                                 />
                                 <Text style={styles.emptyStateTitle}>
-                                    Nenhum estudante aqui
+                                    {t("location.noStudentsHere")}
                                 </Text>
                                 <Text style={styles.emptyStateText}>
-                                    Esta área está vazia no momento.
+                                    {t("location.areaEmpty")}
                                 </Text>
                             </View>
                         )}
@@ -578,11 +577,12 @@ export default function ManualLocationScreen() {
             </Modal>
 
             {/* Loading Overlay */}
+            {/* Loading Overlay */}
             {isLoading && (
                 <View style={styles.loadingOverlay}>
                     <ActivityIndicator size="large" color="#fff" />
                     <Text style={styles.loadingText}>
-                        Salvando localização...
+                        {t("location.savingLocation")}
                     </Text>
                 </View>
             )}
