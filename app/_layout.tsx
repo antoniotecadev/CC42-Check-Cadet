@@ -23,7 +23,7 @@ import useItemStorage from "@/hooks/storage/useItemStorage";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Buffer } from "buffer";
 import * as Notifications from "expo-notifications";
-import { Platform } from "react-native";
+import { Alert, Platform } from "react-native";
 
 // serve para disponibilizar o objeto Buffer globalmente em ambientes onde ele não está presente por padrão
 global.Buffer = Buffer;
@@ -78,7 +78,33 @@ export default function RootLayout() {
             const userId = await getItem("user_id");
             const campusId = await getItem("campus_id");
             const { title, body, data } = notification.request.content;
-            if (data && userId && campusId) {
+            
+            if (!data || !userId || !campusId) return;
+
+            // Verifica o tipo de notificação
+            if (data.type === "location_search") {
+                // Notificação de busca de localização
+                const searchedBy = data.searchedBy || t("location.student");
+                
+                Alert.alert(
+                    t("location.updateLocationPromptTitle"),
+                    t("location.updateLocationPromptMessage", { name: searchedBy }),
+                    [
+                        {
+                            text: t("common.cancel"),
+                            style: "cancel",
+                        },
+                        {
+                            text: t("location.goToLocationScreen"),
+                            onPress: () => {
+                                // Navega para a tela de localização manual
+                                router.push("/(tabs)/manual_location");
+                            },
+                        },
+                    ]
+                );
+            } else if (data.id) {
+                // Notificação de refeição (lógica existente)
                 router.push({
                     pathname: "/meal_details",
                     params: {
