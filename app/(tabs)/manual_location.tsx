@@ -40,6 +40,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { SCHOOL_LOCATIONS, type Location } from "@/constants/schoolLocations";
 import useItemStorage from "@/hooks/storage/useItemStorage";
+import useApiInterceptors from "@/services/api";
 
 interface Student42Data {
     id: number;
@@ -54,8 +55,12 @@ interface Student42Data {
 
 export default function ManualLocationScreen() {
     const router = useRouter();
+
     const insets = useSafeAreaInsets();
+
+    const { api } = useApiInterceptors();
     const { getItem } = useItemStorage();
+
     const { showConfirm, showSuccess, showError } = useAlert();
     const [selectedLocation, setSelectedLocation] = useState<string | null>(
         null
@@ -63,7 +68,6 @@ export default function ManualLocationScreen() {
     const [isLoading, setIsLoading] = useState(false);
     const [imageLoading, setImageLoading] = useState(true);
 
-    // Estados para pesquisa de estudante
     const [searchQuery, setSearchQuery] = useState("");
     const [isSearching, setIsSearching] = useState(false);
     const [selectedStudent, setSelectedStudent] =
@@ -83,31 +87,10 @@ export default function ManualLocationScreen() {
         setStudentLocation(null);
 
         try {
-            // Buscar token de acesso
-            const accessToken = await getItem("access_token");
-            if (!accessToken) {
-                throw new Error("Token de acesso não encontrado");
-            }
-
-            // Fazer requisição à API da 42
-            const response = await fetch(
-                `https://api.intra.42.fr/v2/users/${login.trim()}`,
-                {
-                    method: "GET",
-                    headers: {
-                        Authorization: `Bearer ${accessToken}`,
-                    },
-                }
+            const response = await api.get(
+                `https://api.intra.42.fr/v2/users/${login.trim()}`
             );
-
-            if (!response.ok) {
-                if (response.status === 404) {
-                    throw new Error("Estudante não encontrado");
-                }
-                throw new Error(`Erro na API: ${response.status}`);
-            }
-
-            const studentData: Student42Data = await response.json();
+            const studentData: Student42Data = await response.data;
 
             setSelectedStudent(studentData);
 
