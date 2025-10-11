@@ -23,6 +23,7 @@ export async function saveUserLocation(
     campusId: string,
     cursusId: string,
     displayName: string | null,
+    pushToken: string,
     locationData: LocationData
 ): Promise<void> {
     try {
@@ -37,6 +38,7 @@ export async function saveUserLocation(
             displayName: displayName,
             areaId: locationData.areaId,
             areaName: locationData.areaName,
+            pushToken: pushToken,
             lastUpdated: timestamp,
         };
 

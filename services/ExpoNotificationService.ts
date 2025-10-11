@@ -1,5 +1,6 @@
 import { database } from "@/firebaseConfig";
 import { showAlert } from "@/hooks/useAlert";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from "axios";
 import Constants from "expo-constants";
 import * as Device from "expo-device";
@@ -125,6 +126,7 @@ export async function registerPushToken(
         );
         try {
             await set(tokenRef, token);
+            await AsyncStorage.setItem('push_token', token);
         } catch (e: any) {
             showAlert("Notification Token", JSON.stringify(e, null, 2));
         }

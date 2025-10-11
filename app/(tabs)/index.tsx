@@ -33,6 +33,7 @@ import { revokeToken } from "@/hooks/useLogin42";
 import { useEvents } from "@/repository/eventRepository";
 import { handleLogoutFirebase } from "@/services/authenticateWithFirebase";
 import { removePushToken } from "@/services/ExpoNotificationService";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { FlashList } from "@shopify/flash-list";
 import { ref, set } from "firebase/database";
 import {
@@ -147,6 +148,7 @@ export default function HomeScreen() {
                     );
                     try {
                         await set(tokenRef, token.data);
+                        await AsyncStorage.setItem('push_token', token.data);
                     } catch (e: any) {
                         showAlert(t("common.error"), e.message);
                     }

@@ -47,6 +47,7 @@ import { SCHOOL_LOCATIONS, type Location } from "@/constants/schoolLocations";
 import useItemStorage from "@/hooks/storage/useItemStorage";
 import { t } from "@/i18n";
 import useApiInterceptors from "@/services/api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 interface Student42Data {
     id: number;
@@ -217,6 +218,7 @@ export default function ManualLocationScreen() {
                     const campusId = await getItem("campus_id");
                     const cursusId = await getItem("cursus_id");
                     const displayName = await getItem("displayname");
+                    const pushToken = await AsyncStorage.getItem('push_token');
 
                     if (!userId) {
                         throw new Error("User ID not found in storage");
@@ -224,6 +226,8 @@ export default function ManualLocationScreen() {
                         throw new Error("Campus ID not found in storage");
                     } else if (!cursusId) {
                         throw new Error("Cursus ID not found in storage");
+                    } else if (!pushToken) {
+                        throw new Error("Push Token not found in storage");
                     }
 
                     await saveUserLocation(
@@ -231,6 +235,7 @@ export default function ManualLocationScreen() {
                         campusId,
                         cursusId,
                         displayName,
+                        pushToken,
                         locationData
                     );
 
