@@ -51,11 +51,16 @@ export async function saveUserLocation(
  * @returns Dados da localização actual ou null
  */
 export async function getUserLocation(
-    userId: string
+    userId: string,
+    campusId: string,
+    cursusId: string
 ): Promise<UserLocationDocument | null> {
     try {
         const db = getDatabase();
-        const userLocationRef = ref(db, `user_locations/${userId}`);
+        const userLocationRef = ref(
+            db,
+            `campus/${campusId}/cursus/${cursusId}/user_locations/${userId}`
+        );
         const snapshot = await get(userLocationRef);
 
         if (snapshot.exists()) {
@@ -271,8 +276,7 @@ export async function checkNearbyFriends(userId: string, friendsIds: string[]) {
 
             if (
                 friendLocation &&
-                friendLocation.areaId ===
-                    userLocation.areaId
+                friendLocation.areaId === userLocation.areaId
             ) {
                 nearbyFriends.push({
                     friendId,
