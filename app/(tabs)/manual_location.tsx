@@ -21,7 +21,10 @@
  * - Usamos `position: 'absolute'` com porcentagens para adaptar a qualquer tela
  */
 import useAlert from "@/hooks/useAlert";
-import { getUsersInArea, saveUserLocation } from "@/repository/manualLocationRepository";
+import {
+    getUsersInArea,
+    saveUserLocation,
+} from "@/repository/manualLocationRepository";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -81,8 +84,16 @@ export default function ManualLocationScreen() {
 
     // Estados para modal de usuários na área
     const [showUsersModal, setShowUsersModal] = useState(false);
-    const [selectedAreaForUsers, setSelectedAreaForUsers] = useState<Location | null>(null);
-    const [usersInArea, setUsersInArea] = useState<Array<{ userId: string; areaName: string; lastUpdated: number }>>([]);
+    const [selectedAreaForUsers, setSelectedAreaForUsers] =
+        useState<Location | null>(null);
+    const [usersInArea, setUsersInArea] = useState<
+        Array<{
+            userId: string;
+            areaName: string;
+            displayName: string | null;
+            lastUpdated: number;
+        }>
+    >([]);
     const [loadingUsers, setLoadingUsers] = useState(false);
 
     /**
@@ -98,7 +109,10 @@ export default function ManualLocationScreen() {
             const cursusId = await getItem("cursus_id");
 
             if (!campusId || !cursusId) {
-                showError("⚠️ Erro", "Informações de campus/cursus não encontradas.");
+                showError(
+                    "⚠️ Erro",
+                    "Informações de campus/cursus não encontradas."
+                );
                 return;
             }
 
@@ -199,6 +213,7 @@ export default function ManualLocationScreen() {
                     const userId = await getItem("user_id");
                     const campusId = await getItem("campus_id");
                     const cursusId = await getItem("cursus_id");
+                    const displayName = await getItem("displayname");
 
                     if (!userId) {
                         throw new Error("User ID not found in storage");
@@ -212,6 +227,7 @@ export default function ManualLocationScreen() {
                         userId,
                         campusId,
                         cursusId,
+                        displayName,
                         locationData
                     );
 
@@ -394,7 +410,9 @@ export default function ManualLocationScreen() {
                                         onPress={() =>
                                             handleLocationSelect(location)
                                         }
-                                        onLongPress={() => fetchUsersInArea(location)}
+                                        onLongPress={() =>
+                                            fetchUsersInArea(location)
+                                        }
                                         activeOpacity={0.7}
                                     >
                                         <Text style={styles.locationName}>
@@ -471,11 +489,7 @@ export default function ManualLocationScreen() {
 
                         {/* Contador de Usuários */}
                         <View style={styles.userCountBadge}>
-                            <Ionicons
-                                name="person"
-                                size={16}
-                                color="#fff"
-                            />
+                            <Ionicons name="person" size={16} color="#fff" />
                             <Text style={styles.userCountText}>
                                 {usersInArea.length}{" "}
                                 {usersInArea.length === 1
@@ -516,7 +530,8 @@ export default function ManualLocationScreen() {
                                                     color="#3498db"
                                                 />
                                                 <Text style={styles.userIdText}>
-                                                    ID: {item.userId}
+                                                    {item.displayName ||
+                                                        "Nome não disponível"}
                                                 </Text>
                                             </View>
                                             <View style={styles.userCardFooter}>
@@ -525,7 +540,9 @@ export default function ManualLocationScreen() {
                                                     size={14}
                                                     color="#95a5a6"
                                                 />
-                                                <Text style={styles.userTimestamp}>
+                                                <Text
+                                                    style={styles.userTimestamp}
+                                                >
                                                     Última atualização:{" "}
                                                     {new Date(
                                                         item.lastUpdated

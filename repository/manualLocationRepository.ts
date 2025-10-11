@@ -9,6 +9,7 @@ export interface UserLocationDocument {
     areaId: string;
     areaName: string;
     timestamp: number;
+    displayName: string | null;
     lastUpdated: number;
 }
 
@@ -21,6 +22,7 @@ export async function saveUserLocation(
     userId: string,
     campusId: string,
     cursusId: string,
+    displayName: string | null,
     locationData: LocationData
 ): Promise<void> {
     try {
@@ -32,6 +34,7 @@ export async function saveUserLocation(
 
         const timestamp = Date.now();
         const locationDocument = {
+            displayName: displayName,
             areaId: locationData.areaId,
             areaName: locationData.areaName,
             lastUpdated: timestamp,
@@ -149,10 +152,6 @@ export async function getOccupancyStatistics(): Promise<
     }
 }
 
-// ==========================================
-// 🔄 LISTENERS EM TEMPO REAL
-// ==========================================
-
 /**
  * Observa mudanças na localização de um usuário em tempo real
  * @param userId - ID do usuário
@@ -233,10 +232,6 @@ export function watchAreaOccupancy(
     return unsubscribe;
 }
 
-// ==========================================
-// 🎨 FUNÇÕES AUXILIARES
-// ==========================================
-
 /**
  * Determina o nível de ocupação de uma área
  * @param userCount - Número de usuários
@@ -314,41 +309,9 @@ export async function checkNearbyFriends(
     }
 }
 
-// ==========================================
-// 📖 EXEMPLO DE USO
-// ==========================================
-
-/**
- * INTEGRAÇÃO NO COMPONENTE manual_location.tsx:
- *
- * 1. Importar:
- *    import { saveUserLocation } from './manual_location_example';
- *
- * 2. No handleLocationSelect, após confirmação:
- *    await saveUserLocation(user.uid, {
- *      areaId: location.id,
- *      areaName: location.name,
- *      timestamp: new Date(),
- *    });
- *
- * 3. Para observar ocupação em tempo real:
- *    useEffect(() => {
- *      const unsubscribe = watchAreaOccupancy('cluster_1', (count, users) => {
- *        console.log(`${count} usuários no Cluster 1`);
- *      });
- *      return () => unsubscribe();
- *    }, []);
- */
-
 export default {
     saveUserLocation,
     getUserLocation,
     getUsersInArea,
-    getOccupancyStatistics,
-    getOccupancyLevel,
-    getOccupancyColor,
     checkNearbyFriends,
-    watchUserLocation,
-    watchAllLocations,
-    watchAreaOccupancy,
 };

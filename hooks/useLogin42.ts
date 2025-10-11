@@ -213,6 +213,7 @@ export function useLogin42() {
 
             if (staff) await setItem("staff", `${staff}`);
 
+            await setItem("displayname", `${userWithCoalition.displayname?.trim()}`);
             await setItem("user_id", `${userWithCoalition.id}`);
             await setItem(
                 "campus_id",
