@@ -444,7 +444,7 @@ export default function ManualLocationScreen() {
             <View
                 style={[
                     styles.legendContainer,
-                    { marginBottom: insets.bottom + 50 },
+                    { marginBottom: insets.bottom + 48 },
                 ]}
             >
                 <Text style={styles.legendTitle}>{t("location.tipTitle")}</Text>
