@@ -16,6 +16,33 @@ export type ExpoNotificationPayload = {
     image: string;
 };
 
+export async function sendExpoNotificationToUser(
+    pushToken: string,
+    payload: ExpoNotificationPayload
+): Promise<void> {
+    try {
+        const message = {
+            to: pushToken,
+            sound: "default",
+            title: payload.title,
+            body: payload.body,
+            data: payload.data || {},
+            image: payload.image,
+        };
+
+        await axios.post(EXPO_PUSH_URL, message, {
+            headers: {
+                Accept: "application/json",
+                "Accept-Encoding": "gzip, deflate",
+                "Content-Type": "application/json",
+            },
+        });
+    } catch (error) {
+        console.error("Error sending notification:", error);
+        throw error;
+    }
+}
+
 export async function sendExpoNotificationToGroup(
     campusId: string,
     cursusId: string,

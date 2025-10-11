@@ -47,6 +47,7 @@ import { SCHOOL_LOCATIONS, type Location } from "@/constants/schoolLocations";
 import useItemStorage from "@/hooks/storage/useItemStorage";
 import { t } from "@/i18n";
 import useApiInterceptors from "@/services/api";
+import { sendExpoNotificationToUser } from "@/services/ExpoNotificationService";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 interface Student42Data {
@@ -77,12 +78,14 @@ export default function ManualLocationScreen() {
 
     const [searchQuery, setSearchQuery] = useState("");
     const [isSearching, setIsSearching] = useState(false);
+    const [isSendingNotification, setIsSendingNotification] = useState(false);
     const [selectedStudent, setSelectedStudent] =
         useState<Student42Data | null>(null);
     const [studentLocation, setStudentLocation] = useState<{
         areaId: string;
         areaName: string;
         lastUpdated: number;
+        pushToken?: string;
     } | null>(null);
 
     // Estados para modal de usuários na área
@@ -126,7 +129,9 @@ export default function ManualLocationScreen() {
                 level: t("location.reliable"),
                 color: "#2ecc71", // Verde claro
                 percentage: 80,
-                message: t("location.updatedMinutesAgo", { minutes: diffMinutes }),
+                message: t("location.updatedMinutesAgo", {
+                    minutes: diffMinutes,
+                }),
             };
         }
         // 30 minutos - 2 horas: Incerto
@@ -135,9 +140,12 @@ export default function ManualLocationScreen() {
                 level: t("location.uncertain"),
                 color: "#f39c12", // Laranja
                 percentage: 50,
-                message: diffHours === 1 
-                    ? t("location.updatedHoursAgo", { hours: 1 })
-                    : t("location.updatedMinutesAgo", { minutes: diffMinutes }),
+                message:
+                    diffHours === 1
+                        ? t("location.updatedHoursAgo", { hours: 1 })
+                        : t("location.updatedMinutesAgo", {
+                              minutes: diffMinutes,
+                          }),
             };
         }
         // Mais de 2 horas: Não Confiável
@@ -146,9 +154,10 @@ export default function ManualLocationScreen() {
                 level: t("location.unreliable"),
                 color: "#e74c3c", // Vermelho
                 percentage: 20,
-                message: diffDays > 0
-                    ? t("location.updatedDaysAgo", { days: diffDays })
-                    : t("location.updatedHoursAgo", { hours: diffHours }),
+                message:
+                    diffDays > 0
+                        ? t("location.updatedDaysAgo", { days: diffDays })
+                        : t("location.updatedHoursAgo", { hours: diffHours }),
             };
         }
     };
@@ -164,8 +173,10 @@ export default function ManualLocationScreen() {
         const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
         if (diffMinutes < 1) return t("location.updatedRecently");
-        if (diffMinutes < 60) return t("location.updatedMinutesAgo", { minutes: diffMinutes });
-        if (diffHours < 24) return t("location.updatedHoursAgo", { hours: diffHours });
+        if (diffMinutes < 60)
+            return t("location.updatedMinutesAgo", { minutes: diffMinutes });
+        if (diffHours < 24)
+            return t("location.updatedHoursAgo", { hours: diffHours });
         return t("location.updatedDaysAgo", { days: diffDays });
     };
 
@@ -232,18 +243,22 @@ export default function ManualLocationScreen() {
 
             if (location) {
                 setStudentLocation(location);
-                
+
                 // Calcular confiabilidade
                 const reliability = getReliability(location.lastUpdated);
-                
+
                 // Mensagem baseada na confiabilidade
                 let reliabilityMessage = `${location.areaName}\n\n`;
-                reliabilityMessage += `${t("location.reliability")} ${reliability.level}\n`;
+                reliabilityMessage += `${t("location.reliability")} ${
+                    reliability.level
+                }\n`;
                 reliabilityMessage += reliability.message;
-                
+
                 showSuccess(
                     t("location.locationFound"),
-                    `${studentData.usual_full_name} ${t("location.studentIsAt")}\n${reliabilityMessage}`
+                    `${studentData.usual_full_name} ${t(
+                        "location.studentIsAt"
+                    )}\n${reliabilityMessage}`
                 );
             } else {
                 showError(
@@ -275,6 +290,44 @@ export default function ManualLocationScreen() {
     };
 
     /**
+     * Envia notificação para o estudante procurado
+     */
+    const notifyStudent = async () => {
+        if (!selectedStudent || !studentLocation?.pushToken) {
+            showError(t("common.error"), t("location.notifyStudentError"));
+            return;
+        }
+
+        setIsSendingNotification(true);
+
+        try {
+            const myDisplayName = await getItem("displayname");
+
+            await sendExpoNotificationToUser(studentLocation.pushToken, {
+                title: t("location.someoneIsLookingForYou"),
+                body: t("location.someoneIsLookingBody"),
+                data: {
+                    type: "location_search",
+                    searchedBy: myDisplayName || "Um estudante",
+                },
+                image: "https://via.placeholder.com/150",
+            });
+
+            showSuccess(
+                t("location.notifyStudentTitle"),
+                t("location.notifyStudentSuccess", {
+                    name: selectedStudent.usual_full_name,
+                })
+            );
+        } catch (error) {
+            console.error("Erro ao enviar notificação:", error);
+            showError(t("common.error"), t("location.notifyStudentError"));
+        } finally {
+            setIsSendingNotification(false);
+        }
+    };
+
+    /**
      * Registra a própria localização do usuário logado
      */
     const handleLocationSelect = async (location: Location) => {
@@ -295,7 +348,7 @@ export default function ManualLocationScreen() {
                     const campusId = await getItem("campus_id");
                     const cursusId = await getItem("cursus_id");
                     const displayName = await getItem("displayname");
-                    const pushToken = await AsyncStorage.getItem('push_token');
+                    const pushToken = await AsyncStorage.getItem("push_token");
 
                     if (!userId) {
                         throw new Error("User ID not found in storage");
@@ -340,7 +393,9 @@ export default function ManualLocationScreen() {
             <View
                 style={[styles.searchSection, { paddingTop: insets.top + 16 }]}
             >
-                <Text style={styles.searchTitle}>{t("location.searchStudent")}</Text>
+                <Text style={styles.searchTitle}>
+                    {t("location.searchStudent")}
+                </Text>
 
                 <View style={styles.searchInputContainer}>
                     <TextInput
@@ -387,55 +442,94 @@ export default function ManualLocationScreen() {
                             <Text style={styles.studentLogin}>
                                 {selectedStudent.login}
                             </Text>
-                            {studentLocation && (() => {
-                                const reliability = getReliability(studentLocation.lastUpdated);
-                                return (
-                                    <>
-                                        <View style={styles.locationBadge}>
-                                            <Ionicons
-                                                name="location"
-                                                size={16}
-                                                color="#27ae60"
-                                            />
-                                            <Text style={styles.locationText}>
-                                                {studentLocation.areaName}
-                                            </Text>
-                                        </View>
-                                        <View
-                                            style={[
-                                                styles.reliabilityBadge,
-                                                { backgroundColor: `${reliability.color}20` },
-                                            ]}
-                                        >
+                            {studentLocation &&
+                                (() => {
+                                    const reliability = getReliability(
+                                        studentLocation.lastUpdated
+                                    );
+                                    return (
+                                        <>
+                                            <View style={styles.locationBadge}>
+                                                <Ionicons
+                                                    name="location"
+                                                    size={16}
+                                                    color="#27ae60"
+                                                />
+                                                <Text
+                                                    style={styles.locationText}
+                                                >
+                                                    {studentLocation.areaName}
+                                                </Text>
+                                            </View>
                                             <View
                                                 style={[
-                                                    styles.reliabilityIndicator,
-                                                    { backgroundColor: reliability.color },
-                                                ]}
-                                            />
-                                            <Text
-                                                style={[
-                                                    styles.reliabilityText,
-                                                    { color: reliability.color },
+                                                    styles.reliabilityBadge,
+                                                    {
+                                                        backgroundColor: `${reliability.color}20`,
+                                                    },
                                                 ]}
                                             >
-                                                {reliability.level} • {getTimeAgo(studentLocation.lastUpdated)}
-                                            </Text>
-                                        </View>
-                                    </>
-                                );
-                            })()}
+                                                <View
+                                                    style={[
+                                                        styles.reliabilityIndicator,
+                                                        {
+                                                            backgroundColor:
+                                                                reliability.color,
+                                                        },
+                                                    ]}
+                                                />
+                                                <Text
+                                                    style={[
+                                                        styles.reliabilityText,
+                                                        {
+                                                            color: reliability.color,
+                                                        },
+                                                    ]}
+                                                >
+                                                    {reliability.level} •{" "}
+                                                    {getTimeAgo(
+                                                        studentLocation.lastUpdated
+                                                    )}
+                                                </Text>
+                                            </View>
+                                        </>
+                                    );
+                                })()}
                         </View>
-                        <TouchableOpacity
-                            style={styles.clearButton}
-                            onPress={clearStudent}
-                        >
-                            <Ionicons
-                                name="close-circle"
-                                size={24}
-                                color="#e74c3c"
-                            />
-                        </TouchableOpacity>
+                        <View style={styles.studentCardActions}>
+                            {studentLocation?.pushToken && (
+                                <TouchableOpacity
+                                    style={[
+                                        styles.notifyButton,
+                                        isSendingNotification &&
+                                            styles.notifyButtonDisabled,
+                                    ]}
+                                    onPress={notifyStudent}
+                                    disabled={isSendingNotification}
+                                >
+                                    {isSendingNotification ? (
+                                        <ActivityIndicator
+                                            color="#fff"
+                                            size="small"
+                                        />
+                                    ) : (
+                                        <Text style={styles.notifyButtonText}>
+                                            {t("location.notifyStudent")}
+                                        </Text>
+                                    )}
+                                </TouchableOpacity>
+                            )}
+                            <TouchableOpacity
+                                style={styles.clearButton}
+                                onPress={clearStudent}
+                            >
+                                <Ionicons
+                                    name="close-circle"
+                                    size={24}
+                                    color="#e74c3c"
+                                />
+                            </TouchableOpacity>
+                        </View>
                     </View>
                 )}
             </View>
@@ -556,9 +650,7 @@ export default function ManualLocationScreen() {
                 ]}
             >
                 <Text style={styles.legendTitle}>{t("location.tipTitle")}</Text>
-                <Text style={styles.legendText}>
-                    {t("location.tipText")}
-                </Text>
+                <Text style={styles.legendText}>{t("location.tipText")}</Text>
             </View>
 
             {/* Modal de Usuários na Área */}
@@ -623,60 +715,91 @@ export default function ManualLocationScreen() {
                                 keyExtractor={(item) => item.userId}
                                 contentContainerStyle={styles.usersList}
                                 renderItem={({ item, index }) => {
-                                    const reliability = getReliability(item.lastUpdated);
+                                    const reliability = getReliability(
+                                        item.lastUpdated
+                                    );
                                     return (
                                         <View style={styles.userCard}>
                                             <View style={styles.userNumber}>
-                                                <Text style={styles.userNumberText}>
+                                                <Text
+                                                    style={
+                                                        styles.userNumberText
+                                                    }
+                                                >
                                                     {index + 1}
                                                 </Text>
                                             </View>
-                                            <View style={styles.userCardContent}>
-                                                <View style={styles.userCardHeader}>
+                                            <View
+                                                style={styles.userCardContent}
+                                            >
+                                                <View
+                                                    style={
+                                                        styles.userCardHeader
+                                                    }
+                                                >
                                                     <Ionicons
                                                         name="person-circle"
                                                         size={20}
                                                         color="#3498db"
                                                     />
-                                                    <Text style={styles.userIdText}>
+                                                    <Text
+                                                        style={
+                                                            styles.userIdText
+                                                        }
+                                                    >
                                                         {item.displayName ||
                                                             "Nome não disponível"}
                                                     </Text>
                                                 </View>
-                                                
+
                                                 {/* Badge de Confiabilidade */}
                                                 <View
                                                     style={[
                                                         styles.reliabilityBadgeSmall,
-                                                        { backgroundColor: `${reliability.color}20` },
+                                                        {
+                                                            backgroundColor: `${reliability.color}20`,
+                                                        },
                                                     ]}
                                                 >
                                                     <View
                                                         style={[
                                                             styles.reliabilityIndicatorSmall,
-                                                            { backgroundColor: reliability.color },
+                                                            {
+                                                                backgroundColor:
+                                                                    reliability.color,
+                                                            },
                                                         ]}
                                                     />
                                                     <Text
                                                         style={[
                                                             styles.reliabilityTextSmall,
-                                                            { color: reliability.color },
+                                                            {
+                                                                color: reliability.color,
+                                                            },
                                                         ]}
                                                     >
                                                         {reliability.level}
                                                     </Text>
                                                 </View>
 
-                                                <View style={styles.userCardFooter}>
+                                                <View
+                                                    style={
+                                                        styles.userCardFooter
+                                                    }
+                                                >
                                                     <Ionicons
                                                         name="time-outline"
                                                         size={14}
                                                         color="#95a5a6"
                                                     />
                                                     <Text
-                                                        style={styles.userTimestamp}
+                                                        style={
+                                                            styles.userTimestamp
+                                                        }
                                                     >
-                                                        {getTimeAgo(item.lastUpdated)}
+                                                        {getTimeAgo(
+                                                            item.lastUpdated
+                                                        )}
                                                     </Text>
                                                 </View>
                                             </View>
@@ -958,6 +1081,27 @@ const styles = StyleSheet.create({
     reliabilityTextSmall: {
         fontSize: 10,
         fontWeight: "600",
+    },
+    studentCardActions: {
+        gap: 8,
+        alignItems: "center",
+    },
+    notifyButton: {
+        flexDirection: "row",
+        alignItems: "center",
+        backgroundColor: "#f39c12",
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        borderRadius: 6,
+        gap: 6,
+    },
+    notifyButtonDisabled: {
+        backgroundColor: "#7f8c8d",
+    },
+    notifyButtonText: {
+        fontSize: 12,
+        fontWeight: "600",
+        color: "#fff",
     },
     clearButton: {
         padding: 8,

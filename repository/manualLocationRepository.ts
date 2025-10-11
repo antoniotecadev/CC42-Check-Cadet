@@ -11,6 +11,7 @@ export interface UserLocationDocument {
     timestamp: number;
     displayName: string | null;
     lastUpdated: number;
+    pushToken?: string;
 }
 
 /**
