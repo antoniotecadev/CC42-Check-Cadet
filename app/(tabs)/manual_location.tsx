@@ -26,7 +26,7 @@ import {
     saveUserLocation,
 } from "@/repository/manualLocationRepository";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
     ActivityIndicator,
@@ -63,12 +63,12 @@ interface Student42Data {
 }
 
 export default function ManualLocationScreen() {
-    const router = useRouter();
-
+    
     const insets = useSafeAreaInsets();
-
+    
     const { api } = useApiInterceptors();
     const { getItem } = useItemStorage();
+    const { userLogin } = useLocalSearchParams<{ userLogin?: string }>();
 
     const { showConfirm, showSuccess, showError } = useAlert();
     const [selectedLocation, setSelectedLocation] = useState<string | null>(
@@ -115,7 +115,7 @@ export default function ManualLocationScreen() {
      */
     useEffect(() => {
         loadMyLocation();
-    }, []);
+    }, [userLogin]);
 
     const loadMyLocation = async () => {
         try {
@@ -125,12 +125,12 @@ export default function ManualLocationScreen() {
 
             setUserId(userId);
 
-            if (!userId || !campusId || !cursusId) return;
+            if (!userId || !campusId || !cursusId || !userLogin) return;
 
             const { getUserLocation } = await import(
                 "@/repository/manualLocationRepository"
             );
-
+            searchStudent(userLogin);
             const location = await getUserLocation(userId, campusId, cursusId);
             if (location) {
                 setMyCurrentLocation({

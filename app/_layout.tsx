@@ -32,20 +32,23 @@ const queryClient = new QueryClient({});
 
 // Componente para DevTools que só carrega quando necessário
 const DevTools = () => {
-    const [DevToolsComponent, setDevToolsComponent] = React.useState<React.ComponentType<any> | null>(null);
-    
+    const [DevToolsComponent, setDevToolsComponent] =
+        React.useState<React.ComponentType<any> | null>(null);
+
     React.useEffect(() => {
         if (__DEV__ && Platform.OS === "web") {
-            import("@tanstack/react-query-devtools").then((module) => {
-                setDevToolsComponent(() => module.ReactQueryDevtools);
-            }).catch(() => {
-                // Ignora erros de import silenciosamente
-            });
+            import("@tanstack/react-query-devtools")
+                .then((module) => {
+                    setDevToolsComponent(() => module.ReactQueryDevtools);
+                })
+                .catch(() => {
+                    // Ignora erros de import silenciosamente
+                });
         }
     }, []);
-    
+
     if (!DevToolsComponent) return null;
-    
+
     return <DevToolsComponent initialIsOpen={false} />;
 };
 
@@ -78,17 +81,19 @@ export default function RootLayout() {
             const userId = await getItem("user_id");
             const campusId = await getItem("campus_id");
             const { title, body, data } = notification.request.content;
-            
+
             if (!data || !userId || !campusId) return;
 
             // Verifica o tipo de notificação
             if (data.type === "location_search") {
                 // Notificação de busca de localização
                 const searchedBy = data.searchedBy || t("location.student");
-                
+
                 Alert.alert(
                     t("location.updateLocationPromptTitle"),
-                    t("location.updateLocationPromptMessage", { name: searchedBy }),
+                    t("location.updateLocationPromptMessage", {
+                        name: searchedBy,
+                    }),
                     [
                         {
                             text: t("common.cancel"),
@@ -98,7 +103,12 @@ export default function RootLayout() {
                             text: t("location.goToLocationScreen"),
                             onPress: () => {
                                 // Navega para a tela de localização manual
-                                router.push("/(tabs)/manual_location");
+                                router.push({
+                                    pathname: "/(tabs)/manual_location",
+                                    params: {
+                                        userLogin: String(data.userLogin),
+                                    },
+                                });
                             },
                         },
                     ]
@@ -107,10 +117,15 @@ export default function RootLayout() {
                 // Notificação de localização partilhada
                 const sharedBy = data.sharedBy || t("location.student");
                 const location = data.location || "";
-                
+
                 Alert.alert(
-                    title || t("location.sharedLocationWithYou", { name: sharedBy }),
-                    body || t("location.sharedLocationBody", { name: sharedBy, location }),
+                    title ||
+                        t("location.sharedLocationWithYou", { name: sharedBy }),
+                    body ||
+                        t("location.sharedLocationBody", {
+                            name: sharedBy,
+                            location,
+                        }),
                     [
                         {
                             text: t("common.confirm"),
@@ -202,63 +217,63 @@ export default function RootLayout() {
                                 name="qr_code"
                                 options={{
                                     headerShown: true,
-                                    title: t('navigation.qrCode'),
-                                    headerBackTitle: t('navigation.back'),
+                                    title: t("navigation.qrCode"),
+                                    headerBackTitle: t("navigation.back"),
                                     headerBackVisible: true,
                                 }}
                             />
                             <Stack.Screen
-                            name="qr_code_scanner"
-                            options={{
-                                headerShown: Platform.OS === "web",
-                                title: t('navigation.scanQrCode'),
-                                headerBackTitle: t('navigation.back'),
-                                headerBackVisible: true,
-                            }}
-                        />
-                        <Stack.Screen
-                            name="event_details"
-                            options={{
-                                headerShown: true,
-                                title: t('navigation.details'),
-                                headerBackTitle: t('navigation.back'),
-                                headerBackVisible: true,
-                            }}
-                        />
-                        <Stack.Screen
-                            name="meals"
-                            options={{
-                                headerShown: true,
-                                title: t('navigation.meals'),
-                                headerBackTitle: t('navigation.back'),
-                                headerBackVisible: true,
-                            }}
-                        />
-                        <Stack.Screen
-                            name="messages"
-                            options={{
-                                headerShown: true,
-                                title: t('navigation.messages'),
-                                headerBackTitle: t('navigation.back'),
-                                headerBackVisible: true,
-                            }}
-                        />
-                        <Stack.Screen
-                            name="send_message"
-                            options={{
-                                headerShown: true,
-                                title: t('navigation.message'),
-                                headerBackTitle: t('navigation.back'),
-                                headerBackVisible: true,
-                            }}
-                        />
-                        <Stack.Screen name="+not-found" />
-                    </StackHeader>
-                    <StatusBar style="auto" />
-                </ColorCoalitionProvider>
-            </ThemeProvider>
-            <DevTools />
-        </LanguageProvider>
+                                name="qr_code_scanner"
+                                options={{
+                                    headerShown: Platform.OS === "web",
+                                    title: t("navigation.scanQrCode"),
+                                    headerBackTitle: t("navigation.back"),
+                                    headerBackVisible: true,
+                                }}
+                            />
+                            <Stack.Screen
+                                name="event_details"
+                                options={{
+                                    headerShown: true,
+                                    title: t("navigation.details"),
+                                    headerBackTitle: t("navigation.back"),
+                                    headerBackVisible: true,
+                                }}
+                            />
+                            <Stack.Screen
+                                name="meals"
+                                options={{
+                                    headerShown: true,
+                                    title: t("navigation.meals"),
+                                    headerBackTitle: t("navigation.back"),
+                                    headerBackVisible: true,
+                                }}
+                            />
+                            <Stack.Screen
+                                name="messages"
+                                options={{
+                                    headerShown: true,
+                                    title: t("navigation.messages"),
+                                    headerBackTitle: t("navigation.back"),
+                                    headerBackVisible: true,
+                                }}
+                            />
+                            <Stack.Screen
+                                name="send_message"
+                                options={{
+                                    headerShown: true,
+                                    title: t("navigation.message"),
+                                    headerBackTitle: t("navigation.back"),
+                                    headerBackVisible: true,
+                                }}
+                            />
+                            <Stack.Screen name="+not-found" />
+                        </StackHeader>
+                        <StatusBar style="auto" />
+                    </ColorCoalitionProvider>
+                </ThemeProvider>
+                <DevTools />
+            </LanguageProvider>
         </QueryClientProvider>
     );
 }
