@@ -20,6 +20,7 @@ import { t } from "@/i18n";
 import React, { useEffect } from "react";
 
 import useItemStorage from "@/hooks/storage/useItemStorage";
+import { rescheduleIfNeeded } from "@/services/LocalLocationReminderService";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Buffer } from "buffer";
 import * as Notifications from "expo-notifications";
@@ -71,6 +72,15 @@ export default function RootLayout() {
     useEffect(() => {
         // Libera manualmente a splash (impede que ela fique visível)
         SplashScreen.hideAsync().catch(() => {});
+    }, []);
+
+    useEffect(() => {
+        // Agenda os lembretes de localização quando o app inicia
+        if (Platform.OS !== "web") {
+            rescheduleIfNeeded().catch((error) => {
+                console.error("❌ Erro ao agendar lembretes:", error);
+            });
+        }
     }, []);
 
     useEffect(() => {
@@ -133,6 +143,9 @@ export default function RootLayout() {
                         },
                     ]
                 );
+            } else if (data.type === "location_reminder" || data.type === "location_reminder_onetime") {
+                // Notificação de lembrete de localização (local)
+                router.push("/(tabs)/manual_location");
             } else if (data.id) {
                 // Notificação de refeição (lógica existente)
                 router.push({
