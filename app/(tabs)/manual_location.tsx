@@ -402,6 +402,44 @@ export default function ManualLocationScreen() {
             return;
         }
 
+        // Confirma a localização antes de partilhar
+        const timeAgo = getTimeAgo(myCurrentLocation.lastUpdated);
+        Alert.alert(
+            t("location.confirmShareLocation"),
+            t("location.confirmShareLocationMessage", {
+                location: myCurrentLocation.areaName,
+                time: timeAgo,
+            }),
+            [
+                {
+                    text: t("common.cancel"),
+                    style: "cancel",
+                },
+                {
+                    text: t("location.updateFirst"),
+                    onPress: () => {
+                        // Fecha o card do estudante para atualizar localização
+                        clearStudent();
+                    },
+                },
+                {
+                    text: t("location.sendLocation"),
+                    onPress: async () => {
+                        await sendLocationNotification();
+                    },
+                },
+            ]
+        );
+    };
+
+    /**
+     * Envia a notificação de localização partilhada
+     */
+    const sendLocationNotification = async () => {
+        if (!selectedStudent || !studentLocation?.pushToken || !myCurrentLocation) {
+            return;
+        }
+
         setIsSharingLocation(true);
 
         try {
