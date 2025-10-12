@@ -79,6 +79,7 @@ export default function ManualLocationScreen() {
 
     const [searchQuery, setSearchQuery] = useState("");
     const [isSearching, setIsSearching] = useState(false);
+    const [userId, setUserId] = useState<string | null>(null);
     const [isSendingNotification, setIsSendingNotification] = useState(false);
     const [isSharingLocation, setIsSharingLocation] = useState(false);
     const [selectedStudent, setSelectedStudent] =
@@ -121,6 +122,8 @@ export default function ManualLocationScreen() {
             const userId = await getItem("user_id");
             const campusId = await getItem("campus_id");
             const cursusId = await getItem("cursus_id");
+
+            setUserId(userId);
 
             if (!userId || !campusId || !cursusId) return;
 
@@ -436,7 +439,11 @@ export default function ManualLocationScreen() {
      * Envia a notificação de localização partilhada
      */
     const sendLocationNotification = async () => {
-        if (!selectedStudent || !studentLocation?.pushToken || !myCurrentLocation) {
+        if (
+            !selectedStudent ||
+            !studentLocation?.pushToken ||
+            !myCurrentLocation
+        ) {
             return;
         }
 
@@ -457,8 +464,7 @@ export default function ManualLocationScreen() {
                 }),
                 data: {
                     type: "location_shared",
-                    sharedBy:
-                        `${myDisplayName} - ${myLogin}` || "Um estudante",
+                    sharedBy: `${myDisplayName} - ${myLogin}` || "Um estudante",
                     location: myCurrentLocation.areaName,
                 },
                 image: imageLink || "https://via.placeholder.com/150",
@@ -655,72 +661,77 @@ export default function ManualLocationScreen() {
                                 })()}
                         </View>
                         <View style={styles.studentCardActions}>
-                            {studentLocation?.pushToken && (
-                                <>
-                                    <TouchableOpacity
-                                        style={[
-                                            styles.notifyButton,
-                                            isSendingNotification &&
-                                                styles.notifyButtonDisabled,
-                                        ]}
-                                        onPress={notifyStudent}
-                                        disabled={isSendingNotification}
-                                    >
-                                        {isSendingNotification ? (
-                                            <ActivityIndicator
-                                                color="#fff"
-                                                size="small"
-                                            />
-                                        ) : (
-                                            <>
-                                                <Ionicons
-                                                    name="notifications"
-                                                    size={16}
+                            {studentLocation?.pushToken &&
+                                userId !== selectedStudent.id.toString() && (
+                                    <>
+                                        <TouchableOpacity
+                                            style={[
+                                                styles.notifyButton,
+                                                isSendingNotification &&
+                                                    styles.notifyButtonDisabled,
+                                            ]}
+                                            onPress={notifyStudent}
+                                            disabled={isSendingNotification}
+                                        >
+                                            {isSendingNotification ? (
+                                                <ActivityIndicator
                                                     color="#fff"
+                                                    size="small"
                                                 />
-                                                <Text
-                                                    style={
-                                                        styles.notifyButtonText
-                                                    }
-                                                >
-                                                    {t("location.notifyStudent")}
-                                                </Text>
-                                            </>
-                                        )}
-                                    </TouchableOpacity>
-                                    <TouchableOpacity
-                                        style={[
-                                            styles.shareButton,
-                                            isSharingLocation &&
-                                                styles.shareButtonDisabled,
-                                        ]}
-                                        onPress={shareMyLocation}
-                                        disabled={isSharingLocation}
-                                    >
-                                        {isSharingLocation ? (
-                                            <ActivityIndicator
-                                                color="#fff"
-                                                size="small"
-                                            />
-                                        ) : (
-                                            <>
-                                                <Ionicons
-                                                    name="location"
-                                                    size={16}
+                                            ) : (
+                                                <>
+                                                    <Ionicons
+                                                        name="notifications"
+                                                        size={16}
+                                                        color="#fff"
+                                                    />
+                                                    <Text
+                                                        style={
+                                                            styles.notifyButtonText
+                                                        }
+                                                    >
+                                                        {t(
+                                                            "location.notifyStudent"
+                                                        )}
+                                                    </Text>
+                                                </>
+                                            )}
+                                        </TouchableOpacity>
+                                        <TouchableOpacity
+                                            style={[
+                                                styles.shareButton,
+                                                isSharingLocation &&
+                                                    styles.shareButtonDisabled,
+                                            ]}
+                                            onPress={shareMyLocation}
+                                            disabled={isSharingLocation}
+                                        >
+                                            {isSharingLocation ? (
+                                                <ActivityIndicator
                                                     color="#fff"
+                                                    size="small"
                                                 />
-                                                <Text
-                                                    style={
-                                                        styles.shareButtonText
-                                                    }
-                                                >
-                                                    {t("location.shareMyLocation")}
-                                                </Text>
-                                            </>
-                                        )}
-                                    </TouchableOpacity>
-                                </>
-                            )}
+                                            ) : (
+                                                <>
+                                                    <Ionicons
+                                                        name="location"
+                                                        size={16}
+                                                        color="#fff"
+                                                    />
+                                                    <Text
+                                                        style={
+                                                            styles.shareButtonText
+                                                        }
+                                                    >
+                                                        {t(
+                                                            "location.shareMyLocation"
+                                                        )}
+                                                    </Text>
+                                                </>
+                                            )}
+                                        </TouchableOpacity>
+                                    </>
+                                )}
                             <TouchableOpacity
                                 style={styles.clearButton}
                                 onPress={clearStudent}
