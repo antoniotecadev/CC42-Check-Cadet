@@ -103,6 +103,21 @@ export default function RootLayout() {
                         },
                     ]
                 );
+            } else if (data.type === "location_shared") {
+                // Notificação de localização partilhada
+                const sharedBy = data.sharedBy || t("location.student");
+                const location = data.location || "";
+                
+                Alert.alert(
+                    title || t("location.sharedLocationWithYou", { name: sharedBy }),
+                    body || t("location.sharedLocationBody", { name: sharedBy, location }),
+                    [
+                        {
+                            text: t("common.confirm"),
+                            style: "default",
+                        },
+                    ]
+                );
             } else if (data.id) {
                 // Notificação de refeição (lógica existente)
                 router.push({

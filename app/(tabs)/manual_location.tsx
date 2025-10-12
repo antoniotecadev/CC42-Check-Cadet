@@ -27,9 +27,10 @@ import {
 } from "@/repository/manualLocationRepository";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     ActivityIndicator,
+    Alert,
     FlatList,
     Image,
     ImageBackground,
@@ -79,6 +80,7 @@ export default function ManualLocationScreen() {
     const [searchQuery, setSearchQuery] = useState("");
     const [isSearching, setIsSearching] = useState(false);
     const [isSendingNotification, setIsSendingNotification] = useState(false);
+    const [isSharingLocation, setIsSharingLocation] = useState(false);
     const [selectedStudent, setSelectedStudent] =
         useState<Student42Data | null>(null);
     const [studentLocation, setStudentLocation] = useState<{
@@ -86,6 +88,11 @@ export default function ManualLocationScreen() {
         areaName: string;
         lastUpdated: number;
         pushToken?: string;
+    } | null>(null);
+    const [myCurrentLocation, setMyCurrentLocation] = useState<{
+        areaId: string;
+        areaName: string;
+        lastUpdated: number;
     } | null>(null);
 
     // Estados para modal de usuários na área
@@ -101,6 +108,38 @@ export default function ManualLocationScreen() {
         }>
     >([]);
     const [loadingUsers, setLoadingUsers] = useState(false);
+
+    /**
+     * Carrega a localização atual do usuário logado
+     */
+    useEffect(() => {
+        loadMyLocation();
+    }, []);
+
+    const loadMyLocation = async () => {
+        try {
+            const userId = await getItem("user_id");
+            const campusId = await getItem("campus_id");
+            const cursusId = await getItem("cursus_id");
+
+            if (!userId || !campusId || !cursusId) return;
+
+            const { getUserLocation } = await import(
+                "@/repository/manualLocationRepository"
+            );
+
+            const location = await getUserLocation(userId, campusId, cursusId);
+            if (location) {
+                setMyCurrentLocation({
+                    areaId: location.areaId,
+                    areaName: location.areaName,
+                    lastUpdated: location.lastUpdated,
+                });
+            }
+        } catch (error) {
+            console.error("Erro ao carregar minha localização:", error);
+        }
+    };
 
     /**
      * Calcula o nível de confiabilidade baseado no tempo decorrido
@@ -311,7 +350,7 @@ export default function ManualLocationScreen() {
                 data: {
                     type: "location_search",
                     searchedBy:
-                        `${myDisplayName} (${myLogin})` || "Um estudante",
+                        `${myDisplayName} - ${myLogin}` || "Um estudante",
                     userLogin: myLogin || "",
                 },
                 image: imageLink || "https://via.placeholder.com/150",
@@ -328,6 +367,76 @@ export default function ManualLocationScreen() {
             showError(t("common.error"), t("location.notifyStudentError"));
         } finally {
             setIsSendingNotification(false);
+        }
+    };
+
+    /**
+     * Partilha a localização atual com o estudante procurado
+     */
+    const shareMyLocation = async () => {
+        // Verifica se o estudante tem push token
+        if (!selectedStudent || !studentLocation?.pushToken) {
+            showError(t("common.error"), t("location.shareLocationError"));
+            return;
+        }
+
+        // Verifica se o usuário marcou sua localização
+        if (!myCurrentLocation) {
+            Alert.alert(
+                t("location.needToSetLocation"),
+                t("location.needToSetLocationMessage"),
+                [
+                    {
+                        text: t("common.cancel"),
+                        style: "cancel",
+                    },
+                    {
+                        text: t("location.markNow"),
+                        onPress: () => {
+                            // Fecha o card do estudante e permite marcar no mapa
+                            clearStudent();
+                        },
+                    },
+                ]
+            );
+            return;
+        }
+
+        setIsSharingLocation(true);
+
+        try {
+            const myLogin = await getItem("user_login");
+            const imageLink = await getItem("image_link");
+            const myDisplayName = await getItem("displayname");
+
+            await sendExpoNotificationToUser(studentLocation.pushToken, {
+                title: t("location.sharedLocationWithYou", {
+                    name: myDisplayName || myLogin || "Um estudante",
+                }),
+                body: t("location.sharedLocationBody", {
+                    name: myLogin || "Um estudante",
+                    location: myCurrentLocation.areaName,
+                }),
+                data: {
+                    type: "location_shared",
+                    sharedBy:
+                        `${myDisplayName} - ${myLogin}` || "Um estudante",
+                    location: myCurrentLocation.areaName,
+                },
+                image: imageLink || "https://via.placeholder.com/150",
+            });
+
+            showSuccess(
+                t("location.shareLocationTitle"),
+                t("location.shareLocationSuccess", {
+                    name: selectedStudent.usual_full_name,
+                })
+            );
+        } catch (error) {
+            console.error("Erro ao partilhar localização:", error);
+            showError(t("common.error"), t("location.shareLocationError"));
+        } finally {
+            setIsSharingLocation(false);
         }
     };
 
@@ -372,6 +481,13 @@ export default function ManualLocationScreen() {
                         pushToken,
                         locationData
                     );
+
+                    // Atualiza o estado da localização atual
+                    setMyCurrentLocation({
+                        areaId: location.id,
+                        areaName: location.name,
+                        lastUpdated: Date.now(),
+                    });
 
                     showSuccess(
                         t("location.locationSaved"),
@@ -502,26 +618,70 @@ export default function ManualLocationScreen() {
                         </View>
                         <View style={styles.studentCardActions}>
                             {studentLocation?.pushToken && (
-                                <TouchableOpacity
-                                    style={[
-                                        styles.notifyButton,
-                                        isSendingNotification &&
-                                            styles.notifyButtonDisabled,
-                                    ]}
-                                    onPress={notifyStudent}
-                                    disabled={isSendingNotification}
-                                >
-                                    {isSendingNotification ? (
-                                        <ActivityIndicator
-                                            color="#fff"
-                                            size="small"
-                                        />
-                                    ) : (
-                                        <Text style={styles.notifyButtonText}>
-                                            {t("location.notifyStudent")}
-                                        </Text>
-                                    )}
-                                </TouchableOpacity>
+                                <>
+                                    <TouchableOpacity
+                                        style={[
+                                            styles.notifyButton,
+                                            isSendingNotification &&
+                                                styles.notifyButtonDisabled,
+                                        ]}
+                                        onPress={notifyStudent}
+                                        disabled={isSendingNotification}
+                                    >
+                                        {isSendingNotification ? (
+                                            <ActivityIndicator
+                                                color="#fff"
+                                                size="small"
+                                            />
+                                        ) : (
+                                            <>
+                                                <Ionicons
+                                                    name="notifications"
+                                                    size={16}
+                                                    color="#fff"
+                                                />
+                                                <Text
+                                                    style={
+                                                        styles.notifyButtonText
+                                                    }
+                                                >
+                                                    {t("location.notifyStudent")}
+                                                </Text>
+                                            </>
+                                        )}
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        style={[
+                                            styles.shareButton,
+                                            isSharingLocation &&
+                                                styles.shareButtonDisabled,
+                                        ]}
+                                        onPress={shareMyLocation}
+                                        disabled={isSharingLocation}
+                                    >
+                                        {isSharingLocation ? (
+                                            <ActivityIndicator
+                                                color="#fff"
+                                                size="small"
+                                            />
+                                        ) : (
+                                            <>
+                                                <Ionicons
+                                                    name="location"
+                                                    size={16}
+                                                    color="#fff"
+                                                />
+                                                <Text
+                                                    style={
+                                                        styles.shareButtonText
+                                                    }
+                                                >
+                                                    {t("location.shareMyLocation")}
+                                                </Text>
+                                            </>
+                                        )}
+                                    </TouchableOpacity>
+                                </>
                             )}
                             <TouchableOpacity
                                 style={styles.clearButton}
@@ -1103,6 +1263,23 @@ const styles = StyleSheet.create({
         backgroundColor: "#7f8c8d",
     },
     notifyButtonText: {
+        fontSize: 12,
+        fontWeight: "600",
+        color: "#fff",
+    },
+    shareButton: {
+        flexDirection: "row",
+        alignItems: "center",
+        backgroundColor: "#3498db",
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        borderRadius: 6,
+        gap: 6,
+    },
+    shareButtonDisabled: {
+        backgroundColor: "#7f8c8d",
+    },
+    shareButtonText: {
         fontSize: 12,
         fontWeight: "600",
         color: "#fff",
