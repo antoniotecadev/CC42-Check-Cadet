@@ -262,6 +262,9 @@ export default function HomeScreen() {
                 await clearUser();
                 await removeItem("staff");
                 await removeItem("user_id");
+                await removeItem("user_login");
+                await removeItem("displayname");
+                await removeItem("image_link");
                 await removeItem("campus_id");
                 await removeItem("cursus_id");
                 await removeItem("campus_name");

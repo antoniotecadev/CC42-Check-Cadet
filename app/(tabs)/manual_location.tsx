@@ -301,6 +301,8 @@ export default function ManualLocationScreen() {
         setIsSendingNotification(true);
 
         try {
+            const myLogin = await getItem("user_login");
+            const imageLink = await getItem("image_link");
             const myDisplayName = await getItem("displayname");
 
             await sendExpoNotificationToUser(studentLocation.pushToken, {
@@ -308,9 +310,11 @@ export default function ManualLocationScreen() {
                 body: t("location.someoneIsLookingBody"),
                 data: {
                     type: "location_search",
-                    searchedBy: myDisplayName || "Um estudante",
+                    searchedBy:
+                        `${myDisplayName} (${myLogin})` || "Um estudante",
+                    userLogin: myLogin || "",
                 },
-                image: "https://via.placeholder.com/150",
+                image: imageLink || "https://via.placeholder.com/150",
             });
 
             showSuccess(

@@ -163,11 +163,14 @@ export function useLogin42() {
                     setSuccess(ok);
                     return;
                 }
-                showError(t('common.error'), t('auth.authorizationCodeNotFound'));
+                showError(
+                    t("common.error"),
+                    t("auth.authorizationCodeNotFound")
+                );
             }
         } catch (err: any) {
             console.error("Authentication error:", err);
-            showError(t('auth.authenticationError'), err.message);
+            showError(t("auth.authenticationError"), err.message);
         } finally {
             setLoading(false);
         }
@@ -191,7 +194,7 @@ export function useLogin42() {
                 response.data;
 
             if (!firebaseToken || !userWithCoalition) {
-                throw new Error(t('auth.incompleteServerResponse'));
+                throw new Error(t("auth.incompleteServerResponse"));
             }
 
             // 1. Firebase login
@@ -213,8 +216,16 @@ export function useLogin42() {
 
             if (staff) await setItem("staff", `${staff}`);
 
-            await setItem("displayname", `${userWithCoalition.displayname?.trim()}`);
             await setItem("user_id", `${userWithCoalition.id}`);
+            await setItem("user_login", `${userWithCoalition.login}`);
+            await setItem(
+                "displayname",
+                `${userWithCoalition.displayname?.trim()}`
+            );
+            await setItem(
+                "image_link",
+                `${userWithCoalition.image?.link?.trim()}`
+            );
             await setItem(
                 "campus_id",
                 `${userWithCoalition.campus?.[0]?.id ?? 0}`
@@ -223,7 +234,10 @@ export function useLogin42() {
                 "campus_name",
                 `${userWithCoalition.campus?.[0]?.name?.trim()}`
             );
-            await setItem("cursus_id", `${userWithCoalition.projects_users?.[0]?.cursus_ids?.[0] ?? 0}`);
+            await setItem(
+                "cursus_id",
+                `${userWithCoalition.projects_users?.[0]?.cursus_ids?.[0] ?? 0}`
+            );
             if (Platform.OS === "ios") {
                 registerPushToken(
                     userWithCoalition.id,
