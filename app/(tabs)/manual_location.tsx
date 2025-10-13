@@ -35,6 +35,7 @@ import {
     Image,
     ImageBackground,
     Modal,
+    Platform,
     ScrollView,
     StyleSheet,
     Text,
@@ -63,9 +64,9 @@ interface Student42Data {
 }
 
 export default function ManualLocationScreen() {
-    
+
     const insets = useSafeAreaInsets();
-    
+
     const { api } = useApiInterceptors();
     const { getItem } = useItemStorage();
     const { userLogin } = useLocalSearchParams<{ userLogin?: string }>();
@@ -186,8 +187,8 @@ export default function ManualLocationScreen() {
                     diffHours === 1
                         ? t("location.updatedHoursAgo", { hours: 1 })
                         : t("location.updatedMinutesAgo", {
-                              minutes: diffMinutes,
-                          }),
+                            minutes: diffMinutes,
+                        }),
             };
         }
         // Mais de 2 horas: Não Confiável
@@ -291,9 +292,8 @@ export default function ManualLocationScreen() {
 
                 // Mensagem baseada na confiabilidade
                 let reliabilityMessage = `${location.areaName}\n\n`;
-                reliabilityMessage += `${t("location.reliability")} ${
-                    reliability.level
-                }\n`;
+                reliabilityMessage += `${t("location.reliability")} ${reliability.level
+                    }\n`;
                 reliabilityMessage += reliability.message;
 
                 showSuccess(
@@ -513,7 +513,7 @@ export default function ManualLocationScreen() {
                         throw new Error("Campus ID not found in storage");
                     } else if (!cursusId) {
                         throw new Error("Cursus ID not found in storage");
-                    } else if (!pushToken) {
+                    } else if (!pushToken && Platform.OS !== "web") {
                         throw new Error("Push Token not found in storage");
                     }
 
@@ -538,7 +538,7 @@ export default function ManualLocationScreen() {
                         t("location.locationSavedSuccess")
                     );
                 } catch (error) {
-                    console.error("Erro ao salvar localização:", error);
+                    console.error("Erro ao salvar localização: ", error);
                     showError(
                         t("location.errorSaving"),
                         t("location.errorSavingLocation")
@@ -552,200 +552,201 @@ export default function ManualLocationScreen() {
     };
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, Platform.OS === "web" ? styles.inner : {},]}>
             {/* Search Section */}
-            <View
-                style={[styles.searchSection, { paddingTop: insets.top + 16 }]}
-            >
-                <Text style={styles.searchTitle}>
-                    {t("location.searchStudent")}
-                </Text>
+            {Platform.OS !== "web" &&
+                <View
+                    style={[styles.searchSection, { paddingTop: insets.top + 16 }]}
+                >
+                    <Text style={styles.searchTitle}>
+                        {t("location.searchStudent")}
+                    </Text>
 
-                <View style={styles.searchInputContainer}>
-                    <TextInput
-                        style={styles.searchInput}
-                        placeholder={t("location.searchPlaceholder")}
-                        placeholderTextColor="#999"
-                        value={searchQuery}
-                        onChangeText={setSearchQuery}
-                        editable={!isSearching}
-                        autoCapitalize="none"
-                        autoCorrect={false}
-                    />
-                    <TouchableOpacity
-                        style={[
-                            styles.searchButton,
-                            isSearching && styles.searchButtonDisabled,
-                        ]}
-                        onPress={() => searchStudent(searchQuery)}
-                        disabled={isSearching || !searchQuery.trim()}
-                    >
-                        {isSearching ? (
-                            <ActivityIndicator color="#fff" size="small" />
-                        ) : (
-                            <Ionicons name="search" size={20} color="#fff" />
-                        )}
-                    </TouchableOpacity>
-                </View>
-
-                {/* Selected Student Card */}
-                {selectedStudent && (
-                    <View style={styles.studentCard}>
-                        <Image
-                            source={{
-                                uri:
-                                    selectedStudent.image?.link ||
-                                    "https://via.placeholder.com/60",
-                            }}
-                            style={styles.studentAvatar}
+                    <View style={styles.searchInputContainer}>
+                        <TextInput
+                            style={styles.searchInput}
+                            placeholder={t("location.searchPlaceholder")}
+                            placeholderTextColor="#999"
+                            value={searchQuery}
+                            onChangeText={setSearchQuery}
+                            editable={!isSearching}
+                            autoCapitalize="none"
+                            autoCorrect={false}
                         />
-                        <View style={styles.studentInfo}>
-                            <Text style={styles.studentName}>
-                                {selectedStudent.usual_full_name}
-                            </Text>
-                            <Text style={styles.studentLogin}>
-                                {selectedStudent.login}
-                            </Text>
-                            {studentLocation &&
-                                (() => {
-                                    const reliability = getReliability(
-                                        studentLocation.lastUpdated
-                                    );
-                                    return (
-                                        <>
-                                            <View style={styles.locationBadge}>
-                                                <Ionicons
-                                                    name="location"
-                                                    size={16}
-                                                    color="#27ae60"
-                                                />
-                                                <Text
-                                                    style={styles.locationText}
-                                                >
-                                                    {studentLocation.areaName}
-                                                </Text>
-                                            </View>
-                                            <View
-                                                style={[
-                                                    styles.reliabilityBadge,
-                                                    {
-                                                        backgroundColor: `${reliability.color}20`,
-                                                    },
-                                                ]}
-                                            >
-                                                <View
-                                                    style={[
-                                                        styles.reliabilityIndicator,
-                                                        {
-                                                            backgroundColor:
-                                                                reliability.color,
-                                                        },
-                                                    ]}
-                                                />
-                                                <Text
-                                                    style={[
-                                                        styles.reliabilityText,
-                                                        {
-                                                            color: reliability.color,
-                                                        },
-                                                    ]}
-                                                >
-                                                    {reliability.level} •{" "}
-                                                    {getTimeAgo(
-                                                        studentLocation.lastUpdated
-                                                    )}
-                                                </Text>
-                                            </View>
-                                        </>
-                                    );
-                                })()}
-                        </View>
-                        <View style={styles.studentCardActions}>
-                            {studentLocation?.pushToken &&
-                                userId !== selectedStudent.id.toString() && (
-                                    <>
-                                        <TouchableOpacity
-                                            style={[
-                                                styles.notifyButton,
-                                                isSendingNotification &&
-                                                    styles.notifyButtonDisabled,
-                                            ]}
-                                            onPress={notifyStudent}
-                                            disabled={isSendingNotification}
-                                        >
-                                            {isSendingNotification ? (
-                                                <ActivityIndicator
-                                                    color="#fff"
-                                                    size="small"
-                                                />
-                                            ) : (
-                                                <>
-                                                    <Ionicons
-                                                        name="notifications"
-                                                        size={16}
-                                                        color="#fff"
-                                                    />
-                                                    <Text
-                                                        style={
-                                                            styles.notifyButtonText
-                                                        }
-                                                    >
-                                                        {t(
-                                                            "location.notifyStudent"
-                                                        )}
-                                                    </Text>
-                                                </>
-                                            )}
-                                        </TouchableOpacity>
-                                        <TouchableOpacity
-                                            style={[
-                                                styles.shareButton,
-                                                isSharingLocation &&
-                                                    styles.shareButtonDisabled,
-                                            ]}
-                                            onPress={shareMyLocation}
-                                            disabled={isSharingLocation}
-                                        >
-                                            {isSharingLocation ? (
-                                                <ActivityIndicator
-                                                    color="#fff"
-                                                    size="small"
-                                                />
-                                            ) : (
-                                                <>
+                        <TouchableOpacity
+                            style={[
+                                styles.searchButton,
+                                isSearching && styles.searchButtonDisabled,
+                            ]}
+                            onPress={() => searchStudent(searchQuery)}
+                            disabled={isSearching || !searchQuery.trim()}
+                        >
+                            {isSearching ? (
+                                <ActivityIndicator color="#fff" size="small" />
+                            ) : (
+                                <Ionicons name="search" size={20} color="#fff" />
+                            )}
+                        </TouchableOpacity>
+                    </View>
+
+                    {/* Selected Student Card */}
+                    {selectedStudent && (
+                        <View style={styles.studentCard}>
+                            <Image
+                                source={{
+                                    uri:
+                                        selectedStudent.image?.link ||
+                                        "https://via.placeholder.com/60",
+                                }}
+                                style={styles.studentAvatar}
+                            />
+                            <View style={styles.studentInfo}>
+                                <Text style={styles.studentName}>
+                                    {selectedStudent.usual_full_name}
+                                </Text>
+                                <Text style={styles.studentLogin}>
+                                    {selectedStudent.login}
+                                </Text>
+                                {studentLocation &&
+                                    (() => {
+                                        const reliability = getReliability(
+                                            studentLocation.lastUpdated
+                                        );
+                                        return (
+                                            <>
+                                                <View style={styles.locationBadge}>
                                                     <Ionicons
                                                         name="location"
                                                         size={16}
-                                                        color="#fff"
+                                                        color="#27ae60"
                                                     />
                                                     <Text
-                                                        style={
-                                                            styles.shareButtonText
-                                                        }
+                                                        style={styles.locationText}
                                                     >
-                                                        {t(
-                                                            "location.shareMyLocation"
+                                                        {studentLocation.areaName}
+                                                    </Text>
+                                                </View>
+                                                <View
+                                                    style={[
+                                                        styles.reliabilityBadge,
+                                                        {
+                                                            backgroundColor: `${reliability.color}20`,
+                                                        },
+                                                    ]}
+                                                >
+                                                    <View
+                                                        style={[
+                                                            styles.reliabilityIndicator,
+                                                            {
+                                                                backgroundColor:
+                                                                    reliability.color,
+                                                            },
+                                                        ]}
+                                                    />
+                                                    <Text
+                                                        style={[
+                                                            styles.reliabilityText,
+                                                            {
+                                                                color: reliability.color,
+                                                            },
+                                                        ]}
+                                                    >
+                                                        {reliability.level} •{" "}
+                                                        {getTimeAgo(
+                                                            studentLocation.lastUpdated
                                                         )}
                                                     </Text>
-                                                </>
-                                            )}
-                                        </TouchableOpacity>
-                                    </>
-                                )}
-                            <TouchableOpacity
-                                style={styles.clearButton}
-                                onPress={clearStudent}
-                            >
-                                <Ionicons
-                                    name="close-circle"
-                                    size={24}
-                                    color="#e74c3c"
-                                />
-                            </TouchableOpacity>
+                                                </View>
+                                            </>
+                                        );
+                                    })()}
+                            </View>
+                            <View style={styles.studentCardActions}>
+                                {studentLocation?.pushToken &&
+                                    userId !== selectedStudent.id.toString() && (
+                                        <>
+                                            <TouchableOpacity
+                                                style={[
+                                                    styles.notifyButton,
+                                                    isSendingNotification &&
+                                                    styles.notifyButtonDisabled,
+                                                ]}
+                                                onPress={notifyStudent}
+                                                disabled={isSendingNotification}
+                                            >
+                                                {isSendingNotification ? (
+                                                    <ActivityIndicator
+                                                        color="#fff"
+                                                        size="small"
+                                                    />
+                                                ) : (
+                                                    <>
+                                                        <Ionicons
+                                                            name="notifications"
+                                                            size={16}
+                                                            color="#fff"
+                                                        />
+                                                        <Text
+                                                            style={
+                                                                styles.notifyButtonText
+                                                            }
+                                                        >
+                                                            {t(
+                                                                "location.notifyStudent"
+                                                            )}
+                                                        </Text>
+                                                    </>
+                                                )}
+                                            </TouchableOpacity>
+                                            <TouchableOpacity
+                                                style={[
+                                                    styles.shareButton,
+                                                    isSharingLocation &&
+                                                    styles.shareButtonDisabled,
+                                                ]}
+                                                onPress={shareMyLocation}
+                                                disabled={isSharingLocation}
+                                            >
+                                                {isSharingLocation ? (
+                                                    <ActivityIndicator
+                                                        color="#fff"
+                                                        size="small"
+                                                    />
+                                                ) : (
+                                                    <>
+                                                        <Ionicons
+                                                            name="location"
+                                                            size={16}
+                                                            color="#fff"
+                                                        />
+                                                        <Text
+                                                            style={
+                                                                styles.shareButtonText
+                                                            }
+                                                        >
+                                                            {t(
+                                                                "location.shareMyLocation"
+                                                            )}
+                                                        </Text>
+                                                    </>
+                                                )}
+                                            </TouchableOpacity>
+                                        </>
+                                    )}
+                                <TouchableOpacity
+                                    style={styles.clearButton}
+                                    onPress={clearStudent}
+                                >
+                                    <Ionicons
+                                        name="close-circle"
+                                        size={24}
+                                        color="#e74c3c"
+                                    />
+                                </TouchableOpacity>
+                            </View>
                         </View>
-                    </View>
-                )}
-            </View>
+                    )}
+                </View>}
 
             {/* Instruções */}
             <View style={styles.instructionsContainer}>
@@ -769,7 +770,7 @@ export default function ManualLocationScreen() {
                         style={styles.mapBackground}
                         resizeMode="contain"
                         imageStyle={{ alignSelf: "center" }}
-                        onLoadStart={() => setImageLoading(true)}
+                        onLoadStart={() => setImageLoading(Platform.OS !== "web")}
                         onLoadEnd={() => setImageLoading(false)}
                         onError={() => setImageLoading(false)}
                     >
@@ -814,8 +815,8 @@ export default function ManualLocationScreen() {
                                                 borderColor: isSelected
                                                     ? "#fff"
                                                     : isStudentHere
-                                                    ? "#27ae60"
-                                                    : "transparent",
+                                                        ? "#27ae60"
+                                                        : "transparent",
                                                 borderWidth:
                                                     isSelected || isStudentHere
                                                         ? 3
@@ -859,7 +860,7 @@ export default function ManualLocationScreen() {
             <View
                 style={[
                     styles.legendContainer,
-                    { marginBottom: insets.bottom + 48 },
+                    { marginBottom: Platform.OS !== "web" ? insets.bottom + 48 : 0 },
                 ]}
             >
                 <Text style={styles.legendTitle}>{t("location.tipTitle")}</Text>
@@ -1038,8 +1039,6 @@ export default function ManualLocationScreen() {
                     </View>
                 </View>
             </Modal>
-
-            {/* Loading Overlay */}
             {/* Loading Overlay */}
             {isLoading && (
                 <View style={styles.loadingOverlay}>
@@ -1059,8 +1058,7 @@ const styles = StyleSheet.create({
         backgroundColor: "#fff",
     },
     instructionsContainer: {
-        paddingHorizontal: 16,
-        paddingBottom: 16,
+        padding: 16,
         backgroundColor: "#34495e",
     },
     instructions: {
@@ -1468,5 +1466,10 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: "#95a5a6",
         textAlign: "center",
+    },
+    inner: {
+        width: "100%",
+        maxWidth: 600, // limite superior
+        marginHorizontal: "auto", // centraliza na web (usando style prop em web pura)
     },
 });
