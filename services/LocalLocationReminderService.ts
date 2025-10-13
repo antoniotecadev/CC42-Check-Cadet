@@ -25,7 +25,7 @@ const REMINDER_HOURS = [8, 10, 12, 14, 16, 18, 20];
 const LOCATION_REMINDER_ID_PREFIX = "location-reminder-";
 
 /**
- * Agenda notificações locais diárias para lembrar de atualizar localização
+ * Agenda notificações locais diárias para lembrar de actualizar localização
  * 
  * @returns Promise<void>
  */
@@ -45,8 +45,8 @@ export async function scheduleLocationReminders(): Promise<void> {
         for (const hour of REMINDER_HOURS) {
             const identifier = await Notifications.scheduleNotificationAsync({
                 content: {
-                    title: "📍 Atualizar Localização?",
-                    body: "Toque para atualizar onde você está no campus",
+                    title: "📍 Actualizar Localização?",
+                    body: "Toque para actualizar onde você está no campus",
                     data: {
                         type: "location_reminder",
                         hour: hour,

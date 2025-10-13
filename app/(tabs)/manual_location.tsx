@@ -147,7 +147,7 @@ export default function ManualLocationScreen() {
 
     /**
      * Calcula o nível de confiabilidade baseado no tempo decorrido
-     * @param lastUpdated - Timestamp da última atualização
+     * @param lastUpdated - Timestamp da última actualização
      * @returns Objeto com nível, cor e mensagem
      */
     const getReliability = (lastUpdated: number) => {
@@ -421,7 +421,7 @@ export default function ManualLocationScreen() {
                 {
                     text: t("location.updateFirst"),
                     onPress: () => {
-                        // Fecha o card do estudante para atualizar localização
+                        // Fecha o card do estudante para actualizar localização
                         clearStudent();
                     },
                 },
@@ -526,7 +526,7 @@ export default function ManualLocationScreen() {
                         locationData
                     );
 
-                    // Atualiza o estado da localização atual
+                    // Actualiza o estado da localização atual
                     setMyCurrentLocation({
                         areaId: location.id,
                         areaName: location.name,

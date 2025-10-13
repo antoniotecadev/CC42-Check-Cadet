@@ -38,7 +38,7 @@ if (!admin.apps.length) {
 //     const uid = `intra42:${intra42Id}`;
 
 //     try {
-//         // 1. Opcional: Salvar ou atualizar informações adicionais do usuário no Realtime Database ou Firestore.
+//         // 1. Opcional: Salvar ou actualizar informações adicionais do usuário no Realtime Database ou Firestore.
 //         // Isso é útil para manter um perfil de usuário associado ao UID do Firebase.
 //         // Só faça isso se precisar desses dados no banco de dados.
 //         // if (admin.apps.length > 0 && admin.database()) {

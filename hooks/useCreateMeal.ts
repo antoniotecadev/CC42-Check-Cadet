@@ -314,7 +314,7 @@ export function useCreateMeal() {
         }
     }
 
-    // Atualiza apenas a imagem da refeição
+    // Actualiza apenas a imagem da refeição
     async function updateMealImage({
         campusId,
         cursusId,
@@ -346,7 +346,7 @@ export function useCreateMeal() {
         }
     }
 
-    // Atualiza todos os dados da refeição (incluindo imagem, se fornecida)
+    // Actualiza todos os dados da refeição (incluindo imagem, se fornecida)
     async function updateMealData({
         campusId,
         cursusId,

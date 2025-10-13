@@ -163,7 +163,7 @@ export async function markAttendance({
             await update(campusRef, eventUpdates);
 
             if (userStaffId) {
-                // Atualiza a presença temporária para o usuário
+                // Actualiza a presença temporária para o usuário
                 const infoTmpRef = ref(
                     database,
                     `campus/${campusId}/cursus/${cursusId}/infoTmpUserEventMeal/${userStaffId}`
@@ -225,7 +225,7 @@ export async function markAttendance({
             await update(campusRef, eventUpdates);
 
             if (userStaffId) {
-                // Atualiza a presença temporária para o usuário
+                // Actualiza a presença temporária para o usuário
                 const infoTmpRef = ref(
                     database,
                     `campus/${campusId}/cursus/${cursusId}/infoTmpUserEventMeal/${userStaffId}`
