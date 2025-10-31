@@ -92,10 +92,10 @@ export async function userIsPresentOrSubscribed({
     );
     const snapshot = await get(participantsRef);
     const existingData = snapshot.exists();
-    if (type === "events" && existingData) {
-        const data = snapshot.val();
-        return !!data.checkin && !!data.checkout; // Returns true if there's both check-in and check-out
-    }
+    // if (type === "events" && existingData) {
+    //     const data = snapshot.val();
+    //     return !!data.checkin && !!data.checkout; // Returns true if there's both check-in and check-out
+    // }
     return existingData;
 }
 
