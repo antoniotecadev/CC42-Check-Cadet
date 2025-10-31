@@ -679,11 +679,11 @@ export default function ManualLocationScreen() {
                                                     />
                                                 ) : (
                                                     <>
-                                                        <Ionicons
+                                                        {/* <Ionicons
                                                             name="notifications"
                                                             size={16}
                                                             color="#fff"
-                                                        />
+                                                        /> */}
                                                         <Text
                                                             style={
                                                                 styles.notifyButtonText
@@ -712,11 +712,11 @@ export default function ManualLocationScreen() {
                                                     />
                                                 ) : (
                                                     <>
-                                                        <Ionicons
+                                                        {/* <Ionicons
                                                             name="location"
                                                             size={16}
                                                             color="#fff"
-                                                        />
+                                                        /> */}
                                                         <Text
                                                             style={
                                                                 styles.shareButtonText
