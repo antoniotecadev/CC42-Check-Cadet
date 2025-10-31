@@ -33,6 +33,7 @@ import { revokeToken } from "@/hooks/useLogin42";
 import { useEvents } from "@/repository/eventRepository";
 import { handleLogoutFirebase } from "@/services/authenticateWithFirebase";
 import { removePushToken } from "@/services/ExpoNotificationService";
+import { cancelLocationReminders } from "@/services/LocalLocationReminderService";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { FlashList } from "@shopify/flash-list";
 import { ref, set } from "firebase/database";
@@ -276,6 +277,7 @@ export default function HomeScreen() {
                         user?.projects_users?.[0]?.cursus_ids?.[0]
                     );
                 await handleLogoutFirebase();
+                await cancelLocationReminders();
                 router.replace("/login");
             },
             () => {
