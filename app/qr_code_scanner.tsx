@@ -84,13 +84,9 @@ export default function QrCodeScanner() {
                 });
             },
             onResumeCamera: () => {
-                if (modalData.title === t('common.success')) {
-                    router.back();
-                } else {
-                    player.seekTo(0); // Reinicia o som
-                    setModalVisible(false);
-                    scannedRef.current = false;
-                }
+                player.seekTo(0); // Reinicia o som
+                setModalVisible(false);
+                scannedRef.current = false;
             },
         });
     };
@@ -139,7 +135,7 @@ export default function QrCodeScanner() {
             {/* Overlay acima da camera */}
             <View style={[StyleSheet.absoluteFillObject, styles.overlay]}>
                 <Text style={styles.text}>{t('qrcode.pointToQRCode')}</Text>
-                
+
                 {/* Event action radio group (show only for event flows) */}
                 {eventId && !mealId && (
                     <View style={styles.radioGroup}>
@@ -171,7 +167,7 @@ export default function QrCodeScanner() {
                         </TouchableOpacity>
                     </View>
                 )}
-                
+
                 {/* Meal portion radio group (show only for meal flows) */}
                 {mealId && !eventId && (
                     <View style={styles.radioGroup}>
@@ -350,12 +346,12 @@ const styles = StyleSheet.create({
         marginTop: 12,
         ...(Platform.OS === "web"
             ? {
-                  paddingHorizontal: 24,
-                  maxWidth: 320, // largura máxima (parece botão de login padrão)
-                  width: "90%", // responsivo para telas menores
-              }
+                paddingHorizontal: 24,
+                maxWidth: 320, // largura máxima (parece botão de login padrão)
+                width: "90%", // responsivo para telas menores
+            }
             : {
-                  marginHorizontal: 16,
-              }),
+                marginHorizontal: 16,
+            }),
     },
 });
