@@ -12,6 +12,7 @@
  * - Não drena bateria
  */
 
+import { t } from "@/i18n";
 import * as Notifications from "expo-notifications";
 
 /**
@@ -45,8 +46,8 @@ export async function scheduleLocationReminders(): Promise<void> {
         for (const hour of REMINDER_HOURS) {
             const identifier = await Notifications.scheduleNotificationAsync({
                 content: {
-                    title: "📍 Actualizar Localização?",
-                    body: "Toque para actualizar onde você está no campus",
+                    title: t("location.reminderTitle"),
+                    body: t("location.reminderBody"),
                     data: {
                         type: "location_reminder",
                         hour: hour,
@@ -167,8 +168,8 @@ export async function scheduleOneTimeReminder(
 
         const identifier = await Notifications.scheduleNotificationAsync({
             content: {
-                title: "📍 Tempo de actualizar!",
-                body: `Já se passaram ${hoursFromNow} horas. Ainda está no mesmo lugar?`,
+                title: t("location.reminderOneTimeTitle"),
+                body: t("location.reminderOneTimeBody", { hours: hoursFromNow }),
                 data: {
                     type: "location_reminder_onetime",
                 },
