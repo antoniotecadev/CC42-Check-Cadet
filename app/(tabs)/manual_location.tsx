@@ -340,6 +340,26 @@ export default function ManualLocationScreen() {
             showError(t("common.error"), t("location.notifyStudentError"));
             return;
         }
+        // Verifica se o usuário marcou sua localização
+        if (!myCurrentLocation) {
+            Alert.alert(
+                t("common.warning"),
+                t("location.needToSetLocation"),
+                [
+                    {
+                        text: t("common.cancel"),
+                        style: "cancel",
+                    },
+                    {
+                        text: t("location.markNow"),
+                        onPress: () => {
+                            // Lógica para marcar a localização atual
+                        },
+                    },
+                ]
+            );
+            return;
+        }
 
         setIsSendingNotification(true);
 
@@ -351,7 +371,10 @@ export default function ManualLocationScreen() {
             if (studentLocation.pushToken.startsWith("Expo")) {
                 await sendExpoNotificationToUser(studentLocation.pushToken, {
                     title: t("location.someoneIsLookingForYou"),
-                    body: t("location.someoneIsLookingBody"),
+                    body: t("location.locationPromptMessage", { name: myLogin || "Alguém" }) + "\n" + t("location.sharedLocationBody", {
+                        name: myLogin || "Alguém",
+                        location: myCurrentLocation.areaName,
+                    }),
                     data: {
                         type: "location_search",
                         searchedBy:
@@ -363,7 +386,10 @@ export default function ManualLocationScreen() {
             } else {
                 await sendFCMNotificationToUser(studentLocation.pushToken, {
                     title: t("location.someoneIsLookingForYou"),
-                    body: t("location.someoneIsLookingBody"),
+                    body: t("location.locationPromptMessage", { name: myLogin || "Alguém" }) + "\n" + t("location.sharedLocationBody", {
+                        name: myLogin || "Alguém",
+                        location: myCurrentLocation.areaName,
+                    }),
                     data: {
                         type: "location_search",
                         searchedBy:

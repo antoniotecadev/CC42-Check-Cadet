@@ -311,7 +311,7 @@
     "needToSetLocationMessage": "Para partilhar a sua localização, primeiro precisa marcá-la no mapa.",
     "markNow": "Marcar Agora",
     "updateLocationPromptTitle": "📍 Actualizar Localização?",
-    "updateLocationPromptMessage": "{{name}} está à tua procura. Queres actualizar a tua localização agora?",
+    "locationPromptMessage": "{{name}} está à tua procura.",
     "goToLocationScreen": "Ir para Localização",
     "confirmLocation": "📍 Confirmar Localização",
     "youAreAt": "Você está em: {{location}}",

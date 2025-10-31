@@ -101,7 +101,7 @@ export default function RootLayout() {
 
                 Alert.alert(
                     t("location.updateLocationPromptTitle"),
-                    t("location.updateLocationPromptMessage", {
+                    t("location.locationPromptMessage", {
                         name: searchedBy,
                     }),
                     [
