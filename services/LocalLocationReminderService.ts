@@ -10,10 +10,12 @@
  * - Intervalo: A cada 2 horas
  * - Silencioso (sem som)
  * - Não drena bateria
+ * - Usa IDs fixos para substituir notificações antigas (evita acumulação)
  */
 
 import { t } from "@/i18n";
 import * as Notifications from "expo-notifications";
+import { Platform } from "react-native";
 
 /**
  * Horários para enviar lembretes (8h às 20h, a cada 2 horas)
@@ -26,12 +28,35 @@ const REMINDER_HOURS = [8, 10, 12, 14, 16, 18, 20];
 const LOCATION_REMINDER_ID_PREFIX = "location-reminder-";
 
 /**
+ * Configura canal de notificação no Android (necessário para substituir notificações)
+ * 
+ * @returns Promise<void>
+ */
+export async function setupNotificationChannel(): Promise<void> {
+    if (Platform.OS === "android") {
+        await Notifications.setNotificationChannelAsync("location-reminders", {
+            name: "Location Reminders",
+            description: "Reminders to update your location on campus",
+            importance: Notifications.AndroidImportance.DEFAULT,
+            sound: null, // Sem som
+            vibrationPattern: [0], // Sem vibração
+            enableLights: false,
+            enableVibrate: false,
+            showBadge: false,
+        });
+    }
+}
+
+/**
  * Agenda notificações locais diárias para lembrar de actualizar localização
  * 
  * @returns Promise<void>
  */
 export async function scheduleLocationReminders(): Promise<void> {
     try {
+        // Configura canal de notificação no Android
+        await setupNotificationChannel();
+
         // Verifica permissões
         const { status } = await Notifications.getPermissionsAsync();
         if (status !== "granted") {
@@ -44,7 +69,11 @@ export async function scheduleLocationReminders(): Promise<void> {
 
         // Agenda notificações para cada horário
         for (const hour of REMINDER_HOURS) {
+            // ID fixo para cada horário - substitui notificações antigas automaticamente
+            const notificationId = `${LOCATION_REMINDER_ID_PREFIX}${hour}h`;
+            
             const identifier = await Notifications.scheduleNotificationAsync({
+                identifier: notificationId, // ID fixo para substituir notificações antigas
                 content: {
                     title: t("location.reminderTitle"),
                     body: t("location.reminderBody"),
@@ -54,19 +83,26 @@ export async function scheduleLocationReminders(): Promise<void> {
                     },
                     sound: false, // Silencioso
                     priority: Notifications.AndroidNotificationPriority.DEFAULT,
+                    categoryIdentifier: "location_reminder",
+                    // Android: Tag única para substituir notificações antigas
+                    ...(Platform.OS === "android" && {
+                        sticky: false,
+                        autoDismiss: true,
+                        channelId: "location-reminders", // Canal personalizado
+                    }),
                 },
-            trigger: {
-                type: Notifications.SchedulableTriggerInputTypes.CALENDAR,
-                hour: hour,
-                minute: 0,
-                repeats: true, // Repete diariamente
-            },
-        });
+                trigger: {
+                    type: Notifications.SchedulableTriggerInputTypes.CALENDAR,
+                    hour: hour,
+                    minute: 0,
+                    repeats: true, // Repete diariamente
+                },
+            });
 
-        console.log(
-            `✅ Lembrete agendado para ${hour}:00 (ID: ${identifier})`
-        );
-    }        console.log(
+            console.log(
+                `✅ Lembrete agendado para ${hour}:00 (ID: ${identifier})`
+            );
+        }        console.log(
             `🎉 ${REMINDER_HOURS.length} lembretes de localização agendados com sucesso!`
         );
     } catch (error) {
