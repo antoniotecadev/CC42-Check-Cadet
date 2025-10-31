@@ -396,8 +396,7 @@ export default function ManualLocationScreen() {
                     {
                         text: t("location.markNow"),
                         onPress: () => {
-                            // Fecha o card do estudante e permite marcar no mapa
-                            clearStudent();
+                            // Marca a localização atual do usuário    
                         },
                     },
                 ]
@@ -421,8 +420,7 @@ export default function ManualLocationScreen() {
                 {
                     text: t("location.updateFirst"),
                     onPress: () => {
-                        // Fecha o card do estudante para actualizar localização
-                        clearStudent();
+                        // Marca a localização actual do usuário
                     },
                 },
                 {
