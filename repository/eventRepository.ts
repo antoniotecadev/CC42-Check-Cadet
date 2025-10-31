@@ -11,6 +11,7 @@ interface GetEventsParams {
     campusId: number;
     cursusId?: number;
     isStaff: boolean;
+    enabled?: boolean; // Novo parâmetro para controlar quando carregar
 }
 
 export function useEvents(params: GetEventsParams) {
@@ -38,7 +39,7 @@ export function useEvents(params: GetEventsParams) {
     return useQuery<Event[]>({
         queryKey: ["events", params],
         queryFn: () => (params ? getEvents(params) : Promise.resolve([])),
-        enabled: !!params,
+        enabled: !!params && (params.enabled !== false), // Só carrega se enabled não for false
         staleTime: 1000 * 60 * 60 * 24, // Dados ficam "frescos" por 24 horas
         retry: 2, // tenta 2x se falhar
     });

@@ -57,11 +57,11 @@ export default function HomeScreen() {
     const isWeb = Platform.OS === "web";
 
     const refreshRef = useRef<() => void>(null);
-
+ 
     const [user, setUser] = useState<any>(null);
-
-    const [userCrypt, setUserCrypt] = useState<string | null>(null);
-
+    const [showEvents, setShowEvents] = useState<boolean>(false);
+    const [userCrypt, setUserCrypt] = useState<string | null>(null);  
+  
     const [aboutVisible, setAboutVisible] = useState(false);
     const [webMenuVisible, setWebMenuVisible] = useState(false);
     const [webMenuCursusVisible, setWebMenuCursusVisible] = useState(false);
@@ -97,23 +97,23 @@ export default function HomeScreen() {
             if (userData) {
                 setColor(
                     userData?.coalition?.color?.trim() ||
-                        Colors.light_blue_900.default
+                    Colors.light_blue_900.default
                 );
                 setUserCrypt(
                     encrypt(
                         "cc42user" +
-                            (userData?.id ?? "0") +
-                            "#" +
-                            (userData?.login ?? "") +
-                            "#" +
-                            (userData?.displayname ?? "") +
-                            "#" +
-                            (userData?.projects_users?.[0]?.cursus_ids?.[0] ??
-                                "0") +
-                            "#" +
-                            (userData?.campus?.[0]?.id ?? "0") +
-                            "#" +
-                            (userData?.image?.link?.trim() ?? "")
+                        (userData?.id ?? "0") +
+                        "#" +
+                        (userData?.login ?? "") +
+                        "#" +
+                        (userData?.displayname ?? "") +
+                        "#" +
+                        (userData?.projects_users?.[0]?.cursus_ids?.[0] ??
+                            "0") +
+                        "#" +
+                        (userData?.campus?.[0]?.id ?? "0") +
+                        "#" +
+                        (userData?.image?.link?.trim() ?? "")
                     )
                 );
             } else {
@@ -440,10 +440,26 @@ export default function HomeScreen() {
                 }
             >
                 <>
-                    <ThemedView style={{ padding: 16, paddingBottom: 8 }}>
-                        <LanguageSelector showTitle={true} color={color} />
+                    <ThemedView style={{ 
+                        flexDirection: 'row', 
+                        justifyContent: 'space-between', 
+                        alignItems: 'center',
+                        paddingHorizontal: 6,
+                        gap: 8,
+                    }}>
+                        <ThemedView style={{ flex: 1 }}>
+                            <LanguageSelector showTitle={false} color={color} /> 
+                        </ThemedView>
+                        <TouchableOpacity
+                            style={[styles.eventButton, { borderColor: color }]}
+                            onPress={() => setShowEvents(!showEvents)}
+                        >
+                            <Text style={{ color, fontWeight: "bold", fontVariant: ["small-caps"] }}>
+                                {showEvents ? "❌ " : "✨ "}{t("events.title")}
+                            </Text>
+                        </TouchableOpacity>
                     </ThemedView>
-                    {user && (
+                    {user && showEvents && (
                         <EventsList
                             isWeb={isWeb}
                             color={color}
@@ -480,6 +496,7 @@ function EventsList({
         campusId: userData?.campus?.[0]?.id || 0,
         cursusId: userData?.projects_users?.[0]?.cursus_ids?.[0] || 0,
         isStaff: userData["staff?"],
+        enabled: true, // Agora sempre carrega quando o componente está montado
     });
 
     const [showEventsPast, setShowEventsPast] = useState(false);
@@ -603,5 +620,13 @@ const styles = StyleSheet.create({
         textShadowColor: "#000",
         textShadowOffset: { width: 2, height: 2 },
         textShadowRadius: 3,
+    },
+    eventButton: {
+        alignItems: 'center',
+        alignSelf: 'center',
+        padding: 16,
+        borderWidth: 1,
+        borderRadius: 8,
+        backgroundColor: 'black',
     },
 });

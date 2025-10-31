@@ -18,9 +18,9 @@ interface LanguageSelectorProps {
     color?: string;
 }
 
-const LanguageSelector: React.FC<LanguageSelectorProps> = ({ 
-    showTitle = true, 
-    color = '#007AFF' 
+const LanguageSelector: React.FC<LanguageSelectorProps> = ({
+    showTitle = true,
+    color = '#007AFF'
 }) => {
     const { currentLanguage, availableLanguages, changeLanguage } = useLanguage();
     const [modalVisible, setModalVisible] = useState(false);
@@ -66,7 +66,7 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
                     {t('settings.language')}
                 </Text>
             )}
-            
+
             <TouchableOpacity
                 style={[styles.selector, { borderColor: color }]}
                 onPress={showLanguageOptions}
@@ -77,10 +77,10 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
                         {currentLangData?.name}
                     </Text>
                 </View>
-                <Ionicons 
-                    name="chevron-down" 
-                    size={20} 
-                    color={color} 
+                <Ionicons
+                    name="chevron-down"
+                    size={20}
+                    color={color}
                 />
             </TouchableOpacity>
 
@@ -102,7 +102,7 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
                         ]}>
                             {t('settings.selectLanguage')}
                         </Text>
-                        
+
                         {availableLanguages.map((lang) => (
                             <TouchableOpacity
                                 key={lang.code}
@@ -125,7 +125,7 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
                                 )}
                             </TouchableOpacity>
                         ))}
-                        
+
                         <TouchableOpacity
                             style={[styles.cancelButton, { borderColor: color }]}
                             onPress={() => setModalVisible(false)}
