@@ -274,7 +274,7 @@ export default function HomeScreen() {
                         user?.id,
                         user["staff?"],
                         user?.campus?.[0]?.id,
-                        user?.projects_users?.[0]?.cursus_ids?.[0]
+                        user?.projects_users?.[0]?.cursus_ids?.[0] || 0
                     );
                 await handleLogoutFirebase();
                 await cancelLocationReminders();

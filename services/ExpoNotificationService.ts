@@ -165,6 +165,9 @@ export async function removePushToken(
             ? `campus/${campusId}/tokenIOSNotification/staff/${userId}`
             : `campus/${campusId}/tokenIOSNotification/student/cursus/${cursusId}/${userId}`;
         await remove(ref(database, path));
+
+        const pathLocation = `campus/${campusId}/cursus/${cursusId}/user_locations/${userId}`;
+        await remove(ref(database, pathLocation));
     } catch (e: any) {
         showAlert("Notification Token", e.message);
     }
