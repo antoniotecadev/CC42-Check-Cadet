@@ -1,6 +1,7 @@
 import { database } from "@/firebaseConfig";
 import { showAlert } from "@/hooks/useAlert";
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { NotificationPayload } from "@/model/Notification";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import Constants from "expo-constants";
 import * as Device from "expo-device";
@@ -9,16 +10,9 @@ import { get, ref, remove, set } from "firebase/database";
 
 const EXPO_PUSH_URL = "https://exp.host/--/api/v2/push/send";
 
-export type ExpoNotificationPayload = {
-    title: string;
-    body: string;
-    data?: Record<string, any>;
-    image: string;
-};
-
 export async function sendExpoNotificationToUser(
     pushToken: string,
-    payload: ExpoNotificationPayload
+    payload: NotificationPayload
 ): Promise<void> {
     try {
         const message = {
@@ -46,7 +40,7 @@ export async function sendExpoNotificationToUser(
 export async function sendExpoNotificationToGroup(
     campusId: string,
     cursusId: string,
-    payload: ExpoNotificationPayload
+    payload: NotificationPayload
 ): Promise<void> {
     // Busca os tokens do Firebase Realtime Database
     const tokens: string[] = await getAllNotificationTokens(campusId, cursusId);
@@ -153,7 +147,7 @@ export async function registerPushToken(
         );
         try {
             await set(tokenRef, token);
-            await AsyncStorage.setItem('push_token', token);
+            await AsyncStorage.setItem("push_token", token);
         } catch (e: any) {
             showAlert("Notification Token", JSON.stringify(e, null, 2));
         }

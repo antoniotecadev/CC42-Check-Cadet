@@ -50,6 +50,7 @@ import useItemStorage from "@/hooks/storage/useItemStorage";
 import { t } from "@/i18n";
 import useApiInterceptors from "@/services/api";
 import { sendExpoNotificationToUser } from "@/services/ExpoNotificationService";
+import { sendFCMNotificationToUser } from "@/services/FirebaseNotification";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 interface Student42Data {
@@ -347,17 +348,31 @@ export default function ManualLocationScreen() {
             const imageLink = await getItem("image_link");
             const myDisplayName = await getItem("displayname");
 
-            await sendExpoNotificationToUser(studentLocation.pushToken, {
-                title: t("location.someoneIsLookingForYou"),
-                body: t("location.someoneIsLookingBody"),
-                data: {
-                    type: "location_search",
-                    searchedBy:
-                        `${myDisplayName} - ${myLogin}` || "Um estudante",
-                    userLogin: myLogin || "",
-                },
-                image: imageLink || "https://via.placeholder.com/150",
-            });
+            if (studentLocation.pushToken.startsWith("Expo")) {
+                await sendExpoNotificationToUser(studentLocation.pushToken, {
+                    title: t("location.someoneIsLookingForYou"),
+                    body: t("location.someoneIsLookingBody"),
+                    data: {
+                        type: "location_search",
+                        searchedBy:
+                            `${myDisplayName} - ${myLogin}` || "Um estudante",
+                        userLogin: myLogin || "",
+                    },
+                    image: imageLink || "https://via.placeholder.com/150",
+                });
+            } else {
+                await sendFCMNotificationToUser(studentLocation.pushToken, {
+                    title: t("location.someoneIsLookingForYou"),
+                    body: t("location.someoneIsLookingBody"),
+                    data: {
+                        type: "location_search",
+                        searchedBy:
+                            `${myDisplayName} - ${myLogin}` || "Um estudante",
+                        userLogin: myLogin || "",
+                    },
+                    image: imageLink || "https://via.placeholder.com/150",
+                });
+            }
 
             showSuccess(
                 t("location.notifyStudentTitle"),
@@ -452,22 +467,39 @@ export default function ManualLocationScreen() {
             const imageLink = await getItem("image_link");
             const myDisplayName = await getItem("displayname");
 
-            await sendExpoNotificationToUser(studentLocation.pushToken, {
-                title: t("location.sharedLocationWithYou", {
-                    name: myDisplayName || myLogin || "Um estudante",
-                }),
-                body: t("location.sharedLocationBody", {
-                    name: myLogin || "Um estudante",
-                    location: myCurrentLocation.areaName,
-                }),
-                data: {
-                    type: "location_shared",
-                    sharedBy: `${myDisplayName} - ${myLogin}` || "Um estudante",
-                    location: myCurrentLocation.areaName,
-                },
-                image: imageLink || "https://via.placeholder.com/150",
-            });
-
+            if (studentLocation.pushToken.startsWith("Expo")) {
+                await sendExpoNotificationToUser(studentLocation.pushToken, {
+                    title: t("location.sharedLocationWithYou", {
+                        name: myDisplayName || myLogin || "Um estudante",
+                    }),
+                    body: t("location.sharedLocationBody", {
+                        name: myLogin || "Um estudante",
+                        location: myCurrentLocation.areaName,
+                    }),
+                    data: {
+                        type: "location_shared",
+                        sharedBy: `${myDisplayName} - ${myLogin}` || "Um estudante",
+                        location: myCurrentLocation.areaName,
+                    },
+                    image: imageLink || "https://via.placeholder.com/150",
+                });
+            } else {
+                await sendFCMNotificationToUser(studentLocation.pushToken, {
+                    title: t("location.sharedLocationWithYou", {
+                        name: myDisplayName || myLogin || "Um estudante",
+                    }),
+                    body: t("location.sharedLocationBody", {
+                        name: myLogin || "Um estudante",
+                        location: myCurrentLocation.areaName,
+                    }),
+                    data: {
+                        type: "location_shared",
+                        sharedBy: `${myDisplayName} - ${myLogin}` || "Um estudante",
+                        location: myCurrentLocation.areaName,
+                    },
+                    image: imageLink || "https://via.placeholder.com/150",
+                });
+            }
             showSuccess(
                 t("location.shareLocationTitle"),
                 t("location.shareLocationSuccess", {

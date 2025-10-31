@@ -1,5 +1,6 @@
 import { showAlert } from "@/hooks/useAlert";
 import { t } from "@/i18n";
+import { NotificationPayload } from "@/model/Notification";
 import axios from "axios";
 import { sendExpoNotificationToGroup } from "./ExpoNotificationService";
 
@@ -237,21 +238,22 @@ export const sendNotificationForMessage = async (
     });
 };
 
+const FIREBASE_PUSH_URL = "https://check-cadet.vercel.app/api/notifications";
+
 const sendFCMNotification = async (fcmMessage: FCMessage) => {
     try {
-        const response = await axios.post(
-            "https://check-cadet.vercel.app/api/notifications",
-            fcmMessage,
-            {
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            }
-        );
+        const response = await axios.post(FIREBASE_PUSH_URL, fcmMessage, {
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
 
         if (response.status === 200) {
             console.log("Notification sent:", response.data);
-            showAlert(t('common.success'), t('notifications.notificationSentSuccessfully'));
+            showAlert(
+                t("common.success"),
+                t("notifications.notificationSentSuccessfully")
+            );
         } else {
             console.error(
                 "Failed to send notification:",
@@ -259,8 +261,8 @@ const sendFCMNotification = async (fcmMessage: FCMessage) => {
                 response.data
             );
             showAlert(
-                t('common.error'),
-                `${t('notifications.errorSendingNotification')}: ${
+                t("common.error"),
+                `${t("notifications.errorSendingNotification")}: ${
                     response.status
                 } - ${JSON.stringify(response.data)}`
             );
@@ -271,7 +273,7 @@ const sendFCMNotification = async (fcmMessage: FCMessage) => {
             error.response ? error.response.data : error.message
         );
         showAlert(
-            t('notifications.requestError'),
+            t("notifications.requestError"),
             `${
                 error.response
                     ? JSON.stringify(error.response.data)
@@ -280,3 +282,43 @@ const sendFCMNotification = async (fcmMessage: FCMessage) => {
         );
     }
 };
+
+export async function sendFCMNotificationToUser(
+    pushToken: string,
+    payload: NotificationPayload
+): Promise<void> {
+    try {
+        // Converte todos os valores de data para string (requisito do FCM v1)
+        const dataAsStrings: Record<string, string> = {};
+        if (payload.data) {
+            Object.keys(payload.data).forEach((key) => {
+                dataAsStrings[key] = String(payload.data![key]);
+            });
+        }
+
+        const fcmMessage = {
+            message: {
+                token: pushToken, // FCM v1 usa 'token' ao invés de 'to'
+                notification: {
+                    title: payload.title,
+                    body: payload.body,
+                    ...(payload.image && { image: payload.image }),
+                },
+                data: dataAsStrings, // Data deve ter valores como strings
+            },
+        };
+
+        console.log("Sending FCM to user:", JSON.stringify(fcmMessage, null, 2));
+
+        const response = await axios.post(FIREBASE_PUSH_URL, fcmMessage, {
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+
+        console.log("✅ FCM notification sent successfully:", response.data);
+    } catch (error: any) {
+        console.error("❌ Erro ao enviar notificação:", error.response?.data || error.message);
+        throw error;
+    }
+}
