@@ -649,7 +649,7 @@ export default function ManualLocationScreen() {
                                                             },
                                                         ]}
                                                     >
-                                                        {reliability.level} •{" "}
+                                                        {reliability.level} {"\n"}
                                                         {getTimeAgo(
                                                             studentLocation.lastUpdated
                                                         )}
