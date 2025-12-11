@@ -28,6 +28,17 @@ const REMINDER_HOURS = [8, 10, 12, 14, 16, 18, 20];
 const LOCATION_REMINDER_ID_PREFIX = "location-reminder-";
 
 /**
+ * Gera um ID numérico único para cada hora (necessário para substituir notificações no Android)
+ * @param hour - Hora do dia (0-23)
+ * @returns número único para essa hora
+ */
+function getNotificationIdForHour(hour: number): number {
+    // Usa um número base alto para evitar conflitos + hora
+    // Ex: hora 8 = 10008, hora 10 = 10010, etc.
+    return 10000 + hour;
+}
+
+/**
  * Configura canal de notificação no Android (necessário para substituir notificações)
  * 
  * @returns Promise<void>
@@ -43,6 +54,7 @@ export async function setupNotificationChannel(): Promise<void> {
             enableLights: false,
             enableVibrate: false,
             showBadge: false,
+            lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
         });
     }
 }
@@ -69,26 +81,34 @@ export async function scheduleLocationReminders(): Promise<void> {
 
         // Agenda notificações para cada horário
         for (const hour of REMINDER_HOURS) {
-            // ID fixo para cada horário - substitui notificações antigas automaticamente
+            // ID fixo numérico para Android substituir notificações antigas
+            const notificationNumericId = getNotificationIdForHour(hour);
             const notificationId = `${LOCATION_REMINDER_ID_PREFIX}${hour}h`;
             
             const identifier = await Notifications.scheduleNotificationAsync({
-                identifier: notificationId, // ID fixo para substituir notificações antigas
                 content: {
                     title: t("location.reminderTitle"),
                     body: t("location.reminderBody"),
                     data: {
                         type: "location_reminder",
                         hour: hour,
+                        notificationId: notificationNumericId, // ID numérico para Android
                     },
                     sound: false, // Silencioso
                     priority: Notifications.AndroidNotificationPriority.DEFAULT,
                     categoryIdentifier: "location_reminder",
-                    // Android: Tag única para substituir notificações antigas
+                    // Android: Configurações específicas para substituir notificações
                     ...(Platform.OS === "android" && {
                         sticky: false,
                         autoDismiss: true,
                         channelId: "location-reminders", // Canal personalizado
+                        color: "#007AFF", // Cor para identificar
+                        // Tag é a chave para substituir notificações no Android
+                        tag: notificationId,
+                    }),
+                    // iOS: badge count
+                    ...(Platform.OS === "ios" && {
+                        badge: 1,
                     }),
                 },
                 trigger: {
@@ -96,6 +116,7 @@ export async function scheduleLocationReminders(): Promise<void> {
                     hour: hour,
                     minute: 0,
                     repeats: true, // Repete diariamente
+                    channelId: Platform.OS === "android" ? "location-reminders" : undefined,
                 },
             });
 
