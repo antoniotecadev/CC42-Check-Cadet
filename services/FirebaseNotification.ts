@@ -208,7 +208,7 @@ export const sendNotificationForBackEnd = async (
             cursusId: cursusId,
             description: meal.description,
             createdDate: meal.createdDate,
-            quantity: meal.quantity,
+            quantity: meal.quantityNotReceived ?? 0,
             pathImage: meal.pathImage,
         },
         image: meal.pathImage,
