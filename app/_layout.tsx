@@ -31,6 +31,15 @@ global.Buffer = Buffer;
 
 const queryClient = new QueryClient({});
 
+// Tipos para as notificações do Firebase/Android
+type NotificationData = {
+    notification?: {
+        title?: string;
+        body?: string;
+        image?: string;
+    };
+};
+
 // Componente para DevTools que só carrega quando necessário
 const DevTools = () => {
     const [DevToolsComponent, setDevToolsComponent] =
@@ -71,7 +80,7 @@ export default function RootLayout() {
 
     useEffect(() => {
         // Libera manualmente a splash (impede que ela fique visível)
-        SplashScreen.hideAsync().catch(() => {});
+        SplashScreen.hideAsync().catch(() => { });
     }, []);
 
     useEffect(() => {
@@ -130,12 +139,12 @@ export default function RootLayout() {
 
                 Alert.alert(
                     title ||
-                        t("location.sharedLocationWithYou", { name: sharedBy }),
+                    t("location.sharedLocationWithYou", { name: sharedBy }),
                     body ||
-                        t("location.sharedLocationBody", {
-                            name: sharedBy,
-                            location,
-                        }),
+                    t("location.sharedLocationBody", {
+                        name: sharedBy,
+                        location,
+                    }),
                     [
                         {
                             text: t("common.confirm"),
@@ -147,21 +156,23 @@ export default function RootLayout() {
                 // Notificação de lembrete de localização (local)
                 router.push("/(tabs)/manual_location");
             } else if (data.id) {
-                // Notificação de refeição (lógica existente)
+
+                const typedData = data as NotificationData;
+
                 router.push({
                     pathname: "/meal_details",
                     params: {
                         userId,
                         campusId,
-                        cursusId: data.cursusId as string,
+                        cursusId: data.cursusId as string || data.key4 as string,
                         mealData: JSON.stringify({
-                            id: data.id,
+                            id: data.id || data.key0,
                             type: title,
                             name: body,
-                            description: data.description,
-                            createdDate: data.createdDate,
-                            quantity: data.quantity,
-                            pathImage: data.pathImage,
+                            description: data.description || data.key6,
+                            createdDate: data.createdDate || data.key2,
+                            quantity: data.quantity || data.key3,
+                            pathImage: data.pathImage || typedData.notification?.image,
                         }),
                     },
                 });
