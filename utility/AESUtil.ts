@@ -8,7 +8,7 @@ const ALGORITHM = "AES";
 // Simulates the native function that fetches the secret key
 function getSecretKeyFromJNI(): string {
     // WARNING: replace with real secure logic
-    return "mR7tP3xL9sQ2vY1z"; // deve ter 16, 24 ou 32 bytes
+    return ""; // deve ter 16, 24 ou 32 bytes
 }
 
 export function encrypt(data: string): string | null {
